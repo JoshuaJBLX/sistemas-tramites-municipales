@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy-950: #0a1a30;
+  --navy-900: #0f2542;
+  --navy-800: #143257;
+  --navy-700: #1c426c;
+  --blue-500: #3569a5;
+  --paper: #f6f8fb;
+  --emerald: #10b981;
+  --amber: #f5a623;
+  --warm: #fff8ef;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-mist-100 text-ink font-sans antialiased;
+  background-image:
+    radial-gradient(1000px 520px at 88% -8%, rgba(245, 166, 35, 0.12), transparent 60%),
+    radial-gradient(900px 500px at -8% 18%, rgba(16, 185, 129, 0.1), transparent 60%),
+    radial-gradient(800px 480px at 55% 115%, rgba(53, 105, 165, 0.1), transparent 60%);
+}
+
+::selection {
+  @apply bg-emerald/25 text-primary-950;
+}
+
+@layer components {
+  /* ---- Superficies cálidas ---- */
+  .glass {
+    @apply border border-white/70 bg-white/75 shadow-soft backdrop-blur-xl;
+  }
+  .glass-strong {
+    @apply border border-white/80 bg-white/90 shadow-soft-lg backdrop-blur-2xl;
+  }
+  .glass-dark {
+    @apply border border-white/15 bg-primary-900/80 text-white shadow-soft-lg backdrop-blur-xl;
+  }
+
+  /* ---- Tarjetas suaves, elevación calmada ---- */
+  .card-3d {
+    @apply rounded-[1.75rem] border border-white/70 bg-white/85 shadow-soft backdrop-blur-xl transition-all duration-300;
+  }
+  .card-3d:hover {
+    @apply -translate-y-0.5 border-primary-200/80 shadow-soft-lg;
+  }
+
+  /* ---- Botones pill, cálidos ---- */
+  .btn-neu {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-mist-100 px-5 py-2.5 text-sm font-semibold text-primary-800 shadow-soft-sm transition-all duration-150 hover:-translate-y-0.5 hover:bg-white hover:shadow-soft active:translate-y-0;
+  }
+  .btn-primary-3d {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-primary-600 to-primary-800 px-6 py-3 text-sm font-semibold text-white shadow-lift transition-all duration-150 hover:-translate-y-0.5 hover:shadow-soft-lg active:translate-y-0 active:shadow-none;
+  }
+  .btn-emerald-3d {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-emerald to-emerald-deep px-6 py-3 text-sm font-semibold text-white shadow-lift transition-all duration-150 hover:-translate-y-0.5 hover:shadow-glow-emerald active:translate-y-0;
+  }
+
+  /* ---- Chips y badges cálidos ---- */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+  .badge-emerald {
+    @apply badge border border-emerald/25 bg-emerald-soft/80 text-emerald-deep;
+  }
+  .badge-amber {
+    @apply badge border border-amber/40 bg-amber-soft/90 text-amber-deep;
+  }
+  .badge-blue {
+    @apply badge border border-primary-500/25 bg-primary-50/90 text-primary-700;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-mist-50/70 px-3 py-1.5 text-xs font-semibold text-mist-500 shadow-soft-sm backdrop-blur transition hover:border-primary-300/60 hover:text-primary-700;
+  }
+
+  /* ---- Inputs suaves ---- */
+  .input-glass {
+    @apply w-full rounded-2xl border border-primary-100 bg-white/80 px-4 py-3 text-sm text-ink shadow-inner outline-none backdrop-blur-xl transition placeholder:text-mist-400 focus:border-primary-300 focus:shadow-glow-blue;
+  }
+
+  /* ---- Chat burbujas amigables ---- */
+  .bubble-user {
+    @apply relative max-w-[80%] self-end rounded-[1.4rem] rounded-br-md bg-gradient-to-b from-primary-600 to-primary-800 px-4 py-3 text-sm leading-relaxed text-white shadow-lift;
+  }
+  .bubble-user::after {
+    content: "";
+    @apply absolute -bottom-1.5 right-3 h-3 w-3 rotate-45 rounded-[2px] bg-primary-700;
+  }
+  .bubble-bot {
+    @apply relative max-w-[90%] self-start rounded-[1.4rem] rounded-bl-md border border-white/70 bg-white/90 px-4 py-3 text-sm leading-relaxed text-ink shadow-soft backdrop-blur-xl;
+  }
+  .bubble-bot::after {
+    content: "";
+    @apply absolute -bottom-1.5 left-3 h-3 w-3 rotate-45 rounded-[2px] bg-white/90;
+  }
+
+  /* ---- Avatar del asistente ---- */
+  .avatar-muni {
+    @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-emerald to-emerald-deep text-white shadow-lift;
+  }
+
+  /* ---- Skeleton shimmer ---- */
+  .skeleton {
+    background: linear-gradient(90deg, #f0e9dd 25%, #fbf7ee 50%, #f0e9dd 75%);
+    background-size: 800px 100%;
+    @apply animate-shimmer rounded-xl;
+  }
+
+  /* ---- Títulos ---- */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary-500;
+  }
+  .h-display {
+    @apply text-4xl font-extrabold tracking-tight text-ink sm:text-5xl;
+    line-height: 1.08;
+  }
+  .text-gradient-warm {
+    @apply bg-gradient-to-r from-primary-700 via-emerald-deep to-amber-deep bg-clip-text text-transparent;
+  }
+
+  /* ---- Blob orgánico decorativo ---- */
+  .blob {
+    @apply rounded-[60%_40%_55%_45%/55%_45%_60%_40%];
+  }
+
+  /* ---- Scrollbars suaves ---- */
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #e2d9c8 transparent;
+  }
+  .scroll-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-mist-400;
+  }
+}
