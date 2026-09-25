@@ -1,0 +1,25 @@
+# =============================================================
+# Dependencias del back-end (Python 3.11+)
+# =============================================================
+
+# API REST
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+
+# Persistencia (PostgreSQL + pgvector)
+asyncpg==0.29.0
+pgvector==0.3.0
+
+# Caché
+redis==5.0.4
+
+# Cliente HTTP para el adaptador de Ollama
+httpx==0.27.0
+
+# Validación y configuración
+pydantic[email]==2.7.4
+python-dotenv==1.0.1
+
+# Embeddings (BGE-M3)
+sentence-transformers==3.0.1

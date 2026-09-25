@@ -1,0 +1,60 @@
+# =============================================================
+# Sistema de Trámites Municipales
+# Infraestructura: PostgreSQL + pgvector, Redis y Ollama (SLM local)
+# Uso: docker compose up -d
+# =============================================================
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: tramites-postgres
+    environment:
+      POSTGRES_USER: tramites
+      POSTGRES_PASSWORD: tramites
+      POSTGRES_DB: tramites_municipales
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Las migraciones 001-003 se ejecutan automáticamente al primer arranque.
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tramites -d tramites_municipales']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: tramites-redis
+    ports:
+      - '6379:6379'
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tramites-ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollamadata:/root/.ollama
+    # Descomentar para acelerar el SLM con GPU:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  pgdata:
+  redisdata:
+  ollamadata:
