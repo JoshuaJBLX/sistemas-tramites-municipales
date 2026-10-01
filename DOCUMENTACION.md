@@ -7,6 +7,9 @@ del proyecto). Cada carpeta incluye su propio `indice.md` de resumen y contenido
 **Entidad del sistema:** Municipalidad Provincial de **Junín (MPJ)** — TUPA 2023, 252
 procedimientos. `a.md` estaba redactado para Huancayo (MPH); todas las referencias se corrigen.
 
+**Presentación del PMV1** (para sustentación, en la raíz): [`PRESENTACION-PMV1.md`](PRESENTACION-PMV1.md)
+— contiene los ejemplos reales de consulta, el diagrama del flujo y el rendimiento medido.
+
 ## Estructura de la documentación
 
 ```
