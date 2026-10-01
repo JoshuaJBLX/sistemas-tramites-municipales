@@ -35,9 +35,14 @@ export default function AdminPage() {
           <p className="mt-1 text-xs text-mist-500">Versiones vigentes indexadas con BGE-M3 + pgvector</p>
           <ul className="mt-3 space-y-2 text-sm">
             {[
-              ['TUPA 2023 · Registro Civil N.º 188', 'v3 · 97% groundedness', 'badge-emerald'],
-              ['TUPA 2023 · Licencias N.º 9', 'v5 · 94% groundedness', 'badge-emerald'],
+              ['TUPA 2023 · Registro Civil N.º 188 (Nacimiento)', 'v3 · 97% groundedness', 'badge-emerald'],
+              ['TUPA 2023 · Registro Civil N.º 201 (Matrimonio)', 'v2 · 95% groundedness', 'badge-emerald'],
+              ['TUPA 2023 · Licencias N.º 9 (Funcionamiento)', 'v5 · 94% groundedness', 'badge-emerald'],
+              ['TUPA 2023 · Licencias N.º 30 (Edificación)', 'v4 · 92% groundedness', 'badge-emerald'],
+              ['TUPA 2023 · Urbanismo N.º 27 (Habilitación)', 'v1 · 91% groundedness', 'badge-emerald'],
+              ['TUPA 2023 · Tributos N.º 109 (No adeudo)', 'v2 · 90% groundedness', 'badge-emerald'],
               ['Directorio de oficinas 2026', 'actualizando…', 'badge-amber'],
+              ['Ordenanza de tributos 2026', 'en revisión', 'badge-amber'],
             ].map(([t, s, b]) => (
               <li key={t} className="flex items-center justify-between gap-2 rounded-2xl border border-white/60 bg-white/60 px-4 py-2.5 backdrop-blur">
                 <span className="font-semibold text-primary-800">{t}</span>

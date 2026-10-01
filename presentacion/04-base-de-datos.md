@@ -120,8 +120,8 @@ LIMIT $2
 | Seed | Contenido real | Muestra |
 |---|---|---|
 | `municipios.sql` | 1 municipalidad | Junín (MPJ) |
-| `tramites.sql` | **10 trámites** TUPA 2023 | Inscripción de nacimiento, matrimonio, defunción, separación, certificado de residencia, no adeudo, licencia de funcionamiento, licencia de edificación, impuesto predial, partida de nacimiento |
-| `documentos.sql` | **6 documentos** vigentes | Nacimiento (N.º 188), residencia (N.º 232), licencia funcionamiento, licencia edificación (N.º 30), no adeudo (N.º 109), defunción (N.º 220) — con `url_origen` de `munijunin.gob.pe`, `embedding NULL` (se indexa al registrar) |
+| `tramites.sql` | **22 trámites** TUPA 2023 | Registro civil (nacimiento, matrimonio, defunción, separación, unión de hecho, partida) · certificados (residencia, posesión, no adeudo) · licencias (funcionamiento, edificación, anuncios, comercio) · urbanismo (zonificación, parámetros, habilitación, fábrica, numeración) · tributos (predial, empadronamiento) · otros (eventos, vía pública) |
+| `documentos.sql` | **20 documentos** vigentes | Nacimiento (N.º 188), residencia (N.º 232), licencia funcionamiento (N.º 9), licencia edificación (N.º 30), no adeudo (N.º 109), defunción (N.º 220) + matrimonio (N.º 201), predial, numeración (N.º 42), posesión (N.º 233), zonificación (N.º 34), parámetros (N.º 36), habilitación (N.º 27), fábrica (N.º 47), anuncios (N.º 52), comercio (N.º 118), eventos (N.º 130), unión de hecho (N.º 205), empadronamiento (N.º 240), vía pública (N.º 57) — con `url_origen` de `munijunin.gob.pe`, `embedding NULL` (se indexa al registrar) |
 
 Los seeds referencian la base de conocimiento oficial de la MPJ (TUPA 2023, 252 procedimientos
 según a.md) y citan el portal <https://www.gob.pe/munijunin>.

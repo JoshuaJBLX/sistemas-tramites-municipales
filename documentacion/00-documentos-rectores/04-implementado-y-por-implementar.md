@@ -36,7 +36,7 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 
 ### 2.2 Base de datos (PostgreSQL 16 + pgvector)
 - Migraciones 001 (BD + extensión vector), 002 (6 tablas), 003 (índice **HNSW** `vector_cosine_ops`).
-- Seeds reales TUPA 2023 **MPJ**: 1 municipio, 10 trámites, 6 documentos con fuente `gob.pe/munijunin`.
+- Seeds reales TUPA 2023 **MPJ**: 1 municipio, 22 trámites, 20 documentos con fuente `gob.pe/munijunin`.
 - Búsqueda por similitud de coseno (`embedding <=> $1::vector`).
 
 ### 2.3 Frontend (Next.js 14)

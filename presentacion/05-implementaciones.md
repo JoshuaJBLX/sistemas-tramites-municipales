@@ -31,7 +31,7 @@
 **Infraestructura:**
 
 - ✅ Docker Compose de 3 servicios (PostgreSQL+pgvector, Redis, Ollama) con healthchecks y volúmenes.
-- ✅ Migraciones automáticas y seeds TUPA 2023 (10 trámites / 6 documentos / 1 municipalidad).
+- ✅ Migraciones automáticas y seeds TUPA 2023 (22 trámites / 20 documentos / 1 municipalidad).
 
 ## 2. Estado por Historia de Usuario (las 18)
 
