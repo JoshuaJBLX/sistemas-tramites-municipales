@@ -15,7 +15,7 @@ documentacion/
 │   ├── indice.md                   # Resumen + índice de contenido breve
 │   ├── 01-historias-de-usuario.md  # 18 HU (Given/When/Then) — antes HU.md
 │   ├── 02-implementacion-de-historias.md  # Estado por HU — antes IMPLEMENTACION-HU.md
-│   ├── 03-ejecucion.md             # Instalación (una vez) + ejecución (cada vez) — antes EJECUCION.md
+│   ├── 03-ejecucion.md             # Ejecución local: preparación + arranque — antes EJECUCION.md
 │   ├── 04-implementado-y-por-implementar.md  # Inventario real ✅/⚠️/❌ y brechas G-XX
 │   └── 05-trazabilidad-por-pmv.md  # Avance por PMV1/PMV2/PMV3
 ├── 01-analisis-del-problema/        # Doc. 1 — Diagnóstico del problema (AG-T08)
