@@ -30,13 +30,20 @@ sistema-tramites-municipales/
 
 ## Requisitos previos
 
-- Docker y Docker Compose
-- Python 3.11+
+- Docker y Docker Compose (opcional: puede reemplazarse por servicios nativos)
+- Python 3.11+ (probado en 3.13)
 - Node.js 18+
 
 ## Puesta en marcha
 
-### 1. Infraestructura
+> Guía detallada y separada por etapas en
+> [`documentacion/00-documentos-rectores/03-ejecucion.md`](documentacion/00-documentos-rectores/03-ejecucion.md):
+> **Parte 1 · Instalación** (una sola vez) y **Parte 2 · Ejecución** (cada vez).
+> Resumen rápido aquí abajo con Docker.
+
+### Instalación (una sola vez)
+
+#### 1. Infraestructura
 
 ```bash
 docker compose up -d
@@ -55,24 +62,14 @@ Los seeds cargan la Municipalidad Provincial de Junín y trámites reales del TU
 (registro civil, licencias, certificados, tributos y urbanismo).
 
 ```bash
+psql -h localhost -U tramites -d tramites_municipales -f database/migrations/002_create_tables.sql
+psql -h localhost -U tramites -d tramites_municipales -f database/migrations/003_create_vectors.sql
 psql -h localhost -U tramites -d tramites_municipales -f database/seeds/municipios.sql
 psql -h localhost -U tramites -d tramites_municipales -f database/seeds/tramites.sql
 psql -h localhost -U tramites -d tramites_municipales -f database/seeds/documentos.sql
 ```
 
-### 3. Back-end
-
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate            # Windows  (Linux/macOS: source .venv/bin/activate)
-pip install -r ../requirements.txt
-uvicorn main:app --reload --port 8000
-```
-
-Documentación interactiva: <http://localhost:8000/docs>
-
-### 3.1 Indexar los documentos (BGE-M3)
+#### 3. Indexar los documentos (BGE-M3)
 
 Los seeds insertan los documentos con `embedding` en `NULL`. El script de indexación
 genera los vectores y los guarda (funciona con o sin pgvector):
@@ -83,6 +80,34 @@ python -m backend.scripts.indexar_documentos
 
 Debe ejecutarse desde la raíz del proyecto (para leer el `.env`) y solo indexa los
 documentos vigentes que aún no tienen embedding.
+
+#### 4. Dependencias del back-end y del front-end
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate            # Windows  (Linux/macOS: source .venv/bin/activate)
+pip install -r requirements.txt
+
+cd frontend-tramites && npm install
+```
+
+## Ejecución (cada vez)
+
+```bash
+docker compose up -d                            # PostgreSQL + Redis + Ollama
+.venv\Scripts\activate
+cd backend && uvicorn main:app --reload --port 8000
+```
+
+En otra terminal:
+
+```bash
+cd frontend-tramites && npm run dev
+```
+
+- API → <http://localhost:8000> · Swagger → <http://localhost:8000/docs>
+- App → <http://localhost:3000>
+- Apagar → `docker compose down`
 
 ## Puesta en marcha sin Docker (desarrollo local)
 
@@ -106,13 +131,17 @@ psql -h localhost -U tramites -d tramites_municipales -f database/seeds/municipi
 psql -h localhost -U tramites -d tramites_municipales -f database/seeds/tramites.sql
 psql -h localhost -U tramites -d tramites_municipales -f database/seeds/documentos.sql
 
-# 3. Entorno Python e indexación
+# 3. Servicios del sistema
+redis-server --port 6379
+ollama serve && ollama pull qwen2.5:3b
+
+# 4. Entorno Python e indexación
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 python -m backend.scripts.indexar_documentos
 
-# 4. API
+# 5. API
 cd backend && uvicorn main:app --port 8000
 ```
 
@@ -121,16 +150,6 @@ tiene disponible; si no, la columna `documentos.embedding` se crea como
 `double precision[]` y `BusquedaVectorialAdapter` calcula la similitud de coseno en
 Python. El flujo RAG es idéntico en ambos casos; con pgvector se usa el operador `<=>`
 y el índice HNSW (recomendado para producción).
-
-### 4. Front-end
-
-```bash
-cd frontend-tramites
-npm install
-npm run dev
-```
-
-Disponible en <http://localhost:3000>
 
 ## API principal
 

@@ -12,13 +12,13 @@ verdad de requisitos (HU), su estado de implementación y la guía de ejecución
 |---|---|---|
 | `01-historias-de-usuario.md` | Las 18 historias de usuario (HU-01..18) con épica, criterios de aceptación Given/When/Then. | `./HU.md` (raíz) |
 | `02-implementacion-de-historias.md` | Estado de implementación por HU: checklists, archivos reales, brechas G-XX y prioridades. | `./IMPLEMENTACION-HU.md` (raíz) |
-| `03-ejecucion.md` | Guía resumida de ejecución: infraestructura (Docker), backend y frontend. | `./EJECUCION.md` (raíz) |
+| `03-ejecucion.md` | Guía de puesta en marcha dividida en **instalación** (una vez, con y sin Docker) y **ejecución** (cada vez), más solución de problemas. | `./EJECUCION.md` (raíz) |
 | `04-implementado-y-por-implementar.md` | Inventario ✅/⚠️/❌ de lo implementado vs. pendiente, con brechas G-XX priorizadas. | Nuevo |
 | `05-trazabilidad-por-pmv.md` | Avance por PMV1/PMV2/PMV3: qué se construyó en cada PMV, backlog, distribución de las 18 HU y vacíos G-XX que bloquean cada PMV. | Nuevo |
 
 ## Relación con el repositorio
 
 - Índice maestro de toda la documentación: `../../DOCUMENTACION.md`.
-- Guía completa de puesta en marcha: `../../README.md`.
+- Guía completa de puesta en marcha (instalación + ejecución): `03-ejecucion.md` y `../../README.md`.
 - Los archivos citan código real de `backend/`, `frontend-tramites/`, `database/` y
   `docker-compose.yml`.
