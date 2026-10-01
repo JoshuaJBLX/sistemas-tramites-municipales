@@ -1,9 +1,9 @@
-# Sistema de Trámites Municipales
+﻿# Sistema de Trámites Municipales
 
 Plataforma de orientación de trámites de la **Municipalidad Provincial de Junín** (MPJ),
 que permite a los ciudadanos consultar procedimientos municipales mediante un
-asistente conversacional basado en **RAG** (PostgreSQL + pgvector para la búsqueda
-semántica) y un **SLM local** servido con **Ollama**.
+asistente conversacional basado en **RAG** (PostgreSQL + búsqueda semántica) y un
+**SLM local** servido con **Ollama**.
 
 La base de datos de conocimiento se alimenta del TUPA 2023 (252 procedimientos) y de
 la documentación oficial publicada en <https://www.gob.pe/munijunin>.
@@ -23,133 +23,51 @@ sistema-tramites-municipales/
 │   └── infrastructure/       # Controllers (FastAPI), repositories (pgvector) y adapters
 │
 ├── database/                 # Migraciones SQL, seeds y schema de referencia
-├── docker-compose.yml        # PostgreSQL + pgvector, Redis y Ollama
+├── instalar.ps1              # Instalador de un solo comando (idempotente)
+├── docker-compose.yml        # PostgreSQL + pgvector, Redis y Ollama (opcional)
 ├── requirements.txt          # Dependencias Python
 └── .env                      # Variables de entorno
 ```
 
 ## Requisitos previos
 
-- Docker y Docker Compose (opcional: puede reemplazarse por servicios nativos)
 - Python 3.11+ (probado en 3.13)
+- PostgreSQL 13+ (pgvector es **opcional**)
 - Node.js 18+
+- Ollama
 
-## Puesta en marcha
+## Instalación (una sola vez)
 
-> Guía detallada y separada por etapas en
-> [`documentacion/00-documentos-rectores/03-ejecucion.md`](documentacion/00-documentos-rectores/03-ejecucion.md):
-> **Parte 1 · Instalación** (una sola vez) y **Parte 2 · Ejecución** (cada vez).
-> Resumen rápido aquí abajo con Docker.
-
-### Instalación (una sola vez)
-
-#### 1. Infraestructura
-
-```bash
-docker compose up -d
+```powershell
+powershell -ExecutionPolicy Bypass -File .\instalar.ps1
 ```
 
-Levanta:
-- **PostgreSQL 16 con pgvector** (puerto 5432). Las migraciones de `database/migrations`
-  se ejecutan automáticamente en el primer arranque.
-- **Redis 7** (puerto 6379) para la caché de respuestas.
-- **Ollama** (puerto 11434) para el modelo de lenguaje local. Descarga un modelo:
-  `docker exec -it tramites-ollama ollama pull qwen2.5:3b`
+El script instala y configura todo: verificaciones, `.env`, rol y base de datos, migraciones,
+seeds, entorno virtual de Python, dependencias del front-end, Redis, modelo `qwen2.5:3b` y los
+embeddings BGE-M3 de los documentos. Es **idempotente**: se puede repetir sin romper nada.
 
-### 2. Datos de ejemplo
-
-Los seeds cargan la Municipalidad Provincial de Junín y trámites reales del TUPA 2023
-(registro civil, licencias, certificados, tributos y urbanismo).
-
-```bash
-psql -h localhost -U tramites -d tramites_municipales -f database/migrations/002_create_tables.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/migrations/003_create_vectors.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/municipios.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/tramites.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/documentos.sql
-```
-
-#### 3. Indexar los documentos (BGE-M3)
-
-Los seeds insertan los documentos con `embedding` en `NULL`. El script de indexación
-genera los vectores y los guarda (funciona con o sin pgvector):
-
-```bash
-python -m backend.scripts.indexar_documentos
-```
-
-Debe ejecutarse desde la raíz del proyecto (para leer el `.env`) y solo indexa los
-documentos vigentes que aún no tienen embedding.
-
-#### 4. Dependencias del back-end y del front-end
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate            # Windows  (Linux/macOS: source .venv/bin/activate)
-pip install -r requirements.txt
-
-cd frontend-tramites && npm install
-```
+Detalle de cada paso en [`documentacion/00-documentos-rectores/03-ejecucion.md`](documentacion/00-documentos-rectores/03-ejecucion.md).
 
 ## Ejecución (cada vez)
 
-```bash
-docker compose up -d                            # PostgreSQL + Redis + Ollama
-.venv\Scripts\activate
-cd backend && uvicorn main:app --reload --port 8000
+```powershell
+# API
+.venv\Scripts\Activate.ps1
+cd backend; uvicorn main:app --reload --port 8000
 ```
 
-En otra terminal:
-
-```bash
-cd frontend-tramites && npm run dev
+```powershell
+# Front-end, en otra terminal
+cd frontend-tramites; npm run dev
 ```
 
 - API → <http://localhost:8000> · Swagger → <http://localhost:8000/docs>
 - App → <http://localhost:3000>
-- Apagar → `docker compose down`
 
-## Puesta en marcha sin Docker (desarrollo local)
-
-Si no tienes Docker, el back-end también funciona con servicios instalados en el sistema:
-
-| Servicio   | Requisito                                        | Puerto |
-| ---------- | ------------------------------------------------ | ------ |
-| PostgreSQL | PostgreSQL 13+ (pgvector es **opcional**)        | 5432   |
-| Redis      | Redis 5+                                         | 6379   |
-| Ollama     | Ollama + `ollama pull qwen2.5:3b`                | 11434  |
-
-```bash
-# 1. Crear rol y base de datos
-psql -U postgres -c "CREATE ROLE tramites LOGIN PASSWORD 'tramites' CREATEDB;"
-psql -U postgres -c "CREATE DATABASE tramites_municipales OWNER tramites;"
-
-# 2. Migraciones y seeds (las migraciones crean la extensión vector si está disponible)
-psql -h localhost -U tramites -d tramites_municipales -f database/migrations/002_create_tables.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/migrations/003_create_vectors.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/municipios.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/tramites.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/documentos.sql
-
-# 3. Servicios del sistema
-redis-server --port 6379
-ollama serve && ollama pull qwen2.5:3b
-
-# 4. Entorno Python e indexación
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python -m backend.scripts.indexar_documentos
-
-# 5. API
-cd backend && uvicorn main:app --port 8000
-```
-
-**Sobre pgvector:** la migración `002` crea la extensión `vector` cuando el servidor la
-tiene disponible; si no, la columna `documentos.embedding` se crea como
-`double precision[]` y `BusquedaVectorialAdapter` calcula la similitud de coseno en
-Python. El flujo RAG es idéntico en ambos casos; con pgvector se usa el operador `<=>`
-y el índice HNSW (recomendado para producción).
+**Sobre pgvector:** la migración `002` crea la extensión `vector` cuando el servidor la tiene
+disponible; si no, la columna `documentos.embedding` se crea como `double precision[]` y
+`BusquedaVectorialAdapter` calcula la similitud de coseno en Python. El flujo RAG es idéntico
+en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomendado para producción).
 
 ## API principal
 

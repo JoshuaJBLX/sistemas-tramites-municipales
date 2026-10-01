@@ -1,57 +1,45 @@
 # EJECUCIÓN LOCAL
 
-> Guía verificada en Windows 11 (octubre 2026) con servicios nativos, sin Docker.
-> **1. Una vez** (preparación) · **2. Cada vez** (arranque).
+> Verificado en Windows 11 (octubre 2026) con servicios nativos, sin Docker.
 
-## 1. Una vez (instalación)
+## 1. Instalar (una sola vez)
 
 ```powershell
-# Configuración
-Copy-Item .env.example .env
-
-# Base de datos (rol, BD, migraciones y datos)
-psql -U postgres -c "CREATE ROLE tramites LOGIN PASSWORD 'tramites' CREATEDB;"
-psql -U postgres -c "CREATE DATABASE tramites_municipales OWNER tramites;"
-psql -h localhost -U tramites -d tramites_municipales -f database/migrations/002_create_tables.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/migrations/003_create_vectors.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/municipios.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/tramites.sql
-psql -h localhost -U tramites -d tramites_municipales -f database/seeds/documentos.sql
-
-# Dependencias
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-cd frontend-tramites; npm install; cd ..
-
-# Modelo del SLM
-ollama pull qwen2.5:3b
-
-# Embeddings de los documentos (imprescindible para el RAG)
-python -m backend.scripts.indexar_documentos
+powershell -ExecutionPolicy Bypass -File .\instalar.ps1
 ```
 
-## 2. Cada vez (ejecución)
+El script es **idempotente**: se puede repetir sin romper nada. Hace todo lo necesario:
+
+| # | Paso | Resultado |
+|---|------|-----------|
+| 1 | Verifica herramientas | Python, PostgreSQL, Node.js, Ollama (Redis opcional) |
+| 2 | Crea `.env` | A partir de `.env.example` |
+| 3 | Prepara la base de datos | Rol, base, migraciones y seeds |
+| 4 | Instala Python | Entorno `.venv` + `requirements.txt` |
+| 5 | Instala el front-end | `npm install` |
+| 6 | Levanta Redis y Ollama | Descarga `qwen2.5:3b` |
+| 7 | Genera embeddings | BGE-M3 sobre los 20 documentos |
+
+Parametros útiles:
 
 ```powershell
-# Servicios (si no están como servicio del sistema)
-redis-server --port 6379
-ollama serve
+.\instalar.ps1 -PostgresPassword 'mi_clave'   # superusuario de PostgreSQL
+.\instalar.ps1 -SinIndexar                   # omite el paso 7 (el RAG quedará sin documentos)
+```
 
+## 2. Ejecutar (cada vez)
+
+```powershell
 # API
 .venv\Scripts\Activate.ps1
-cd backend; uvicorn main:app --reload --port 8000; cd ..
+cd backend; uvicorn main:app --reload --port 8000
+```
 
-# Front-end (otra terminal)
+```powershell
+# Front-end, en otra terminal
 cd frontend-tramites; npm run dev
 ```
 
-- API: <http://localhost:8000> · Swagger: <http://localhost:8000/docs> · App: <http://localhost:3000>
-- Verificar: `curl http://localhost:8000/health` → `{"status":"ok"}`
+- API <http://localhost:8000> · Swagger <http://localhost:8000/docs> · App <http://localhost:3000>
+- Comprobar: `curl http://localhost:8000/health` → `{"status":"ok"}`
 - Una consulta RAG tarda ~5-9 s; las repetidas salen de la caché en ~30 ms.
-
-## Notas
-
-- PostgreSQL queda instalado como servicio de Windows (puerto 5432); Redis (6379) y Ollama (11434) se levantan a mano.
-- Si PowerShell bloquea el venv: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`.
-- Sin pgvector la búsqueda usa coseno en Python; el flujo es el mismo (ver `04-implementado-y-por-implementar.md`).
