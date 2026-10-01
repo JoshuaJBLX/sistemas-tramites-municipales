@@ -22,9 +22,17 @@ export default function ChatBox({ compact = false }: { compact?: boolean }) {
       setMensajes((prev) => [...prev, {
         autor: 'asistente', texto: r.texto,
         fuentes: r.fuentes, groundedness: r.groundedness, confianza: r.confianza,
+        intencion: r.intencion, pideAclaracion: r.pide_aclaracion,
+        tramiteProbable: r.tramite_probable,
       }]);
-    } catch {
-      setMensajes((prev) => [...prev, { autor: 'asistente', texto: 'Ocurrió un error al procesar la consulta. Intenta nuevamente.' }]);
+    } catch (error) {
+      setMensajes((prev) => [...prev, {
+        autor: 'asistente',
+        texto: error instanceof Error
+          ? `No pude responder: ${error.message}`
+          : 'No pude responder la consulta. Intenta nuevamente.',
+        fallo: true,
+      }]);
     } finally {
       setCargando(false);
     }

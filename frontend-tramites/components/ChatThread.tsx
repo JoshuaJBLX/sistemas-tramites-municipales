@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import GroundednessBadge from './GroundednessBadge';
-import type { FuenteCitada } from '../lib/api';
+import TramiteProbableCard from './TramiteProbableCard';
+import type { FuenteCitada, TramiteProbable } from '../lib/api';
 
 export interface ChatMsg {
   autor: 'usuario' | 'asistente';
@@ -9,6 +10,10 @@ export interface ChatMsg {
   fuentes?: (FuenteCitada | string)[];
   groundedness?: number;
   confianza?: string;
+  intencion?: string;
+  pideAclaracion?: boolean;
+  tramiteProbable?: TramiteProbable | null;
+  fallo?: boolean;
 }
 
 export function MuniAvatar() {
@@ -56,9 +61,15 @@ export default function ChatThread({ mensajes, cargando }: { mensajes: ChatMsg[]
           <div key={i} className="flex items-end gap-2 animate-rise-in max-w-[95%]">
             <MuniAvatar />
             <div className="min-w-0">
-              <div className="bubble-bot !rounded-2xl">
+              <div className={`bubble-bot !rounded-2xl ${m.fallo ? 'border-amber-300' : ''}`}>
+                {m.pideAclaracion && (
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-amber-700">
+                    Necesito que precises tu consulta
+                  </p>
+                )}
                 <p>{m.texto}</p>
-                <GroundednessBadge score={m.groundedness} fuentes={m.fuentes} />
+                {m.tramiteProbable && <TramiteProbableCard tramite={m.tramiteProbable} />}
+                {!m.fallo && <GroundednessBadge score={m.groundedness} fuentes={m.fuentes} />}
               </div>
             </div>
           </div>

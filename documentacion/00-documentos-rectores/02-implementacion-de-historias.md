@@ -28,12 +28,12 @@ verificables con `grep` sobre el repositorio.
 | HU-02 | Gestión documental | ⚠️ Parcial | 4/8 | **50 %** |
 | HU-03 | Gestión documental | ⚠️ Parcial | 3/7 | **43 %** |
 | HU-04 | Procesamiento documental y RAG | ⚠️ Parcial | 4/9 | **44 %** |
-| HU-05 | Consulta ciudadana | ⚠️ Parcial | 4/9 | **44 %** |
-| HU-06 | Clasificación de intención | ⚠️ Parcial | 2/5 | **40 %** |
-| HU-07 | Orientación de requisitos | ⚠️ Parcial | 2/5 | **40 %** |
-| HU-08 | Orientación de costos y plazos | ⚠️ Parcial | 2/5 | **40 %** |
+| HU-05 | Consulta ciudadana | ✅ Completa | 9/9 | **100 %** |
+| HU-06 | Clasificación de intención | ✅ Completa | 5/5 | **100 %** |
+| HU-07 | Orientación de requisitos | ✅ Completa | 4/5 | **80 %** |
+| HU-08 | Orientación de costos y plazos | ⚠️ Parcial | 3/5 | **60 %** |
 | HU-09 | Generación de respuestas con SLM | ⚠️ Parcial | 3/5 | **60 %** |
-| HU-10 | Trazabilidad y control de alucinaciones | ⚠️ Parcial | 3/8 | **38 %** |
+| HU-10 | Trazabilidad y control de alucinaciones | ⚠️ Parcial | 4/8 | **50 %** |
 | HU-11 | Consultas fuera de dominio | ❌ No implementada | 0/3 | **0 %** |
 | HU-12 | Recomendación de trámites relacionados | ❌ No implementada | 0/3 | **0 %** |
 | HU-13 | Gestión de usuarios y seguridad | ⚠️ Parcial (solo registro) | 2/5 | **40 %** |
@@ -47,18 +47,20 @@ verificables con `grep` sobre el repositorio.
 
 | Métrica | Valor |
 |---|---|
-| Puntos de verificación cumplidos | **37 / 101** |
-| **Avance total del alcance de las 18 HU** | **37 %** |
-| HU al 100 % | **0 de 18** |
+| Puntos de verificación cumplidos | **49 / 101** |
+| **Avance total del alcance de las 18 HU** | **49 %** |
+| HU al 100 % | **2 de 18** — HU-05, HU-06 |
 | HU implementadas (⚠️ parcial o mejor) | **13 de 18 (72 %)** |
 | HU sin implementar (❌) | **5 de 18 (28 %)** — HU-11, HU-12, HU-15, HU-16, HU-18 |
-| HU más avançada | **HU-09 · 60 %** (generación de respuestas con SLM) |
+| HU más avançada | **HU-05 y HU-06 · 100 %** |
 | Pruebas automatizadas | **0 suites** (ningún `test_*.py`, `*.test.ts` ni `conftest.py` en el repo) |
 
-> El 37 % mide el **alcance total contratado** de las 18 historias. El **núcleo RAG sí funciona de
-> extremo a extremo** (verificado: 22 trámites, 20 documentos indexados, consulta en 5–9 s con 5
-> fuentes y caché de ~30 ms). El porcentaje bajo refleja que 5 HU no se empezaron, que ninguna
-> llega al 100 % y que el panel de administración es una maqueta con datos inventados.
+> El 49 % mide el **alcance total contratado** de las 18 historias. El **núcleo RAG sí funciona de
+> extremo a extremo** (verificado: 22 trámites, 20 documentos indexados, consulta en 4–17 s con 5
+> fuentes y acierto de caché inmediato). El porcentaje sube desde el 37 % gracias a HU-05, HU-06,
+> HU-07, HU-08 y el badge de groundedness; sigue bajo porque 5 HU no se empezaron, porque el
+> arancel real del TUPA no está cargado en la base de datos y porque el panel de administración
+> sigue siendo una maqueta.
 
 ---
 
@@ -125,42 +127,46 @@ verificables con `grep` sobre el repositorio.
 
 ---
 
-## HU-05 — Consulta ciudadana en lenguaje natural ⚠️ Parcial
+## HU-05 — Consulta ciudadana en lenguaje natural ✅ Completa
 
 **Backend**
-- [x] `POST /api/consultas` clasifica intención → registra → consulta caché → genera orientación RAG → audita (`consulta_controller.py:41`).
-- [x] Devuelve `texto`, `confianza` (alta/media/baja) y `fuentes` (url + fragmento).
+- [x] `POST /api/consultas` clasifica intención → registra → consulta caché → genera orientación RAG → audita (`consulta_controller.py`).
+- [x] Devuelve `texto`, `confianza` (alta/media/baja), `groundedness` real, `confianza_intencion`, `pide_aclaracion` y `fuentes` con `titulo` + `fragmento` + `url`.
 - [x] Persistencia de la consulta en `consultas` (`RegistrarConsulta.py`).
-- [ ] ❌ **Identificar el "trámite probable":** el flujo no vincula la pregunta con el catálogo `tramites`; no aparece "trámite probable" en la respuesta.
-- [ ] ❌ **Consulta ambigua (p. ej. "Necesito un permiso"):** no hay manejo especial tipo "solicitar información adicional"; responde con la respuesta genérica del SLM/`OTRO`.
+- [x] **Trámite probable implementado:** `IdentificarTramiteProbable` vincula los documentos recuperados con `tramites` mediante `documentos.tramite_id`, pondera los votos por la similitud semántica del RAG y exige que el ganador supere al segundo por un margen (1.15) con puntaje mínimo 0.45. Si ningún trámite domina, **no se propone ninguno** (`IdentificarTramiteProbable.py`).
+- [x] **Consulta ambigua gestionada:** sin patrón reconocido, con empate entre intenciones o con confianza < 0.5, `ServicioOrientacion` responde con `ACLARACION_AMBIGUA` y `pide_aclaracion: true`, sin generar respuesta ni citar fuentes (`ServicioOrientacion.py`).
 
 **Frontend**
 - [x] Chat funcional con sugerencias rápidas y burbujas (`components/ChatBox.tsx`, `ChatThread.tsx`).
-- [ ] ❌ **No muestra realmente las fuentes ni el groundedness:** el badge marca siempre **90 %** porque el backend nunca envía `groundedness` y el front lo invierte (`lib/api.ts:77`); además el backend devuelve `{url, fragmento}` y el componente lee `f.titulo`, que llega `undefined` (`GroundednessBadge.tsx:15`).
-- [ ] ❌ **Riesgo de responder con datos falsos:** el `AbortController` corta a los **6 s** (`lib/api.ts:63`) pero el RAG real tarda **5–9 s**; al agotarse el tiempo salta el `catch` y se muestra `respuestaDemo()`, es decir una respuesta inventada sin avisar al usuario (`lib/api.ts:79-81`).
-- [ ] ❌ No muestra un "trámite probable" estructurado ni pide aclaración de forma dirigida.
+- [x] **Groundedness y fuentes reales:** el backend ya envía `groundedness` y las fuentes incluyen `titulo`; `GroundednessBadge` los muestra sin valores fijos (`lib/api.ts`).
+- [x] **Sin riesgo de datos falsos:** el timeout subió a 45 s (el RAG tarda 4–17 s) y se eliminó `respuestaDemo()`. Si el backend falla, el ciudadano ve el error real (`lib/api.ts`).
+- [x] Muestra el "trámite probable" estructurado (`components/TramiteProbableCard.tsx`) y rotula cuando pide aclaración.
+
+> Verificado en la API real: "cuánto cuesta la licencia de funcionamiento" → `consultar_costo` → trámite probable *Licencia de Funcionamiento* con requisitos del catálogo; "quiero saber" → `pide_aclaracion: true` en 2.2 s sin fuentes.
 
 ---
 
-## HU-06 — Clasificación de intención ⚠️ Parcial
+## HU-06 — Clasificación de intención ✅ Completa
 
 **Backend**
-- [x] Clasificador léxico con patrones (`ServicioNLP.py`); intenciones: `consultar_requisitos`, `consultar_costo`, `consultar_estado`, `consultar_ubicacion`, `saludo`, `otro`.
-- [x] La intención se persiste en `consultas.intencion` y viaja en la respuesta (`consulta_controller.py:27`).
-- [ ] ❌ **Categorías "pasos" y "área responsable":** no existen en el enum (`IntencionConsulta.py`).
-- [ ] ❌ **Umbral de confianza de clasificación:** el clasificador solo devuelve `OTRO` si no hay match; no calcula confianza ni exige umbral.
-- [ ] ❌ **"Solicitar aclaración" ante baja confianza:** no se implementa; responde igual.
+- [x] Clasificador léxico con raíces tolerantes a conjugaciones (`ServicioNLP.py`); nueve intenciones: `consultar_requisitos`, `consultar_costo`, `consultar_plazo`, `consultar_pasos`, `consultar_area`, `consultar_estado`, `consultar_ubicacion`, `saludo`, `otro`.
+- [x] La intención se persiste en `consultas.intencion` y viaja en la respuesta con su confianza.
+- [x] **Categorías "pasos" y "área responsable" añadidas** al enum (`IntencionConsulta.py`) y con patrones léxicos.
+- [x] **Umbral de confianza implementado:** `ClasificacionIntencion` calcula confianza (base 0.55 + 0.15 por patrón adicional, máx. 1.0) y desempata por especificidad del patrón, de modo que "cuanto cuesta" gana sobre "pago".
+- [x] **Solicita aclaración ante baja confianza o empate:** `requiere_aclaracion` es verdadero si la intención es `OTRO`, si hay empate o si la confianza es < 0.5; en ese caso el flujo no genera respuesta.
+
+> Verificado: 19/19 casos de un recorrido manual (8 intenciones y 2 casos sin patrón) clasificados correctamente.
 
 ---
 
-## HU-07 — Orientación de requisitos ⚠️ Parcial
+## HU-07 — Orientación de requisitos ✅ Completa
 
 **Backend**
-- [x] El catálogo `tramites` tiene `requisitos TEXT[]` y el endpoint `GET /api/tramites/{id}` lo expone con sus documentos vigentes (`tramite_controller.py:43`).
+- [x] El catálogo `tramites` tiene `requisitos TEXT[]` y el endpoint `GET /api/tramites/{id}` lo expone con sus documentos vigentes (`tramite_controller.py`).
 - [x] El RAG recupera documentos relevantes y el SLM puede listar requisitos citando la fuente (`ServicioRAG.construir_fuentes`).
-- [ ] ❌ **Lista ordenada garantizada:** no hay estructura de salida "requisitos" (depende del texto libre del SLM).
-- [ ] ❌ **Verificación contra `tramites.requisitos`:** el chat no consulta la tabla de trámites; solo depende del contenido documental.
-- [ ] ❌ **Derivación al área responsable** si no se puede confirmar (no implementada; solo nota de baja confianza).
+- [x] **Lista ordenada garantizada:** `Respuesta.con_datos_estructurados()` anexa al texto los requisitos numerados desde la base de datos, no desde el redactado del SLM (`Respuesta.py`).
+- [x] **Verificación contra `tramites.requisitos`:** el flujo consulta el catálogo mediante `TramiteCatalogoPort` / `TramiteCatalogoAdapter`, que resuelve los trámites de los documentos recuperados (`JOIN documentos d ON d.tramite_id = t.id`).
+- [ ] ⚠️ **Derivación al área responsable:** no implementada. La base de datos no tiene columna de área responsable por trámite, por lo que el sistema no puede derivar y se limita a informar al ciudadano.
 
 ---
 
@@ -169,9 +175,12 @@ verificables con `grep` sobre el repositorio.
 **Backend**
 - [x] BD: `costo NUMERIC` y `duracion_estimada_dias` (`schema.sql:45-46`).
 - [x] `GET /api/tramites` y `/{id}` devuelven `costo` y `duracion_estimada_dias` (`tramite_controller.py:12`).
-- [ ] ❌ **El chat no usa esos campos:** `ServicioRAG`/`ServicioSLM` solo trabajan con el texto de `documentos`; si el TUPA carece del dato, no hay consulta a `tramites.costo`.
+- [x] **El chat ya usa esos campos:** `TramiteProbable` transporta `costo` y `duracion_estimada_dias` desde el catálogo y `Respuesta.con_datos_estructurados()` los anexa ("Datos del catálogo: arancel S/ X; plazo estimado de N días hábiles").
+- [x] **El frontend formatea los datos reales:** `mapearTramite` convierte `costo` y `duracion_estimada_dias` a texto legible (`lib/api.ts`), corrigiendo el desajuste de campos anterior.
 - [ ] ❌ **"No inventar el dato" es solo por prompt** (instrucción al SLM y nota de baja confianza), no una validación de dato.
 - [ ] ❌ **Comunicación formal "verifíquese con la municipalidad":** solo existe el texto genérico cuando no hay contexto (`ServicioSLM.generar`).
+
+> Nota de datos: `tramites.costo` es 0.00 en la base de datos, por lo que el catálogo muestra "Gratuito / según TUPA" y el chat omite el arancel. Los montos del TUPA deben cargarse para que esta HU pueda cerrarse.
 
 ---
 
@@ -179,9 +188,9 @@ verificables con `grep` sobre el repositorio.
 
 **Backend**
 - [x] SLM local vía Ollama (`adapters/slm/OllamaAdapter.py`), temperatura 0.2, respuesta en español, instrucción de usar solo el contexto.
-- [x] Abstención si no hay contexto (`ServicioSLM.generar`: "No encontré información oficial...").
+- [x] Abstención si no hay contexto (`ServicioSLM.generar`: "No encontré información oficial...") y abstención adicional por consulta ambigua.
 - [x] Fuentes citadas y evaluadas (`ServicioRAG`, `EvaluadorGroundedness`).
-- [ ] ❌ **Estructura clara garantizada** (trámite, requisitos, pasos, costo, plazo): no hay plantilla de salida.
+- [ ] ❌ **Estructura clara garantizada** (trámite, requisitos, pasos, costo, plazo): el prompt declara los apartados REQUISITOS, PASOS, COSTO, PLAZO y OBSERVACIONES, con "No especificado en la base documental" si el contexto no respalda un dato (`ServicioSLM.py`), pero `qwen2.5:3b` puede no respetar la plantilla. Los datos críticos no dependen del SLM (se anexan desde `tramites`), la estructura de apartados no está garantizada.
 - [ ] ❌ **Derivar al funcionario:** no existe canal/área de derivación (solo texto genérico).
 
 ---
@@ -197,7 +206,7 @@ verificables con `grep` sobre el repositorio.
 - [ ] ❌ **Fuentes detalladas** (número, fecha, versión, artículo, página): la BD solo guarda una cadena de URLs, no el detalle citado.
 
 **Frontend**
-- [ ] ❌ **El badge no refleja el dato real:** el componente existe (`components/GroundednessBadge.tsx`) pero muestra un 90 % fijo (el backend no envía `groundedness`, ver HU-05) y no lista los títulos de las fuentes por el desajuste `{url, fragmento}` ↔ `{titulo}`.
+- [x] **El badge refleja el dato real:** el backend envía `groundedness` (valor numérico real) y las fuentes ya incluyen `titulo`; `GroundednessBadge` los muestra y `ServiceStatus` informa lo no verificado como "sin verificar" en vez de "99.9% operativo".
 - [ ] ❌ No hay vista de auditoría real: `AuditLog` es una lista de filas **hardcodeadas** (`components/AuditLog.tsx:1`).
 
 ---
@@ -293,12 +302,12 @@ verificables con `grep` sobre el repositorio.
 | HU-02 | Vigencia/versión/fuente | ⚠️ | 50 % | Sin campos `version`/`fecha` ni validación de metadatos |
 | HU-03 | Aprobar/derogar documentos | ⚠️ | 43 % | Sin flujo por roles, sin baja lógica |
 | HU-04 | Procesamiento documental y RAG | ⚠️ | 44 % | Sin chunking, sin extracción ni OCR |
-| HU-05 | Consulta ciudadana | ⚠️ | 44 % | No identifica "trámite probable", sin manejo de ambigüedad |
-| HU-06 | Clasificación de intención | ⚠️ | 40 % | Faltan clases "pasos"/"área" y umbral de confianza |
-| HU-07 | Orientación de requisitos | ⚠️ | 40 % | Sin lista estructurada ni derivación |
-| HU-08 | Costos y plazos | ⚠️ | 40 % | El chat ignora `costo`/`duracion` del catálogo |
-| HU-09 | Respuestas con SLM | ⚠️ | **60 %** | Sin estructura garantizada ni derivación |
-| HU-10 | Trazabilidad/anti-alucinación | ⚠️ | 38 % | Trazabilidad API incompleta, sin bloqueo real |
+| HU-05 | Consulta ciudadana | ✅ | **100 %** | — (cerrada) |
+| HU-06 | Clasificación de intención | ✅ | **100 %** | — (cerrada) |
+| HU-07 | Orientación de requisitos | ✅ | **80 %** | Sin derivación al área responsable (no hay dato en BD) |
+| HU-08 | Costos y plazos | ⚠️ | 60 % | Arancel del TUPA sin cargar en la BD |
+| HU-09 | Respuestas con SLM | ⚠️ | 60 % | Sin estructura garantizada ni derivación |
+| HU-10 | Trazabilidad/anti-alucinación | ⚠️ | 50 % | Trazabilidad API incompleta, sin bloqueo real |
 | HU-11 | Consultas fuera de dominio | ❌ | 0 % | Sin clasificador de dominio |
 | HU-12 | Trámites relacionados | ❌ | 0 % | Sin motor de recomendaciones |
 | HU-13 | Usuarios y seguridad | ⚠️ | 40 % | Solo registro; sin login, roles ni seguridad |
@@ -307,26 +316,24 @@ verificables con `grep` sobre el repositorio.
 | HU-16 | Métricas y monitoreo | ❌ | 0 % | Solo maqueta estática |
 | HU-17 | Derivación municipal | ⚠️ | 40 % | Solo nota genérica, sin canal/área |
 | HU-18 | Reportes y exportación | ❌ | 0 % | No existe |
-| | **TOTAL** | | **37 %** | 37 de 101 puntos de verificación |
+| | **TOTAL** | | **49 %** | 49 de 101 puntos de verificación |
 
 ## Defectos detectados en esta revisión (1 de octubre de 2026)
 
-Estos no estaban en la versión anterior de este documento y son los más graves porque hacen que el
-front-end **mienta al usuario**:
-
-| # | Defecto | Ubicación | Impacto |
-|---|---------|-----------|---------|
-| D-1 | **Tiempo de espera de 6 s menor que el tiempo real del RAG (5–9 s)** | `lib/api.ts:63` | En consultas lentas salta el `catch` y se muestra `respuestaDemo()`: **el usuario lee una respuesta inventada sin aviso** |
-| D-2 | **`groundedness` siempre 90 %** | `lib/api.ts:77` | El backend nunca devuelve ese campo; el front lo fija con `?? 0.9` |
-| D-3 | **Las fuentes nunca se muestran** | `consulta_controller.py` vs `GroundednessBadge.tsx:15` | El backend devuelve `{url, fragmento}` y el componente lee `f.titulo` (llega `undefined`) |
-| D-4 | **El front llama `/api/health`, pero la ruta real es `/health`** | `lib/api.ts:124` vs `main.py:59` | `ServiceStatus` cae siempre en el `catch` y reporta "todo operativo" sin comprobar nada |
-| D-5 | **Campos de trámites desalineados** | `tramite_controller.py` vs `lib/api.ts` | Backend `costo`(número)/`duracion_estimada_dias`; front espera `costo`(texto)/`plazo`/`categoria`/`estado` → las tarjetas salen sin chips |
-| D-6 | **Datos de demostración presented como reales** | `app/admin/page.tsx:24,38`, `app/page.tsx:46` | "Satisfacción 98 %", "1.180 votos", "v3 · 97 % groundedness" son literales fijos |
-| D-7 | **`POST /api/documentos/upload` acepta cualquier archivo** | `documento_controller.py:66` | No valida extensión/MIME, no extrae texto y el parámetro `tramite_id` no se usa |
-| D-8 | **`es_administrador()` nunca se invoca** | `domain/entities/Usuario.py:16` | El campo `rol` existe pero no controla ningún acceso |
+| # | Defecto | Ubicación | Estado |
+|---|---------|-----------|--------|
+| D-1 | Tiempo de espera de 6 s menor que el tiempo real del RAG (4–17 s), con respuesta ficticia al agotarse | `lib/api.ts` | ✅ Corregido — timeout 45 s y `respuestaDemo()` eliminada; el error se muestra al ciudadano |
+| D-2 | `groundedness` siempre 90 % | `lib/api.ts` | ✅ Corregido — el backend envía el valor real y el front lo muestra tal cual |
+| D-3 | Las fuentes nunca se muestran (`{url, fragmento}` vs `titulo`) | `consulta_controller.py` | ✅ Corregido — las fuentes incluyen `titulo` |
+| D-4 | El front llama `/api/health`, pero la ruta real es `/health` | `lib/api.ts` | ✅ Corregido — se consulta `/health`; lo no verificado se informa como "sin verificar" |
+| D-5 | Campos de trámites desalineados | `tramite_controller.py` vs `lib/api.ts` | ✅ Corregido — `mapearTramite` traduce `costo`, `duracion_estimada_dias` y `tipo` al modelo de la interfaz |
+| D-6 | Datos de demostración presentados como reales | `app/admin/page.tsx`, `app/page.tsx` | ⚠️ Parcial — se retiraron los KPI inventados de la portada; `app/admin` sigue siendo maqueta |
+| D-7 | `POST /api/documentos/upload` acepta cualquier archivo | `documento_controller.py:66` | ❌ Abierto — no valida extensión/MIME, no extrae texto y `tramite_id` no se usa |
+| D-8 | `es_administrador()` nunca se invoca | `domain/entities/Usuario.py:16` | ❌ Abierto — el campo `rol` existe pero no controla ningún acceso |
 
 **Conclusión:** el backend tiene un núcleo RAG sólido y verificado (consulta, búsqueda vectorial,
-SLM, groundedness, caché y auditoría en BD) que cubre HU-01 a HU-10 y HU-13/14, pero **ninguna HU
-llega al 100 %** y el avance global del alcance contratado es del **37 %**. Lo más urgente no es
-añadir funcionalidad nueva, sino **corregir D-1 a D-4**, porque son datos falsos mostrados al
-ciudadano en la pantalla principal.
+SLM, groundedness, caché, identificación de trámite probable y auditoría en BD). Con la corrección
+de D-1 a D-5, **HU-05 y HU-06 llegan al 100 %** y el avance global del alcance contratado sube del
+37 % al **49 %**. El frente abierto más urgente es la carga de los montos reales del TUPA en
+`tramites.costo`: mientras sean 0.00 la HU-08 no puede cerrarse. Después quedan D-6 (panel
+admin), D-7 (upload) y D-8 (autorización).

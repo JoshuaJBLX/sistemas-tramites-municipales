@@ -9,6 +9,14 @@ PLANTILLA_SISTEMA = (
     'respuesta, indícalo explícitamente y sugiere acudir a la municipalidad.'
 )
 
+# Estructura de salida para que la respuesta sea clara y ordenable (HU-09).
+INSTRUCCION_ESTRUCTURA = (
+    'Organiza la respuesta en estos apartados, solo si el contexto los respalda: '
+    'REQUISITOS, PASOS, COSTO, PLAZO y OBSERVACIONES. Si el contexto no aporta '
+    'un dato, escribe "No especificado en la base documental" en ese apartado. '
+    'No inventes montos, plazos ni documentos que no aparezcan en el contexto.'
+)
+
 
 class ServicioSLM:
     """Construye el prompt y delega la generación al modelo de lenguaje."""
@@ -31,4 +39,7 @@ class ServicioSLM:
             f'[Documento: {documento.titulo}]\n{documento.contenido}'
             for documento in contexto
         )
-        return f'{PLANTILLA_SISTEMA}\n\nContexto:\n{fragmentos}\n\nPregunta: {pregunta}'
+        return (
+            f'{PLANTILLA_SISTEMA}\n\n{INSTRUCCION_ESTRUCTURA}'
+            f'\n\nContexto:\n{fragmentos}\n\nPregunta: {pregunta}'
+        )

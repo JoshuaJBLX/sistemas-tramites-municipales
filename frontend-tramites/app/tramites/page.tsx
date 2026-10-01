@@ -8,8 +8,15 @@ export default function TramitesPage() {
   const [todos, setTodos] = useState<Tramite[]>([]);
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('Todas');
+  const [error, setError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(true);
 
-  useEffect(() => { obtenerTramites().then(setTodos); }, []);
+  useEffect(() => {
+    obtenerTramites()
+      .then(setTodos)
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : 'No se pudo cargar el catálogo.'))
+      .finally(() => setCargando(false));
+  }, []);
   const cats = ['Todas', ...Array.from(new Set(todos.map((t) => t.categoria).filter(Boolean) as string[]))];
   const list = todos.filter((t) =>
     (cat === 'Todas' || t.categoria === cat) &&
@@ -37,12 +44,22 @@ export default function TramitesPage() {
           ))}
         </div>
       </div>
-      {list.length === 0 && <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-48" />)}</div>}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((t, i) => (
-          <TramiteCard key={t.id} tramite={t} index={i} />
-        ))}
-      </div>
+      {error && (
+        <div className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+          No se pudo cargar el catálogo de trámites: {error}
+        </div>
+      )}
+      {!error && cargando && <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-48" />)}</div>}
+      {!error && !cargando && list.length === 0 && (
+        <p className="mt-6 text-sm text-mist-500">No hay trámites que coincidan con la búsqueda.</p>
+      )}
+      {!error && list.length > 0 && (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((t, i) => (
+            <TramiteCard key={t.id} tramite={t} index={i} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

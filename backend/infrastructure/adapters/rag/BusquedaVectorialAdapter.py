@@ -52,7 +52,7 @@ def _coseno(a: list[float] | None, b: list[float] | None) -> float:
     return float(np.dot(va, vb) / norma)
 
 
-def _mapear_documento(fila) -> Documento:
+def _mapear_documento(fila, similitud: float = 0.0) -> Documento:
     return Documento(
         id=fila['id'],
         tramite_id=fila['tramite_id'],
@@ -61,6 +61,7 @@ def _mapear_documento(fila) -> Documento:
         url_origen=fila['url_origen'],
         estado=EstadoDocumento(fila['estado']),
         actualizado_en=fila['actualizado_en'],
+        puntuacion_similitud=similitud,
     )
 
 
@@ -91,7 +92,7 @@ class BusquedaVectorialAdapter(BusquedaSemanticaPort):
             )
 
         return [
-            _mapear_documento(fila)
+            _mapear_documento(fila, float(fila['similitud']))
             for fila in filas
             if float(fila['similitud']) >= self._umbral_similitud
         ]
@@ -107,7 +108,7 @@ class BusquedaVectorialAdapter(BusquedaSemanticaPort):
         candidatos.sort(key=lambda par: par[0], reverse=True)
 
         return [
-            _mapear_documento(fila)
+            _mapear_documento(fila, similitud)
             for similitud, fila in candidatos
             if similitud >= self._umbral_similitud
         ][:top_k]

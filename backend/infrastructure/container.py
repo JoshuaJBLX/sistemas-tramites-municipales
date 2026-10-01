@@ -23,6 +23,7 @@ from application.use_cases.ClasificarIntencion import ClasificarIntencion
 from application.use_cases.ConsultarTramite import ConsultarTramite
 from application.use_cases.GenerarOrientacion import GenerarOrientacion
 from application.use_cases.GestionarDocumentos import GestionarDocumentos
+from application.use_cases.IdentificarTramiteProbable import IdentificarTramiteProbable
 from application.use_cases.RegistrarConsulta import RegistrarConsulta
 from domain.entities.Consulta import Consulta
 from domain.entities.Respuesta import Respuesta
@@ -32,7 +33,9 @@ from domain.ports.CachePort import CachePort
 from domain.ports.ConsultaRepository import ConsultaRepository
 from domain.ports.DocumentoRepository import DocumentoRepository
 from domain.ports.GeneracionRespuestaPort import GeneracionRespuestaPort
+from domain.ports.TramiteCatalogoPort import TramiteCatalogoPort
 from infrastructure.adapters.cache.RedisAdapter import RedisAdapter
+from infrastructure.adapters.catalog.TramiteCatalogoAdapter import TramiteCatalogoAdapter
 from infrastructure.adapters.documents.DocumentStorageAdapter import DocumentStorageAdapter
 from infrastructure.adapters.embeddings.BGE_M3Adapter import BGE_M3Adapter
 from infrastructure.adapters.rag.BusquedaVectorialAdapter import BusquedaVectorialAdapter
@@ -77,10 +80,12 @@ class Container:
     generacion_respuesta: GeneracionRespuestaPort
     cache: CachePort
     almacenamiento: DocumentStorageAdapter
+    tramite_catalogo: TramiteCatalogoPort
     servicio_cache: ServicioCache
     registrar_consulta: RegistrarConsulta
     consultar_tramite: ConsultarTramite
     clasificar_intencion: ClasificarIntencion
+    identificar_tramite: IdentificarTramiteProbable
     buscar_documentos: BuscarDocumentos
     generar_orientacion: GenerarOrientacion
     gestionar_documentos: GestionarDocumentos
@@ -103,6 +108,9 @@ def crear_container(dsn: str | None = None) -> Container:
     documento_repository = DocumentoRepositoryImpl(connection)
     consulta_repository = ConsultaRepositoryImpl(connection)
 
+    # Adaptadores de catálogo: resuelve los trámites de los documentos recuperados.
+    tramite_catalogo = TramiteCatalogoAdapter(documento_repository)
+
     # Servicios de aplicación.
     servicio_nlp = ServicioNLP()
     servicio_slm = ServicioSLM(generacion_respuesta)
@@ -112,7 +120,10 @@ def crear_container(dsn: str | None = None) -> Container:
         top_k=int(os.getenv('RAG_TOP_K', '5')),
     )
     evaluador_groundedness = EvaluadorGroundedness()
-    servicio_orientacion = ServicioOrientacion(servicio_rag, evaluador_groundedness)
+    identificar_tramite = IdentificarTramiteProbable(tramite_catalogo)
+    servicio_orientacion = ServicioOrientacion(
+        servicio_rag, evaluador_groundedness, identificar_tramite
+    )
     servicio_auditoria = ServicioAuditoria(auditoria, consulta_repository)
     servicio_cache = ServicioCache(
         cache, ttl_segundos=int(os.getenv('CACHE_TTL_SEGUNDOS', '3600'))
@@ -127,10 +138,12 @@ def crear_container(dsn: str | None = None) -> Container:
         generacion_respuesta=generacion_respuesta,
         cache=cache,
         almacenamiento=almacenamiento,
+        tramite_catalogo=tramite_catalogo,
         servicio_cache=servicio_cache,
         registrar_consulta=RegistrarConsulta(consulta_repository),
         consultar_tramite=ConsultarTramite(documento_repository, cache),
         clasificar_intencion=ClasificarIntencion(servicio_nlp),
+        identificar_tramite=identificar_tramite,
         buscar_documentos=BuscarDocumentos(busqueda_semantica),
         generar_orientacion=GenerarOrientacion(servicio_orientacion),
         gestionar_documentos=GestionarDocumentos(documento_repository, busqueda_semantica),

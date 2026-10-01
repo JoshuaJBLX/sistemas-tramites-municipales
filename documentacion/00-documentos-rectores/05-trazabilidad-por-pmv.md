@@ -10,17 +10,17 @@
 
 | Dimensión | Resultado |
 |---|---|
-| **Avance global de las 18 HU** | **37 %** (37/101 puntos) |
-| **PMV1 · Prototipo funcional** | **46 %** (11/24) — 4 HU |
-| **PMV2 · Modelo RAG optimizado** | **36 %** (9/25) — 4 HU |
+| **Avance global de las 18 HU** | **49 %** (49/101 puntos) |
+| **PMV1 · Prototipo funcional** | **88 %** (21/24) — 4 HU |
+| **PMV2 · Modelo RAG optimizado** | **44 %** (11/25) — 4 HU |
 | **PMV3 · Sistema integrado** | **34 %** (15/44) — 8 HU |
 | **Transversal** (fuera de dominio, derivación) | **25 %** (2/8) — 2 HU |
-| HU completas al 100 % | 0 / 18 |
+| HU completas al 100 % | 2 / 18 — HU-05, HU-06 |
 | HU iniciadas | 13 / 18 |
 | HU sin empezar | 5 / 18 (HU-11, HU-12, HU-15, HU-16, HU-18) |
 | Pruebas automatizadas | 0 suites |
 
-> Los tres PMV están **por debajo del 50 %** porque el avance se mide contra el alcance completo de
+> Los tres PMV están **por debajo del 100 %** porque el avance se mide contra el alcance completo de
 > las historias (que incluye versionado, chunking, OCR, seguridad, métricas y reportes), no solo
 > contra la demo. El **núcleo conversacional RAG funciona de extremo a extremo**.
 
@@ -83,17 +83,20 @@
 
 | PMV | HU | % por HU | Justificación |
 |---|---|---|---|
-| **PMV1** (46 %) | HU-05 · HU-06 · HU-07 · HU-09 | 44 · 40 · 40 · **60 %** | Consulta ciudadana, clasificación, requisitos y respuesta SLM = núcleo del prototipo |
-| **PMV2** (36 %) | HU-04 · HU-08 · HU-10 · HU-12 | 44 · 40 · 38 · **0 %** | Procesamiento RAG, costos/plazos, trazabilidad y trámites relacionados |
+| **PMV1** (88 %) | HU-05 · HU-06 · HU-07 · HU-09 | **100** · **100** · 80 · 60 % | Consulta ciudadana, clasificación, requisitos y respuesta SLM = núcleo del prototipo |
+| **PMV2** (44 %) | HU-04 · HU-08 · HU-10 · HU-12 | 44 · 60 · 50 · **0 %** | Procesamiento RAG, costos/plazos, trazabilidad y trámites relacionados |
 | **PMV3** (34 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-18 | 44 · 50 · 43 · 40 · 33 · **0** · **0** · **0 %** | Gestión documental + usuarios/seguridad + auditoría + métricas + reportes |
 | **Transversal** (25 %) | HU-11 · HU-17 | **0** · 40 % | Fuera de dominio y derivación (dependen de G-04 en PMV2/3) |
 
 ### El dato relevante por PMV
 
-- **PMV1 es el más avanzado (46 %)** y su HU más sólida es **HU-09 (60 %)**: la generación de
-  respuestas con el SLM local funciona (Ollama + qwen2.5:3b, temperatura 0.2, con fuentes).
-- **PMV2 (36 %)** arrastra a **HU-12 = 0 %**: el motor de trámites relacionados no existe, así que
-  uno de los cuatro pilares del PMV2 no ha empezado.
+- **PMV1 es el más avanzado (88 %)** con **HU-05 y HU-06 al 100 %**: la clasificación de intención
+  con confianza y aclaración, el trámite probable y los requisitos verificados contra el catálogo
+  funcionan de extremo a extremo. Quedan pendientes la derivación al área responsable (HU-07) y la
+  estructura garantizada de la respuesta (HU-09).
+- **PMV2 (44 %)** arrastra a **HU-12 = 0 %**: el motor de trámites relacionados no existe, así que
+  uno de los cuatro pilares del PMV2 no ha empezado. HU-08 quedó en 60 % porque el chat ya usa
+  `costo` y `duracion_estimada_dias`, pero los montos del TUPA no están cargados en la base de datos.
 - **PMV3 (34 %)** es el que más trabajo tiene: **3 de sus 8 HU están en 0 %** (HU-15 retroalimentación,
   HU-16 métricas y HU-18 reportes), y las otras 5 siguen en estado parcial.
 - **Transversal (25 %)**: HU-11 sin clasificador de dominio y HU-17 solo con una nota genérica.
@@ -111,26 +114,28 @@
 
 Estricto a la definición de 04.4 y contrastado con el código:
 
-- **Funcional:** el repositorio está **entre PMV1 (cerrado) y PMV2 (funcionalmente listo)** — el
-  RAG con 20+ trámites y fuentes citadas ya opera; falta la **abstención** (G-04) y la validación.
-- **Medido:** PMV1 **46 %** · PMV2 **36 %** · PMV3 **34 %** · global **37 %**.
-  Ningún PMV llega al 50 % porque el alcance de las historias incluye versionado documental,
+- **Funcional:** el repositorio está **en PMV1 cerrado (88 %)** y entrando en PMV2 — el RAG con 20+
+  trámites y fuentes citadas ya opera, y ahora también la abstención (G-04): el asistente pide
+  aclaración cuando la consulta es ambigua y se abstiene cuando no encuentra documentos oficiales.
+- **Medido:** PMV1 **88 %** · PMV2 **44 %** · PMV3 **34 %** · global **49 %**.
+  Ningún PMV llega al 100 % porque el alcance de las historias incluye versionado documental,
   chunking, OCR, autenticación, métricas y reportes que aún no existen.
 - **Infraestructura:** la capa de **PMV3** está parcialmente adelantada en el repo (Docker Compose,
   Redis, API completa ya existen), pero eso no se refleja en el avance funcional de sus HU.
-- **Pendiente prioritario para declarar PMV2 cerrado:** G-04 (abstención/rechazo) y G-21
-  (dataset y resultados de la PoC), más **HU-12 (trámites relacionados) al 0 %**.
+- **Pendiente prioritario para declarar PMV2 cerrado:** **HU-12 (trámites relacionados) al 0 %**,
+  G-21 (dataset y resultados de la PoC) y **cargar los montos reales del TUPA** en `tramites.costo`,
+  hoy en 0.00, que es lo que impide cerrar HU-08.
 - **Pendiente para PMV3:** seguridad (G-01/G-20), métricas (G-16), pruebas (G-18/G-26) y validación
-  con usuarios (SUS). Antes que eso, corregir los defectos **D-1 a D-4** del documento 02, porque
-  hacen que la pantalla principal muestre datos falsos al ciudadano.
+  con usuarios (SUS). Los defectos **D-1 a D-5** del documento 02 ya están corregidos; quedan D-6
+  (panel admin como maqueta), D-7 (upload sin validación) y D-8 (autorización sin usar).
 
 ## 7. Ruta de cierre sugerida (por PMV)
 
-1. **Corrección inmediata (antes que funcionalidad nueva):** subir el timeout del front de 6 s a
-   ~30 s y eliminar el fallback `respuestaDemo()` silencioso (**D-1**), enviar `groundedness` real
-   desde el backend (**D-2**) y alinear el contrato de fuentes `{url, fragmento}` ↔ `{titulo}` (**D-3**).
-2. **Cerrar PMV2 (36 %):** implementar abstención por umbral de groundedness (G-04) → **HU-12
-   trámites relacionados (0 %)** → dataset de consultas sintéticas y resultados (G-21).
+1. ~~**Corrección inmediata (antes que funcionalidad nueva):** subir el timeout del front, eliminar
+   el fallback `respuestaDemo()` (**D-1**), enviar `groundedness` real (**D-2**) y alinear el contrato
+   de fuentes (**D-3**)~~ — **hecho**: D-1 a D-5 corregidos y verificados contra la API en ejecución.
+2. **Cerrar PMV2 (44 %):** cargar los montos reales del TUPA en `tramites.costo` → **HU-12 trámites
+   relacionados (0 %)** → dataset de consultas sintéticas y resultados (G-21).
 3. **Avanzar PMV3 (34 %), bloque 1:** pytest del flujo RAG (G-18) y autenticación JWT + roles (G-01).
 4. **Avanzar PMV3, bloque 2:** endpoint de métricas (G-16) y guardrails anti prompt-injection (G-20).
 5. **Validación final:** pruebas de carga (k6) + auditoría WCAG + SonarQube (G-26) y medición de
@@ -140,8 +145,8 @@ Estricto a la definición de 04.4 y contrastado con el código:
 
 | Escenario | Avance estimado |
 |---|---|
-| Estado actual | **37 %** |
-| + corregir D-1..D-4 (datos falsos en el chat) | ~42 % |
-| + abstención (G-04) y HU-12 | ~50 % |
+| Estado actual | **49 %** |
+| ~~+ corregir D-1..D-4 (datos falsos en el chat)~~ | ~~42 %~~ — **superado** |
+| + cargar montos del TUPA y abstención ya hecha | ~52 % |
 | + autenticación, métricas y pytest | ~62 % |
 | + retroalimentación, reportes y validación SUS | ~75–80 % |

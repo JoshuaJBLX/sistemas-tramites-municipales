@@ -50,6 +50,7 @@ class ServicioRAG:
                 tipo=FuenteOficial.PORTAL_MUNICIPAL,
                 url=documento.url_origen,
                 fragmento=documento.contenido[:280],
+                titulo=documento.titulo,
             )
             for documento in documentos
         ]

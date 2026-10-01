@@ -6,11 +6,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from domain.entities.Fuente import Fuente
-from domain.entities.Respuesta import Respuesta
-from domain.value_objects.FuenteOficial import FuenteOficial
 from domain.value_objects.IntencionConsulta import IntencionConsulta
-from domain.value_objects.NivelConfianza import NivelConfianza
 from infrastructure.container import Container, obtener_container
 
 router = APIRouter(prefix='/api/consultas', tags=['consultas'])
@@ -22,8 +18,22 @@ class ConsultaRequest(BaseModel):
 
 
 class FuenteResponse(BaseModel):
+    """Fuente citada. Incluye el título para que el front pueda mostrarla."""
+
     url: str
     fragmento: str
+    titulo: str = ''
+
+
+class TramiteProbableResponse(BaseModel):
+    """Trámite del catálogo que mejor explica la consulta (HU-05, HU-07)."""
+
+    id: UUID
+    nombre: str
+    requisitos: list[str] = Field(default_factory=list)
+    costo: float = 0.0
+    duracion_estimada_dias: int = 0
+    fuente_url: str | None = None
 
 
 class RespuestaResponse(BaseModel):
@@ -31,7 +41,11 @@ class RespuestaResponse(BaseModel):
     intencion: IntencionConsulta
     texto: str
     confianza: str
-    fuentes: list[FuenteResponse]
+    groundedness: float = 0.0
+    confianza_intencion: float = 0.0
+    pide_aclaracion: bool = False
+    tramite_probable: TramiteProbableResponse | None = None
+    fuentes: list[FuenteResponse] = Field(default_factory=list)
 
 
 class ConsultaResponse(BaseModel):
@@ -42,6 +56,40 @@ class ConsultaResponse(BaseModel):
     creada_en: datetime
 
 
+def _cuerpo_respuesta(respuesta) -> dict:
+    """Serializa la respuesta en el formato que consume el front-end."""
+    cuerpo = {
+        'texto': respuesta.texto,
+        'confianza': respuesta.confianza.value,
+        'groundedness': respuesta.groundedness,
+        'confianza_intencion': respuesta.confianza_intencion,
+        'pide_aclaracion': respuesta.pide_aclaracion,
+        'fuentes': [
+            {
+                'url': fuente.url,
+                'fragmento': fuente.fragmento,
+                'titulo': fuente.titulo,
+            }
+            for fuente in respuesta.fuentes
+        ],
+    }
+
+    tramite = respuesta.tramite_probable
+    cuerpo['tramite_probable'] = (
+        {
+            'id': str(tramite.id),
+            'nombre': tramite.nombre,
+            'requisitos': tramite.requisitos,
+            'costo': tramite.costo,
+            'duracion_estimada_dias': tramite.duracion_estimada_dias,
+            'fuente_url': tramite.fuente_url,
+        }
+        if tramite is not None
+        else None
+    )
+    return cuerpo
+
+
 @router.post('', response_model=RespuestaResponse)
 async def crear_consulta(
     payload: ConsultaRequest,
@@ -49,8 +97,11 @@ async def crear_consulta(
 ) -> RespuestaResponse:
     """Registra la consulta, clasifica su intención y genera la orientación."""
     try:
-        # 1. Clasificación de intención.
-        intencion = await container.clasificar_intencion.ejecutar(payload.pregunta)
+        # 1. Clasificación de intención con confianza y detección de ambigüedad.
+        clasificacion = await container.clasificar_intencion.ejecutar_detallado(
+            payload.pregunta
+        )
+        intencion = clasificacion.intencion
 
         # 2. Registro de la consulta.
         consulta = await container.registrar_consulta.ejecutar(
@@ -62,45 +113,26 @@ async def crear_consulta(
         # 3. Caché de respuestas frecuentes.
         en_cache = await container.servicio_cache.obtener_respuesta(payload.pregunta)
         if en_cache is not None:
-            respuesta_cache = Respuesta(
-                id=uuid4(),
-                consulta_id=consulta.id,
-                texto=en_cache['texto'],
-                confianza=NivelConfianza(en_cache['confianza']),
-                fuentes=[
-                    Fuente(
-                        id=uuid4(),
-                        documento_id=uuid4(),
-                        tipo=FuenteOficial.PORTAL_MUNICIPAL,
-                        url=fuente['url'],
-                        fragmento=fuente['fragmento'],
-                    )
-                    for fuente in en_cache['fuentes']
-                ],
-            )
             # 4. Auditoría también en cache-hit para mantener trazabilidad completa.
-            await container.auditar_consulta.ejecutar(consulta, respuesta_cache)
+            await container.auditar_consulta.ejecutar(
+                consulta,
+                _respuesta_desde_cuerpo(en_cache, consulta.id),
+            )
             return RespuestaResponse(
                 consulta_id=consulta.id, intencion=intencion, **en_cache
             )
 
         # 5. Generación de la orientación con RAG.
         respuesta = await container.generar_orientacion.ejecutar(
-            consulta_id=consulta.id, pregunta=payload.pregunta
+            consulta_id=consulta.id,
+            pregunta=payload.pregunta,
+            clasificacion=clasificacion,
         )
 
         # 6. Auditoría de la interacción.
         await container.auditar_consulta.ejecutar(consulta, respuesta)
 
-        cuerpo = {
-            'texto': respuesta.texto,
-            'confianza': respuesta.confianza.value,
-            # Se guardan como dicts planos para que la caché sea JSON puro.
-            'fuentes': [
-                {'url': fuente.url, 'fragmento': fuente.fragmento}
-                for fuente in respuesta.fuentes
-            ],
-        }
+        cuerpo = _cuerpo_respuesta(respuesta)
         await container.servicio_cache.guardar_respuesta(payload.pregunta, cuerpo)
 
         return RespuestaResponse(
@@ -108,6 +140,51 @@ async def crear_consulta(
         )
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+def _respuesta_desde_cuerpo(cuerpo: dict, consulta_id: UUID):
+    """Reconstruye una respuesta mínima para poder auditar un acierto de caché."""
+    from domain.entities.Fuente import Fuente
+    from domain.entities.Respuesta import Respuesta
+    from domain.value_objects.FuenteOficial import FuenteOficial
+    from domain.value_objects.NivelConfianza import NivelConfianza
+    from domain.value_objects.TramiteProbable import TramiteProbable
+
+    tramite = cuerpo.get('tramite_probable')
+    tramite_probable = (
+        TramiteProbable(
+            id=UUID(str(tramite['id'])),
+            nombre=tramite['nombre'],
+            requisitos=tramite.get('requisitos', []),
+            costo=tramite.get('costo', 0.0),
+            duracion_estimada_dias=tramite.get('duracion_estimada_dias', 0),
+            fuente_url=tramite.get('fuente_url'),
+        )
+        if tramite
+        else None
+    )
+
+    return Respuesta(
+        id=uuid4(),
+        consulta_id=consulta_id,
+        texto=cuerpo['texto'],
+        confianza=NivelConfianza(cuerpo['confianza']),
+        fuentes=[
+            Fuente(
+                id=uuid4(),
+                documento_id=uuid4(),
+                tipo=FuenteOficial.PORTAL_MUNICIPAL,
+                url=fuente['url'],
+                fragmento=fuente['fragmento'],
+                titulo=fuente.get('titulo', ''),
+            )
+            for fuente in cuerpo.get('fuentes', [])
+        ],
+        groundedness=cuerpo.get('groundedness', 0.0),
+        confianza_intencion=cuerpo.get('confianza_intencion', 0.0),
+        pide_aclaracion=cuerpo.get('pide_aclaracion', False),
+        tramite_probable=tramite_probable,
+    )
 
 
 @router.get('/{consulta_id}', response_model=ConsultaResponse)

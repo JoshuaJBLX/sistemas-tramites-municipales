@@ -4,6 +4,7 @@ from uuid import UUID
 
 from application.services.ServicioOrientacion import ServicioOrientacion
 from domain.entities.Respuesta import Respuesta
+from domain.value_objects.ClasificacionIntencion import ClasificacionIntencion
 
 
 class GenerarOrientacion:
@@ -12,11 +13,17 @@ class GenerarOrientacion:
     def __init__(self, servicio_orientacion: ServicioOrientacion) -> None:
         self._servicio_orientacion = servicio_orientacion
 
-    async def ejecutar(self, consulta_id: UUID, pregunta: str) -> Respuesta:
+    async def ejecutar(
+        self,
+        consulta_id: UUID,
+        pregunta: str,
+        clasificacion: ClasificacionIntencion | None = None,
+    ) -> Respuesta:
         if not pregunta or not pregunta.strip():
             raise ValueError('La pregunta no puede estar vacía.')
 
         return await self._servicio_orientacion.orientar(
             consulta_id=consulta_id,
             pregunta=pregunta.strip(),
+            clasificacion=clasificacion,
         )

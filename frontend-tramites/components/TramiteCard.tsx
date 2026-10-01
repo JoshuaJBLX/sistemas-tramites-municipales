@@ -3,12 +3,6 @@
 import type { Tramite } from '../lib/api';
 import { DocIcon, ClockIcon } from './icons';
 
-const badgeByEstado: Record<string, string> = {
-  activo: 'badge-emerald',
-  nuevo: 'badge-blue',
-  actualizando: 'badge-amber',
-};
-
 export default function TramiteCard({ tramite, index = 0 }: { tramite: Tramite; index?: number }) {
   return (
     <article
@@ -22,7 +16,7 @@ export default function TramiteCard({ tramite, index = 0 }: { tramite: Tramite; 
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-b from-emerald to-emerald-deep text-white shadow-lift">
             <DocIcon className="h-6 w-6" />
           </span>
-          {tramite.estado && <span className={badgeByEstado[tramite.estado] ?? 'badge-blue'}>{tramite.estado}</span>}
+          {/* El catálogo no tiene columna de estado: no se muestra una etiqueta inventada. */}
         </div>
         {tramite.categoria && <p className="eyebrow mt-3 !text-[10px]">{tramite.categoria}</p>}
         <h2 className="mt-1 text-lg font-extrabold tracking-tight text-ink">{tramite.nombre}</h2>

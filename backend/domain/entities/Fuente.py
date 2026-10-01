@@ -13,4 +13,5 @@ class Fuente:
     tipo: FuenteOficial
     url: str
     fragmento: str
+    titulo: str = ''
     puntuacion_relevancia: float = 0.0

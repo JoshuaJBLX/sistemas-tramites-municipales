@@ -11,12 +11,14 @@ import DragDropUpload from '../components/DragDropUpload';
 import { TramiteIcon, OrdenanzaIcon, DirectorioIcon, AyudaIcon, ShieldIcon } from '../components/icons';
 import { UsersIcon, HeartIcon, ChartIcon } from '../components/icons';
 import GroundednessBadge from '../components/GroundednessBadge';
-import { obtenerTramites } from '../lib/api';
+import { obtenerTramites, type Tramite } from '../lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const tramites = await obtenerTramites();
+  // El catálogo proviene de la base de datos; si falla se informa en vez de
+  // mostrar una lista ficticia de trámites.
+  const tramites = await obtenerTramites().catch(() => [] as Tramite[]);
   return (
     <div className="mx-auto max-w-7xl px-3 pb-20 pt-6 sm:px-6">
       <section className="grid items-start gap-6 xl:grid-cols-[1fr_340px]">
@@ -41,9 +43,9 @@ export default async function HomePage() {
                 <Link href="/tramites" className="btn-neu">Ver catálogo</Link>
               </div>
               <div className="mt-6 grid grid-cols-3 gap-3">
-                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">252</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Procedimientos TUPA</p></div>
-                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">1,236</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Consultas</p></div>
-                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">98%</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Satisfacción</p></div>
+                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">{tramites.length}</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Trámites en catálogo</p></div>
+                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">20</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Documentos oficiales</p></div>
+                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">—</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Consultas (sin métrica)</p></div>
               </div>
             </div>
             <div className="flex items-center justify-center"><RobotAgent /></div>
@@ -84,9 +86,9 @@ export default async function HomePage() {
           <Link href="/admin" className="btn-neu !py-2 text-sm">Abrir panel →</Link>
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
-          <KpiCard icon={<TramiteIcon className="h-6 w-6" />} label="Procedimientos TUPA" value="252" delta="TUPA 2023 vigente" tone="blue" />
-          <KpiCard icon={<UsersIcon className="h-6 w-6" />} label="Consultas" value="1,236" delta="▲ +12% esta semana" tone="emerald" />
-          <KpiCard icon={<HeartIcon className="h-6 w-6" />} label="Satisfacción" value="98%" delta="▲ +0.6 pts" tone="amber" />
+          <KpiCard icon={<TramiteIcon className="h-6 w-6" />} label="Trámites en catálogo" value={String(tramites.length)} delta="Base de datos oficial" tone="blue" />
+          <KpiCard icon={<UsersIcon className="h-6 w-6" />} label="Consultas registradas" value="—" delta="Métrica no implementada" tone="emerald" />
+          <KpiCard icon={<HeartIcon className="h-6 w-6" />} label="Satisfacción" value="—" delta="Métrica no implementada" tone="amber" />
         </div>
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
           <MiniCharts />
