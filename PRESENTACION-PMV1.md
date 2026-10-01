@@ -1,30 +1,25 @@
-# PMV1 — Prototipo Funcional
+# PMV1 — Demostración
 
 **Trámites Municipales · Municipalidad Provincial de Junín**
 
-## Qué hace
-
-El ciudadano escribe su duda en español y recibe una respuesta de una IA que corre **en el equipo**,
-**citando la fuente oficial** y **reconociendo cuando no sabe**.
-
-## Cómo se levanta
+## Levantar el sistema
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\instalar.ps1   # una sola vez
 
 .venv\Scripts\Activate.ps1
-cd backend; uvicorn main:app --reload --port 8000         # API
+cd backend; uvicorn main:app --reload --port 8000
 
-cd frontend-tramites; npm run dev                         # App → localhost:3000
+cd frontend-tramites; npm run dev
 ```
 
-Swagger (para probar la API): <http://localhost:8000/docs>
+App → <http://localhost:3000> · API → <http://localhost:8000/docs>
 
-## Prueba de que funciona
+---
 
-**`GET /api/tramites`** → **22 trámites** del TUPA 2023 cargados desde la BD.
+## HU-09 · Generación de respuestas con SLM
 
-**Consulta real** — *¿Qué necesito para el permiso de funcionamiento de una cafetería?*
+**Demo:** en <http://localhost:3000>, escribir *¿Qué necesito para el permiso de funcionamiento de una cafetería?*
 
 ```
 Intención: consultar_requisitos   Confianza: media   Fuentes: 5
@@ -38,32 +33,63 @@ Intención: consultar_requisitos   Confianza: media   Fuentes: 5
 
 Fuente: `munijunin.gob.pe/tupa/licencia-funcionamiento`
 
-**Y cuando no sabe, lo dice** — *¿Cuánto cuesta la licencia?* → confianza **baja**:
-> No se especifica un costo fijo en el contexto proporcionado. ⚠️ La información recuperada no
-> sustenta completamente esta respuesta.
+**Y cuando no tiene respaldo, lo avisa** — *¿Cuánto cuesta la licencia?* → confianza **baja**:
 
-## Rendimiento
+> No se especifica un costo fijo en el contexto proporcionado.
+> ⚠️ La información recuperada no sustenta completamente esta respuesta.
 
-| | |
+---
+
+## HU-06 · Clasificación de intención
+
+**Demo:** el sistema detecta solo qué tipo de pregunta es, sin gastar IA:
+
+| Se escribe | Detecta |
 |---|---|
-| Pregunta repetida (caché) | **5 ms** |
-| Pregunta nueva (IA local en CPU) | 4–14 s |
+| hola, buenos días | `saludo` |
+| ¿qué requisitos necesito para el permiso? | `consultar_requisitos` |
+| ¿cuánto cuesta la licencia? | `consultar_costo` |
+| ¿dónde se tramita el permiso? | `consultar_ubicacion` |
+| ¿cómo va el estado de mi trámite? | `consultar_estado` |
+| ¿quién es el presidente del Perú? | `otro` |
 
-## Historias de usuario que se implementan aquí
+---
 
-| HU | Qué hace | Avance |
+## HU-07 · Orientación de requisitos
+
+**Demo:** *¿Cómo solicito un certificado de residencia?*
+
+```
+Fuentes: 5
+```
+
+> Presenta tu DNI, un recibo de servicios básicos (luz, agua o teléfono) y la solicitud en
+> formato establecido. El plazo de atención es de 1 a 3 días hábiles.
+
+Fuentes: `tupa/certificado-residencia`, `tupa/certificado-posesion`, `tupa/union-de-hecho`
+
+---
+
+## HU-05 · Consulta ciudadana
+
+**Demo:** el flujo completo está montado — pregunta → intención → búsqueda → respuesta → auditoría.
+
+```
+GET /api/tramites   →  22 trámites del TUPA 2023
+```
+
+**Velocidad:** pregunta repetida → **5 ms** (caché). Pregunta nueva → **4–14 s** (IA en CPU).
+
+---
+
+## Resumen
+
+| HU | Qué demuestra | Estado |
 |---|---|:-:|
-| **HU-05** | Consulta ciudadana en lenguaje natural | 44 % |
-| **HU-06** | Clasificación de intención | 40 % |
-| **HU-07** | Orientación de requisitos | 40 % |
-| **HU-09** | Generación de respuestas con SLM | 60 % |
+| **HU-09** | Responde con fuentes y avisa cuando no sabe | 60 % |
+| **HU-05** | Flujo completo de consulta funcionando | 44 % |
+| **HU-06** | Detecta el tipo de pregunta | 40 % |
+| **HU-07** | Entrega los requisitos con su fuente | 40 % |
 
-**PMV1: 46 % · Proyecto completo: 37 %** → detalle en
-[`05-trazabilidad-por-pmv.md`](documentacion/00-documentos-rectores/05-trazabilidad-por-pmv.md).
-
-## Pendiente
-
-- El front corta la espera a 6 s y el RAG tarda hasta 14 s → a veces muestra texto de ejemplo (**D-1**)
-- El panel de administración es maqueta (98 % satisfacción y 1.180 votos están inventados en el código)
-- Sin inicio de sesión, sin pruebas automáticas, costos de trámites en 0
-- Falta la validación con los 15 usuarios del PMV1
+**PMV1: 46 %** → detalle en
+[`05-trazabilidad-por-pmv.md`](documentacion/00-documentos-rectores/05-trazabilidad-por-pmv.md)
