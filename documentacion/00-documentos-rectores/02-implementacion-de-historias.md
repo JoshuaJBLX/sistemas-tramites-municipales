@@ -2,30 +2,63 @@
 
 Análisis detallado de las 18 HU contra el código real del repositorio.
 **Método:** revisión de `backend/` (controllers, use cases, services, adapters, repositorios,
-schema/migraciones), `database/` y `frontend-tramites/`.
+schema/migraciones), `database/` y `frontend-tramites/`. Verificado el **1 de octubre de 2026**
+(37 puntos verificados contra el código, 101 en total).
 
 **Leyenda:** ✅ Implementado · ⚠️ Parcial · ❌ No implementado
 
-| ID | Épica | Estado |
-| -- | ----- | ------ |
-| HU-01 | Gestión documental | ⚠️ Parcial |
-| HU-02 | Gestión documental | ⚠️ Parcial |
-| HU-03 | Gestión documental | ⚠️ Parcial |
-| HU-04 | Procesamiento documental y RAG | ⚠️ Parcial |
-| HU-05 | Consulta ciudadana | ⚠️ Parcial |
-| HU-06 | Clasificación de intención | ⚠️ Parcial |
-| HU-07 | Orientación de requisitos | ⚠️ Parcial |
-| HU-08 | Orientación de costos y plazos | ⚠️ Parcial |
-| HU-09 | Generación de respuestas con SLM | ⚠️ Parcial |
-| HU-10 | Trazabilidad y control de alucinaciones | ⚠️ Parcial |
-| HU-11 | Consultas fuera de dominio | ❌ No implementada |
-| HU-12 | Recomendación de trámites relacionados | ❌ No implementada |
-| HU-13 | Gestión de usuarios y seguridad | ⚠️ Parcial (solo registro) |
-| HU-14 | Auditoría | ⚠️ Parcial (solo persistencia) |
-| HU-15 | Retroalimentación ciudadana | ❌ No implementada |
-| HU-16 | Métricas y monitoreo | ❌ No implementada (solo maqueta) |
-| HU-17 | Derivación a atención municipal | ⚠️ Mínima (solo nota) |
-| HU-18 | Reportes y exportación | ❌ No implementada |
+## Cómo se calcula el % de avance
+
+Cada HU se descompone en puntos de verificación objetivos (sección **Backend**, **Frontend**, **BD**).
+El avance de la HU es el porcentaje de esos puntos ya implementados:
+
+```
+% avance HU = puntos ✅ / (puntos ✅ + puntos ❌) × 100
+% global    = Σ puntos ✅ / Σ puntos totales × 100
+```
+
+No es una estimación subjective: cada punto es un archivo o una comprobación concreta, y todos son
+verificables con `grep` sobre el repositorio.
+
+## Resumen con porcentaje de avance
+
+| ID | Épica | Estado | ✅/Total | **% avance** |
+| -- | ----- | ------ | :------: | :-----------: |
+| HU-01 | Gestión documental | ⚠️ Parcial | 4/9 | **44 %** |
+| HU-02 | Gestión documental | ⚠️ Parcial | 4/8 | **50 %** |
+| HU-03 | Gestión documental | ⚠️ Parcial | 3/7 | **43 %** |
+| HU-04 | Procesamiento documental y RAG | ⚠️ Parcial | 4/9 | **44 %** |
+| HU-05 | Consulta ciudadana | ⚠️ Parcial | 4/9 | **44 %** |
+| HU-06 | Clasificación de intención | ⚠️ Parcial | 2/5 | **40 %** |
+| HU-07 | Orientación de requisitos | ⚠️ Parcial | 2/5 | **40 %** |
+| HU-08 | Orientación de costos y plazos | ⚠️ Parcial | 2/5 | **40 %** |
+| HU-09 | Generación de respuestas con SLM | ⚠️ Parcial | 3/5 | **60 %** |
+| HU-10 | Trazabilidad y control de alucinaciones | ⚠️ Parcial | 3/8 | **38 %** |
+| HU-11 | Consultas fuera de dominio | ❌ No implementada | 0/3 | **0 %** |
+| HU-12 | Recomendación de trámites relacionados | ❌ No implementada | 0/3 | **0 %** |
+| HU-13 | Gestión de usuarios y seguridad | ⚠️ Parcial (solo registro) | 2/5 | **40 %** |
+| HU-14 | Auditoría | ⚠️ Parcial (solo persistencia) | 2/6 | **33 %** |
+| HU-15 | Retroalimentación ciudadana | ❌ No implementada | 0/3 | **0 %** |
+| HU-16 | Métricas y monitoreo | ❌ No implementada (solo maqueta) | 0/3 | **0 %** |
+| HU-17 | Derivación a atención municipal | ⚠️ Mínima (solo nota) | 2/5 | **40 %** |
+| HU-18 | Reportes y exportación | ❌ No implementada | 0/3 | **0 %** |
+
+### Avance global
+
+| Métrica | Valor |
+|---|---|
+| Puntos de verificación cumplidos | **37 / 101** |
+| **Avance total del alcance de las 18 HU** | **37 %** |
+| HU al 100 % | **0 de 18** |
+| HU implementadas (⚠️ parcial o mejor) | **13 de 18 (72 %)** |
+| HU sin implementar (❌) | **5 de 18 (28 %)** — HU-11, HU-12, HU-15, HU-16, HU-18 |
+| HU más avançada | **HU-09 · 60 %** (generación de respuestas con SLM) |
+| Pruebas automatizadas | **0 suites** (ningún `test_*.py`, `*.test.ts` ni `conftest.py` en el repo) |
+
+> El 37 % mide el **alcance total contratado** de las 18 historias. El **núcleo RAG sí funciona de
+> extremo a extremo** (verificado: 22 trámites, 20 documentos indexados, consulta en 5–9 s con 5
+> fuentes y caché de ~30 ms). El porcentaje bajo refleja que 5 HU no se empezaron, que ninguna
+> llega al 100 % y que el panel de administración es una maqueta con datos inventados.
 
 ---
 
@@ -103,7 +136,8 @@ schema/migraciones), `database/` y `frontend-tramites/`.
 
 **Frontend**
 - [x] Chat funcional con sugerencias rápidas y burbujas (`components/ChatBox.tsx`, `ChatThread.tsx`).
-- [x] Muestra fuentes y groundedness.
+- [ ] ❌ **No muestra realmente las fuentes ni el groundedness:** el badge marca siempre **90 %** porque el backend nunca envía `groundedness` y el front lo invierte (`lib/api.ts:77`); además el backend devuelve `{url, fragmento}` y el componente lee `f.titulo`, que llega `undefined` (`GroundednessBadge.tsx:15`).
+- [ ] ❌ **Riesgo de responder con datos falsos:** el `AbortController` corta a los **6 s** (`lib/api.ts:63`) pero el RAG real tarda **5–9 s**; al agotarse el tiempo salta el `catch` y se muestra `respuestaDemo()`, es decir una respuesta inventada sin avisar al usuario (`lib/api.ts:79-81`).
 - [ ] ❌ No muestra un "trámite probable" estructurado ni pide aclaración de forma dirigida.
 
 ---
@@ -163,7 +197,7 @@ schema/migraciones), `database/` y `frontend-tramites/`.
 - [ ] ❌ **Fuentes detalladas** (número, fecha, versión, artículo, página): la BD solo guarda una cadena de URLs, no el detalle citado.
 
 **Frontend**
-- [x] Badge de groundedness y fuentes en el chat (`components/GroundednessBadge.tsx`).
+- [ ] ❌ **El badge no refleja el dato real:** el componente existe (`components/GroundednessBadge.tsx`) pero muestra un 90 % fijo (el backend no envía `groundedness`, ver HU-05) y no lista los títulos de las fuentes por el desajuste `{url, fragmento}` ↔ `{titulo}`.
 - [ ] ❌ No hay vista de auditoría real: `AuditLog` es una lista de filas **hardcodeadas** (`components/AuditLog.tsx:1`).
 
 ---
@@ -253,25 +287,46 @@ schema/migraciones), `database/` y `frontend-tramites/`.
 
 ## Resumen final
 
-| # | HU | Estado | Brecha principal |
-| -- | --- | ------ | ---------------- |
-| HU-01 | Carga de documentos | ⚠️ | Sin validación PDF ni extracción de texto |
-| HU-02 | Vigencia/versión/fuente | ⚠️ | Sin campos `version`/`fecha` ni validación de metadatos |
-| HU-03 | Aprobar/derogar documentos | ⚠️ | Sin flujo por roles, sin baja lógica |
-| HU-04 | Procesamiento documental y RAG | ⚠️ | Sin chunking, sin extracción ni OCR |
-| HU-05 | Consulta ciudadana | ⚠️ | No identifica "trámite probable", sin manejo de ambigüedad |
-| HU-06 | Clasificación de intención | ⚠️ | Faltan clases "pasos"/"área" y umbral de confianza |
-| HU-07 | Orientación de requisitos | ⚠️ | Sin lista estructurada ni derivación |
-| HU-08 | Costos y plazos | ⚠️ | El chat ignora `costo`/`duracion` del catálogo |
-| HU-09 | Respuestas con SLM | ⚠️ | Sin estructura garantizada ni derivación |
-| HU-10 | Trazabilidad/anti-alucinación | ⚠️ | Trazabilidad API incompleta, sin bloqueo real |
-| HU-11 | Consultas fuera de dominio | ❌ | Sin clasificador de dominio |
-| HU-12 | Trámites relacionados | ❌ | Sin motor de recomendaciones |
-| HU-13 | Usuarios y seguridad | ⚠️ | Solo registro; sin login, roles ni seguridad |
-| HU-14 | Auditoría | ⚠️ | Solo persistencia; sin búsqueda ni UI real |
-| HU-15 | Retroalimentación | ❌ | Sin calificaciones ni comentarios |
-| HU-16 | Métricas y monitoreo | ❌ | Solo maqueta estática |
-| HU-17 | Derivación municipal | ⚠️ | Solo nota genérica, sin canal/área |
-| HU-18 | Reportes y exportación | ❌ | No existe |
+| # | HU | Estado | % | Brecha principal |
+| -- | --- | ------ | :-: | ---------------- |
+| HU-01 | Carga de documentos | ⚠️ | 44 % | Sin validación PDF ni extracción de texto |
+| HU-02 | Vigencia/versión/fuente | ⚠️ | 50 % | Sin campos `version`/`fecha` ni validación de metadatos |
+| HU-03 | Aprobar/derogar documentos | ⚠️ | 43 % | Sin flujo por roles, sin baja lógica |
+| HU-04 | Procesamiento documental y RAG | ⚠️ | 44 % | Sin chunking, sin extracción ni OCR |
+| HU-05 | Consulta ciudadana | ⚠️ | 44 % | No identifica "trámite probable", sin manejo de ambigüedad |
+| HU-06 | Clasificación de intención | ⚠️ | 40 % | Faltan clases "pasos"/"área" y umbral de confianza |
+| HU-07 | Orientación de requisitos | ⚠️ | 40 % | Sin lista estructurada ni derivación |
+| HU-08 | Costos y plazos | ⚠️ | 40 % | El chat ignora `costo`/`duracion` del catálogo |
+| HU-09 | Respuestas con SLM | ⚠️ | **60 %** | Sin estructura garantizada ni derivación |
+| HU-10 | Trazabilidad/anti-alucinación | ⚠️ | 38 % | Trazabilidad API incompleta, sin bloqueo real |
+| HU-11 | Consultas fuera de dominio | ❌ | 0 % | Sin clasificador de dominio |
+| HU-12 | Trámites relacionados | ❌ | 0 % | Sin motor de recomendaciones |
+| HU-13 | Usuarios y seguridad | ⚠️ | 40 % | Solo registro; sin login, roles ni seguridad |
+| HU-14 | Auditoría | ⚠️ | 33 % | Solo persistencia; sin búsqueda ni UI real |
+| HU-15 | Retroalimentación | ❌ | 0 % | Sin calificaciones ni comentarios |
+| HU-16 | Métricas y monitoreo | ❌ | 0 % | Solo maqueta estática |
+| HU-17 | Derivación municipal | ⚠️ | 40 % | Solo nota genérica, sin canal/área |
+| HU-18 | Reportes y exportación | ❌ | 0 % | No existe |
+| | **TOTAL** | | **37 %** | 37 de 101 puntos de verificación |
 
-**Conclusión:** el backend tiene un núcleo RAG sólido y funcional (consulta, búsqueda vectorial, SLM, grounding, caché, auditoría en BD) que cubre la base de HU-01 a HU-10 y HU-13/14, pero **ninguna HU se cumple al 100%** de sus escenarios de aceptación. Las historias de HU-11 a HU-18 (fuera de dominio, recomendaciones, seguridad, feedback, métricas reales, derivación y reportes) están ausentes o solo simuladas en el frontend.
+## Defectos detectados en esta revisión (1 de octubre de 2026)
+
+Estos no estaban en la versión anterior de este documento y son los más graves porque hacen que el
+front-end **mienta al usuario**:
+
+| # | Defecto | Ubicación | Impacto |
+|---|---------|-----------|---------|
+| D-1 | **Tiempo de espera de 6 s menor que el tiempo real del RAG (5–9 s)** | `lib/api.ts:63` | En consultas lentas salta el `catch` y se muestra `respuestaDemo()`: **el usuario lee una respuesta inventada sin aviso** |
+| D-2 | **`groundedness` siempre 90 %** | `lib/api.ts:77` | El backend nunca devuelve ese campo; el front lo fija con `?? 0.9` |
+| D-3 | **Las fuentes nunca se muestran** | `consulta_controller.py` vs `GroundednessBadge.tsx:15` | El backend devuelve `{url, fragmento}` y el componente lee `f.titulo` (llega `undefined`) |
+| D-4 | **El front llama `/api/health`, pero la ruta real es `/health`** | `lib/api.ts:124` vs `main.py:59` | `ServiceStatus` cae siempre en el `catch` y reporta "todo operativo" sin comprobar nada |
+| D-5 | **Campos de trámites desalineados** | `tramite_controller.py` vs `lib/api.ts` | Backend `costo`(número)/`duracion_estimada_dias`; front espera `costo`(texto)/`plazo`/`categoria`/`estado` → las tarjetas salen sin chips |
+| D-6 | **Datos de demostración presented como reales** | `app/admin/page.tsx:24,38`, `app/page.tsx:46` | "Satisfacción 98 %", "1.180 votos", "v3 · 97 % groundedness" son literales fijos |
+| D-7 | **`POST /api/documentos/upload` acepta cualquier archivo** | `documento_controller.py:66` | No valida extensión/MIME, no extrae texto y el parámetro `tramite_id` no se usa |
+| D-8 | **`es_administrador()` nunca se invoca** | `domain/entities/Usuario.py:16` | El campo `rol` existe pero no controla ningún acceso |
+
+**Conclusión:** el backend tiene un núcleo RAG sólido y verificado (consulta, búsqueda vectorial,
+SLM, groundedness, caché y auditoría en BD) que cubre HU-01 a HU-10 y HU-13/14, pero **ninguna HU
+llega al 100 %** y el avance global del alcance contratado es del **37 %**. Lo más urgente no es
+añadir funcionalidad nueva, sino **corregir D-1 a D-4**, porque son datos falsos mostrados al
+ciudadano en la pantalla principal.
