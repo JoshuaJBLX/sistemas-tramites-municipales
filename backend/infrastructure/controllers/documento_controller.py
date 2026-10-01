@@ -37,7 +37,7 @@ def _a_response(documento: Documento) -> DocumentoResponse:
         titulo=documento.titulo,
         url_origen=documento.url_origen,
         estado=documento.estado,
-        indexado=documento.embedding is not None,
+        indexado=documento.indexado or documento.embedding is not None,
     )
 
 

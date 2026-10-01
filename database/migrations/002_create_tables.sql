@@ -5,7 +5,14 @@
 -- Ejecutar conectado a la BD: psql -d tramites_municipales -f database/migrations/002_create_tables.sql
 -- =============================================================
 
-CREATE EXTENSION IF NOT EXISTS vector;
+-- Habilita pgvector si el binario de la extensión está disponible en el
+-- servidor (Docker: imagen pgvector/pgvector; local: puede faltar).
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_available_extensions WHERE name = 'vector') THEN
+        CREATE EXTENSION vector;
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS municipalidades (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -45,7 +52,6 @@ CREATE TABLE IF NOT EXISTS documentos (
     url_origen     VARCHAR(500) NOT NULL,
     estado         VARCHAR(20) NOT NULL DEFAULT 'vigente'
                    CHECK (estado IN ('vigente', 'obsoleto', 'en_revision')),
-    embedding      vector(1024),
     actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -72,3 +78,17 @@ CREATE INDEX IF NOT EXISTS idx_documentos_tramite     ON documentos (tramite_id)
 CREATE INDEX IF NOT EXISTS idx_documentos_estado      ON documentos (estado);
 CREATE INDEX IF NOT EXISTS idx_consultas_usuario      ON consultas (usuario_id);
 CREATE INDEX IF NOT EXISTS idx_consultas_creada_en    ON consultas (creada_en DESC);
+
+-- Columna de embedding: vector(1024) cuando hay pgvector, o double precision[]
+-- en servidores sin la extensión (la búsqueda semántica cae a coseno en Python).
+DO $$
+DECLARE existe_pgvector BOOLEAN;
+BEGIN
+    SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector') INTO existe_pgvector;
+
+    IF existe_pgvector THEN
+        EXECUTE 'ALTER TABLE documentos ADD COLUMN IF NOT EXISTS embedding vector(1024)';
+    ELSE
+        EXECUTE 'ALTER TABLE documentos ADD COLUMN IF NOT EXISTS embedding double precision[]';
+    END IF;
+END $$;

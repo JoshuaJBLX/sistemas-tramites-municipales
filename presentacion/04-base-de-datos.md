@@ -64,7 +64,7 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 | contenido | TEXT | Texto que alimenta al RAG |
 | url_origen | VARCHAR(500) | Fuente oficial citada |
 | estado | VARCHAR(20) | CHECK IN ('vigente','obsoleto','en_revision') |
-| **embedding** | **vector(1024)** | Embedding BGE-M3; NULL si no indexado |
+| **embedding** | **vector(1024)**¹ | Embedding BGE-M3; NULL si no indexado |
 | actualizado_en | TIMESTAMPTZ | default NOW() |
 
 ### consultas
@@ -99,6 +99,12 @@ CREATE INDEX IF NOT EXISTS idx_documentos_embedding_hnsw
 - Requiere pgvector ≥ 0.5.0 (la imagen `pgvector/pgvector:pg16` lo incluye).
 - Alternativa IVFFlat comentada para versiones viejas.
 - Permite búsqueda por **similitud de coseno** (operador `<=>`).
+
+¹ **pgvector es opcional en desarrollo local.** La migración `002` crea la extensión
+`vector` solo si el servidor la tiene disponible; si no, la columna `embedding` se crea
+como `double precision[]` y `BusquedaVectorialAdapter` calcula el coseno en Python
+(`Connection.es_pgvector()` decide la ruta en el arranque). El índice HNSW se crea solo
+con pgvector. En producción (Docker) se mantiene el camino vectorial nativo.
 
 ## 5. Búsqueda vectorial (RAG) — query real
 

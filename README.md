@@ -72,6 +72,56 @@ uvicorn main:app --reload --port 8000
 
 Documentación interactiva: <http://localhost:8000/docs>
 
+### 3.1 Indexar los documentos (BGE-M3)
+
+Los seeds insertan los documentos con `embedding` en `NULL`. El script de indexación
+genera los vectores y los guarda (funciona con o sin pgvector):
+
+```bash
+python -m backend.scripts.indexar_documentos
+```
+
+Debe ejecutarse desde la raíz del proyecto (para leer el `.env`) y solo indexa los
+documentos vigentes que aún no tienen embedding.
+
+## Puesta en marcha sin Docker (desarrollo local)
+
+Si no tienes Docker, el back-end también funciona con servicios instalados en el sistema:
+
+| Servicio   | Requisito                                        | Puerto |
+| ---------- | ------------------------------------------------ | ------ |
+| PostgreSQL | PostgreSQL 13+ (pgvector es **opcional**)        | 5432   |
+| Redis      | Redis 5+                                         | 6379   |
+| Ollama     | Ollama + `ollama pull qwen2.5:3b`                | 11434  |
+
+```bash
+# 1. Crear rol y base de datos
+psql -U postgres -c "CREATE ROLE tramites LOGIN PASSWORD 'tramites' CREATEDB;"
+psql -U postgres -c "CREATE DATABASE tramites_municipales OWNER tramites;"
+
+# 2. Migraciones y seeds (las migraciones crean la extensión vector si está disponible)
+psql -h localhost -U tramites -d tramites_municipales -f database/migrations/002_create_tables.sql
+psql -h localhost -U tramites -d tramites_municipales -f database/migrations/003_create_vectors.sql
+psql -h localhost -U tramites -d tramites_municipales -f database/seeds/municipios.sql
+psql -h localhost -U tramites -d tramites_municipales -f database/seeds/tramites.sql
+psql -h localhost -U tramites -d tramites_municipales -f database/seeds/documentos.sql
+
+# 3. Entorno Python e indexación
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python -m backend.scripts.indexar_documentos
+
+# 4. API
+cd backend && uvicorn main:app --port 8000
+```
+
+**Sobre pgvector:** la migración `002` crea la extensión `vector` cuando el servidor la
+tiene disponible; si no, la columna `documentos.embedding` se crea como
+`double precision[]` y `BusquedaVectorialAdapter` calcula la similitud de coseno en
+Python. El flujo RAG es idéntico en ambos casos; con pgvector se usa el operador `<=>`
+y el índice HNSW (recomendado para producción).
+
 ### 4. Front-end
 
 ```bash

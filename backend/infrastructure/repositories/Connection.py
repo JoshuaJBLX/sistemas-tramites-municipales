@@ -11,6 +11,7 @@ class Connection:
     def __init__(self, dsn: str | None = None) -> None:
         self._dsn = dsn or self._construir_dsn_desde_entorno()
         self._pool: asyncpg.Pool | None = None
+        self._es_vector: bool | None = None
 
     @staticmethod
     def _construir_dsn_desde_entorno() -> str:
@@ -41,3 +42,16 @@ class Connection:
                 'Ejecuta await Connection.conectar() primero.'
             )
         return self._pool
+
+    async def es_pgvector(self) -> bool:
+        """Indica si la extensión `vector` está disponible en el servidor.
+
+        Se comprueba una sola vez y se cachea. En servidores sin pgvector la
+        búsqueda semántica se resuelve en Python sobre `double precision[]`.
+        """
+        if self._es_vector is None:
+            async with self.pool.acquire() as conexion:
+                self._es_vector = bool(
+                    await conexion.fetchval("SELECT to_regtype('vector') IS NOT NULL")
+                )
+        return self._es_vector

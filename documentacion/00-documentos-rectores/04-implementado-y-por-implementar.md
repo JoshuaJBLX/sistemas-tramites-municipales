@@ -7,6 +7,30 @@
 
 > **Trazabilidad por PMV:** ver `05-trazabilidad-por-pmv.md` (qué se construyó en PMV1/PMV2/PMV3).
 
+## 0. Verificación local (octubre 2026)
+
+El back-end se ejecutó de extremo a extremo en esta máquina con servicios nativos
+(PostgreSQL 18 local, Redis y Ollama), sin Docker:
+
+| Prueba | Resultado |
+|---|---|
+| `/health` | ✅ 200 `{"status":"ok"}` |
+| `GET /api/tramites` | ✅ 22 trámites con su municipalidad |
+| `GET /api/tramites/{id}` | ✅ incluye sus documentos vigentes |
+| `POST /api/consultas` (RAG) | ✅ BGE-M3 → top-5 → Qwen 2.5 3B → confianza + 5 fuentes |
+| `POST /api/consultas` (caché) | ✅ 30 ms vs ~5-9 s de la generación completa |
+| `GET /api/consultas/{id}` | ✅ trazabilidad registrada |
+| Consulta fuera de dominio | ✅ confianza **baja** + nota de verificación (sigue G-04) |
+| `POST/PUT/DELETE /api/documentos` | ✅ indexado, cambio de estado y borrado |
+
+Correcciones aplicadas durante esa verificación (ver commit `fix(backend)`):
+1. `obtener_container` sin anotar `request` → FastAPI exigía un query param en toda ruta.
+2. Fuentes de la respuesta cacheada se serializaban como `str(...)` → error de validación.
+3. Actualizar el estado de un documento **borraba su embedding** (upsert con NULL) → `COALESCE`.
+4. `indexado` siempre `false` porque los SELECT no leían la columna → flag `(embedding IS NOT NULL)`.
+5. pgvector ahora es **opcional**: sin la extensión la columna es `double precision[]` y el
+   coseno se calcula en Python (`Connection.es_pgvector()`).
+
 ## 1. Situación general
 
 El sistema es una **PoC funcional**: el flujo ciudadano completo (preguntar → RAG → SLM →

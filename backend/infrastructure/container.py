@@ -8,6 +8,8 @@ import os
 from dataclasses import dataclass
 from uuid import uuid4
 
+from fastapi import Request
+
 from application.services.EvaluadorGroundedness import EvaluadorGroundedness
 from application.services.ServicioAuditoria import ServicioAuditoria
 from application.services.ServicioCache import ServicioCache
@@ -136,6 +138,6 @@ def crear_container(dsn: str | None = None) -> Container:
     )
 
 
-def obtener_container(request) -> Container:
+def obtener_container(request: Request) -> Container:
     """Dependencia de FastAPI que expone el contenedor desde app.state."""
     return request.app.state.container

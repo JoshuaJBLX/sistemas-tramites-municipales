@@ -17,6 +17,7 @@ class Documento:
     estado: EstadoDocumento
     embedding: list[float] | None = None
     actualizado_en: datetime | None = None
+    indexado: bool = False
 
     def esta_vigente(self) -> bool:
         return self.estado == EstadoDocumento.VIGENTE
