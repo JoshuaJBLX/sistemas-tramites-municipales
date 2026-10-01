@@ -5,6 +5,8 @@
 
 **Leyenda:** ✅ implementado · ⚠️ parcial/maqueta · ❌ no implementado
 
+> **Trazabilidad por PMV:** ver `05-trazabilidad-por-pmv.md` (qué se construyó en PMV1/PMV2/PMV3).
+
 ## 1. Situación general
 
 El sistema es una **PoC funcional**: el flujo ciudadano completo (preguntar → RAG → SLM →

@@ -14,6 +14,7 @@ verdad de requisitos (HU), su estado de implementación y la guía de ejecución
 | `02-implementacion-de-historias.md` | Estado de implementación por HU: checklists, archivos reales, brechas G-XX y prioridades. | `./IMPLEMENTACION-HU.md` (raíz) |
 | `03-ejecucion.md` | Guía resumida de ejecución: infraestructura (Docker), backend y frontend. | `./EJECUCION.md` (raíz) |
 | `04-implementado-y-por-implementar.md` | Inventario ✅/⚠️/❌ de lo implementado vs. pendiente, con brechas G-XX priorizadas. | Nuevo |
+| `05-trazabilidad-por-pmv.md` | Avance por PMV1/PMV2/PMV3: qué se construyó en cada PMV, backlog, distribución de las 18 HU y vacíos G-XX que bloquean cada PMV. | Nuevo |
 
 ## Relación con el repositorio
 
