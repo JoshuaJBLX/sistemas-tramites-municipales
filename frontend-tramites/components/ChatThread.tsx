@@ -49,7 +49,7 @@ export default function ChatThread({ mensajes, cargando }: { mensajes: ChatMsg[]
         <div className="flex items-end gap-2 animate-rise-in">
           <MuniAvatar />
           <div className="bubble-bot !rounded-2xl">
-            <p className="font-semibold text-primary-800">¡Hola! Soy Muni, tu asistente virtual 👋</p>
+            <p className="font-semibold text-primary-800">¡Hola! Soy MUN AI, tu asistente virtual de trámites municipales 👋</p>
             <p className="mt-1 text-sm text-mist-500">Pregúntame por requisitos, costos y plazos. Respondo solo con información oficial, para que todo sea claro y sencillo.</p>
           </div>
         </div>

@@ -4,7 +4,7 @@ export default function RobotAgent({ compact = false }: { compact?: boolean }) {
     <div className="relative flex flex-col items-center">
       {/* halo cálido */}
       <div className="absolute -top-4 h-24 w-56 rounded-full bg-amber/20 blur-2xl" aria-hidden="true" />
-      <div className={`relative ${size} animate-float-y`} role="img" aria-label="Muni, asistente virtual municipal">
+      <div className={`relative ${size} animate-float-y`} role="img" aria-label="MUN AI, asistente virtual de trámites municipales">
         <svg viewBox="0 0 200 220" className="h-full w-full drop-shadow-[0_20px_28px_rgba(20,50,87,.28)]">
           <defs>
             <linearGradient id="rb-body" x1="0" y1="0" x2="0" y2="1">

@@ -22,8 +22,8 @@ export default function Navbar() {
             <ShieldIcon className="h-8 w-8" />
           </span>
           <span className="leading-tight">
-            <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-primary-500">Municipalidad Provincial de Junín</span>
-            <span className="block text-base font-extrabold text-ink">Trámites Digitales</span>
+            <span className="block text-[10px] font-bold uppercase tracking-[0.22em] text-primary-500">Municipalidad Provincial de Huancayo</span>
+            <span className="block text-base font-extrabold text-ink">MUN AI</span>
           </span>
         </Link>
         <div className="hidden items-center gap-1 md:flex">

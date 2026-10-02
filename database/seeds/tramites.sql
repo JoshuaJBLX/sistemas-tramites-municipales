@@ -1,10 +1,10 @@
 -- =============================================================
 -- seeds/tramites.sql
--- Trámites de la Municipalidad Provincial de Junín (MPJ).
+-- Trámites de la Municipalidad Provincial de Huancayo (MPH).
 -- Basados en el TUPA 2023 (252 procedimientos) y la base de
 -- conocimiento oficial (H:\OBSIDIAN-WORKS\MUNICIPALIDADES JUNIN).
 -- Los costos se citan como arancel TUPA vigente; el monto exacto
--- se publica en el TUPA 2023 (https://www.gob.pe/munijunin).
+-- se publica en el TUPA 2023 (https://www.gob.pe/munihuancayo).
 -- =============================================================
 
 INSERT INTO tramites (id, municipalidad_id, nombre, descripcion, tipo, requisitos, costo, duracion_estimada_dias)
@@ -13,7 +13,7 @@ VALUES
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
      '11111111-1111-1111-1111-111111111111',
      'Inscripción de Nacimiento',
-     'Registro oficial del nacimiento de una persona ante la Oficina de Registro Civil de la MPJ. Trámite inmediato, se realiza el mismo día.',
+     'Registro oficial del nacimiento de una persona ante la Oficina de Registro Civil de la MPH. Trámite inmediato, se realiza el mismo día.',
      'partida_nacimiento',
      ARRAY['Certificado de nacimiento del establecimiento de salud', 'DNI de la madre', 'DNI del padre (si está disponible)'],
      0.00, 1),
@@ -49,7 +49,7 @@ VALUES
     ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
      '11111111-1111-1111-1111-111111111111',
      'Certificado de Residencia',
-     'Documento que acredita el domicilio de una persona en un sector específico de la provincia de Junín.',
+     'Documento que acredita el domicilio de una persona en un sector específico de la provincia de Huancayo.',
      'certificado_domicilio',
      ARRAY['DNI del solicitante', 'Recibo de servicios básicos (luz, agua o teléfono)', 'Solicitud en formato establecido'],
      0.00, 3),
@@ -58,7 +58,7 @@ VALUES
     ('12345678-1234-1234-1234-123456789012',
      '11111111-1111-1111-1111-111111111111',
      'Certificado de No Adeudo',
-     'Documento que declara que una persona no tiene deudas pendientes con la Municipalidad Provincial de Junín.',
+     'Documento que declara que una persona no tiene deudas pendientes con la Municipalidad Provincial de Huancayo.',
      'pago_tributos',
      ARRAY['DNI del solicitante', 'Solicitud escrita', 'Verificación en el sistema de tributos'],
      0.00, 2),
@@ -76,7 +76,7 @@ VALUES
     ('bbbbbbbb-1111-2222-3333-bbbbbbbbbbbb',
      '11111111-1111-1111-1111-111111111111',
      'Licencia de Edificación',
-     'Autorización para ejecutar obras de construcción, edificación o remodelación en la provincia de Junín.',
+     'Autorización para ejecutar obras de construcción, edificación o remodelación en la provincia de Huancayo.',
      'licencia_construccion',
      ARRAY['Solicitud formal', 'Título de propiedad', 'Planos arquitectónicos', 'Memoria descriptiva', 'Estudio de suelos (si aplica)'],
      0.00, 20),
@@ -103,7 +103,7 @@ VALUES
     ('11111111-aaaa-2222-3333-444444444444',
      '11111111-1111-1111-1111-111111111111',
      'Asignación de Numeración Municipal',
-     'Asignación de la numeración oficial del predio (puerta u acceso principal) en calles de la provincia de Junín.',
+     'Asignación de la numeración oficial del predio (puerta u acceso principal) en calles de la provincia de Huancayo.',
      'otro',
      ARRAY['Solicitud en formato establecido', 'DNI del solicitante', 'Croquis de ubicación del predio'],
      0.00, 7),

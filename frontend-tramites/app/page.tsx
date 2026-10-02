@@ -31,15 +31,16 @@ export default async function HomePage() {
           </div>
           <div className="relative mt-4 grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
             <div>
-              <p className="eyebrow">Ecosistema digital · Municipalidad Provincial de Junín</p>
+              <p className="eyebrow">MUN AI · Municipalidad Provincial de Huancayo</p>
               <h1 className="h-display mt-2">Tus trámites,<br />
-                <span className="text-gradient-warm">guiados por Muni</span>
+                <span className="text-gradient-warm">guiados por MUN AI</span>
               </h1>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-mist-500">
-                Asistente virtual con respuestas fundamentadas en ordenanzas y TUPA vigente.
+                Sistema basado en SLM para la orientación de trámites municipales, con
+                respuestas fundamentadas en ordenanzas y TUPA vigente.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
-                <Link href="/chat" className="btn-primary-3d">Hablar con Muni →</Link>
+                <Link href="/chat" className="btn-primary-3d">Hablar con MUN AI →</Link>
                 <Link href="/tramites" className="btn-neu">Ver catálogo</Link>
               </div>
               <div className="mt-6 grid grid-cols-3 gap-3">
@@ -54,7 +55,7 @@ export default async function HomePage() {
             <QuickAccessCard href="/tramites" title="Trámites" subtitle="Catálogo, costos y plazos" icon={<TramiteIcon />} accent="from-primary-500 to-primary-800" />
             <QuickAccessCard href="/tramites" title="Ordenanzas" subtitle="Normas vigentes" icon={<OrdenanzaIcon />} accent="from-amber to-amber-deep" />
             <QuickAccessCard href="/admin" title="Directorio" subtitle="Oficinas y contacto" icon={<DirectorioIcon />} accent="from-emerald to-emerald-deep" />
-            <QuickAccessCard href="/chat" title="Ayuda" subtitle="Pregunta a Muni" icon={<AyudaIcon />} accent="from-primary-700 to-primary-950" />
+            <QuickAccessCard href="/chat" title="Ayuda" subtitle="Pregunta a MUN AI" icon={<AyudaIcon />} accent="from-primary-700 to-primary-950" />
           </div>
         </div>
         <div className="flex justify-center animate-rise-in">
@@ -64,7 +65,7 @@ export default async function HomePage() {
                 <div className="mx-auto mb-2 h-5 w-24 rounded-full bg-primary-950/80" />
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20"><ShieldIcon className="h-6 w-6" /></span>
-                  <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Municipalidad Provincial de Junín</p><p className="text-sm font-extrabold">Muni · En línea 🟢</p></div>
+                  <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Municipalidad Provincial de Huancayo</p><p className="text-sm font-extrabold">MUN AI · En línea 🟢</p></div>
                 </div>
               </div>
               <div className="flex h-[340px] flex-col gap-2 overflow-hidden p-3">
@@ -74,7 +75,7 @@ export default async function HomePage() {
                 <div className="bubble-bot !text-xs"><p>Lun–Vie 8:00–17:30.</p><GroundednessBadge score={0.91} fuentes={[{ titulo: 'Directorio oficial' }]} compact /></div>
               </div>
               <div className="border-t border-white/60 bg-white/80 p-2.5">
-                <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-inner"><span className="flex-1 text-xs text-mist-500">Pregunta a Muni…</span><Link href="/chat" className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald text-sm text-white" aria-label="Abrir chat">➤</Link></div>
+                <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-inner"><span className="flex-1 text-xs text-mist-500">Pregunta a MUN AI…</span><Link href="/chat" className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald text-sm text-white" aria-label="Abrir chat">➤</Link></div>
               </div>
             </div>
           </div>

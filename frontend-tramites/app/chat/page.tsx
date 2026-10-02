@@ -12,7 +12,7 @@ export default function ChatPage() {
         <div className="animate-rise-in">
           <p className="eyebrow">Asistente conversacional · RAG + SLM</p>
           <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-            Habla con Muni, tu orientador municipal
+            Habla con MUN AI, tu orientador de trámites municipales
           </h1>
           <p className="mt-2 max-w-xl text-sm text-mist-500">
             Respuestas fundamentadas en ordenanzas y TUPA vigente. Cada respuesta cita sus fuentes oficiales.
@@ -32,8 +32,8 @@ export default function ChatPage() {
               {/* notch */}
               <div className="relative bg-gradient-to-b from-primary-800 to-primary-600 px-4 pb-3 pt-4 text-white">
                 <div className="mx-auto mb-2 h-5 w-24 rounded-full bg-primary-950/80" />
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Municipalidad Provincial de Junín</p>
-                <p className="text-sm font-extrabold">Muni · En línea</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Municipalidad Provincial de Huancayo</p>
+                <p className="text-sm font-extrabold">MUN AI · En línea</p>
               </div>
               <div className="flex h-[380px] flex-col gap-2 overflow-y-auto scroll-thin p-3">
                 <div className="bubble-user !text-xs">¿Qué necesito para mi partida de nacimiento?</div>

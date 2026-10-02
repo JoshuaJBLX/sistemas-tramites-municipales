@@ -15,7 +15,7 @@ export default function AdminPage() {
         <h1 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">Dashboard de métricas</h1>
         <div className="flex gap-2">
           <span className="badge-emerald">● En vivo</span>
-          <span className="badge-blue">Junín · todas las sedes</span>
+          <span className="badge-blue">Huancayo · todas las sedes</span>
         </div>
       </div>
       <div className="mt-5 grid gap-4 md:grid-cols-3">
