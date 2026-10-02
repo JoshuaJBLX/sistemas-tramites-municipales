@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from domain.value_objects.IntencionConsulta import IntencionConsulta
 from infrastructure.container import Container, obtener_container
@@ -114,14 +114,20 @@ async def crear_consulta(
         # 3. Caché de respuestas frecuentes.
         en_cache = await container.servicio_cache.obtener_respuesta(payload.pregunta)
         if en_cache is not None:
-            # 4. Auditoría también en cache-hit para mantener trazabilidad completa.
-            await container.auditar_consulta.ejecutar(
-                consulta,
-                _respuesta_desde_cuerpo(en_cache, consulta.id),
-            )
-            return RespuestaResponse(
-                consulta_id=consulta.id, intencion=intencion, **en_cache
-            )
+            cuerpo_cache = _cuerpo_valido(en_cache)
+            if cuerpo_cache is None:
+                # Entrada corrupta o de formato antiguo: se descarta y se recalcula
+                # en vez de devolver un error al ciudadano.
+                await container.servicio_cache.invalidar(payload.pregunta)
+            else:
+                # 4. Auditoría también en cache-hit para mantener trazabilidad completa.
+                await container.auditar_consulta.ejecutar(
+                    consulta,
+                    _respuesta_desde_cuerpo(cuerpo_cache, consulta.id),
+                )
+                return RespuestaResponse(
+                    consulta_id=consulta.id, intencion=intencion, **cuerpo_cache
+                )
 
         # 5. Generación de la orientación con RAG.
         try:
@@ -153,6 +159,21 @@ async def crear_consulta(
         )
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+def _cuerpo_valido(cuerpo: object) -> dict | None:
+    """Devuelve el cuerpo de caché si tiene el formato esperado; si no, None.
+
+    Una entrada corrupta (por ejemplo escrita por una versión anterior del
+    esquema) se descarta en lugar de provocar un error 500.
+    """
+    if not isinstance(cuerpo, dict):
+        return None
+    try:
+        RespuestaResponse.model_validate(cuerpo)
+    except ValidationError:
+        return None
+    return cuerpo
 
 
 def _respuesta_desde_cuerpo(cuerpo: dict, consulta_id: UUID):
