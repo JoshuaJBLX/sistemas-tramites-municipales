@@ -3,6 +3,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
@@ -123,11 +124,23 @@ async def crear_consulta(
             )
 
         # 5. Generación de la orientación con RAG.
-        respuesta = await container.generar_orientacion.ejecutar(
-            consulta_id=consulta.id,
-            pregunta=payload.pregunta,
-            clasificacion=clasificacion,
-        )
+        try:
+            respuesta = await container.generar_orientacion.ejecutar(
+                consulta_id=consulta.id,
+                pregunta=payload.pregunta,
+                clasificacion=clasificacion,
+            )
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadTimeout) as error:
+            # El SLM local no está disponible: se informa con claridad en lugar de
+            # devolver un 500 con traza técnica.
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    'El asistente no está disponible en este momento: no se pudo '
+                    'conectar con el modelo de lenguaje local. Intenta en unos '
+                    'minutos.'
+                ),
+            ) from error
 
         # 6. Auditoría de la interacción.
         await container.auditar_consulta.ejecutar(consulta, respuesta)

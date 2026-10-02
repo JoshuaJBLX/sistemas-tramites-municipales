@@ -50,13 +50,25 @@ export const SUGERENCIAS_RAPIDAS = [
   '¿Cómo sigue el estado de mi expediente?',
 ];
 
+async function leerDetalle(response: Response): Promise<string | null> {
+  try {
+    const cuerpo = await response.json();
+    return typeof cuerpo?.detail === 'string' ? cuerpo.detail : null;
+  } catch {
+    return null;
+  }
+}
+
 async function pedir<T>(url: string, init: RequestInit, timeoutMs: number): Promise<T> {
   const controller = new AbortController();
   const temporizador = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${API_URL}${url}`, { ...init, signal: controller.signal });
     if (!response.ok) {
-      throw new Error(`El servidor respondió ${response.status}.`);
+      // Se conserva el detalle que explica el backend (p. ej. SLM no disponible)
+      // en lugar de mostrar un código HTTP sin contexto.
+      const detalle = await leerDetalle(response);
+      throw new Error(detalle ?? `El servidor respondió ${response.status}.`);
     }
     return (await response.json()) as T;
   } catch (error) {
