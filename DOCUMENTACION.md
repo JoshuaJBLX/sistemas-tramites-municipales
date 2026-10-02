@@ -4,8 +4,17 @@ Documentación derivada de `a.md`, corregida y contrastada contra el código rea
 **1 carpeta de documentos rectores** (00) y **6 carpetas temáticas** (una por documento académico
 del proyecto). Cada carpeta incluye su propio `indice.md` de resumen y contenido breve.
 
-**Entidad del sistema:** Municipalidad Provincial de **Junín (MPJ)** — TUPA 2023, 252
-procedimientos. `a.md` estaba redactado para Huancayo (MPH); todas las referencias se corrigen.
+**Entidad del sistema:** Municipalidad Provincial de **Huancayo (MPH)** — TUPA 2023, 252
+procedimientos. ⚠️ `a.md` y los documentos de la raíz (`README.md`, `PRESENTACION-PMV1.md`) aún
+dicen «Municipalidad Provincial de Junín (MPJ)» y el dominio `munijunin.gob.pe`: es una
+inconsistencia pendiente de corregir (ver `06-estado-actual-implementado.md` §12.1). El código,
+el front-end y los seeds ya usan Huancayo/MPH.
+
+> **★ Documento rector de entrada:** [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md)
+> consolida este índice: inventaría los 79 `.md` del repositorio, el código archivo por archivo
+> (back-end + front-end), los flujos completos de front-end, back-end y base de datos, y el estado
+> verificado de las 18 HU y los 3 PMV (**49 %** global; PMV1 **88 %**, PMV2 44 %, PMV3 34 %).
+> Las cifras de este índice y de los documentos temáticos deben reconciliarse contra su §10.
 
 **Presentación del PMV1** (para sustentación, en la raíz): [`PRESENTACION-PMV1.md`](PRESENTACION-PMV1.md)
 — contiene los ejemplos reales de consulta, el diagrama del flujo y el rendimiento medido.
@@ -20,7 +29,11 @@ documentacion/
 │   ├── 02-implementacion-de-historias.md  # Estado por HU — antes IMPLEMENTACION-HU.md
 │   ├── 03-ejecucion.md             # Ejecución local: preparación + arranque — antes EJECUCION.md
 │   ├── 04-implementado-y-por-implementar.md  # Inventario real ✅/⚠️/❌ y brechas G-XX
-│   └── 05-trazabilidad-por-pmv.md  # Avance por PMV1/PMV2/PMV3
+│   ├── 05-trazabilidad-por-pmv.md  # Avance por PMV1/PMV2/PMV3
+│   └── 06-estado-actual-implementado.md  # ★ Documento maestro: consolida los 79 .md,
+│                                       #   inventaría el código archivo por archivo,
+│                                       #   documenta los flujos front/back/BD y fija el
+│                                       #   estado real de las 18 HU y los 3 PMV
 ├── 01-analisis-del-problema/        # Doc. 1 — Diagnóstico del problema (AG-T08)
 │   ├── indice.md                    # Resumen + índice de contenido breve
 │   └── 01..10                       # 10 numerales: contexto, AS-IS, causas, efectos,
@@ -57,6 +70,8 @@ documentacion/
 |---|---|
 | `README.md` | Guía de puesta en marcha completa del repositorio |
 | `DOCUMENTACION.md` | Índice maestro de toda la documentación |
+| `PRESENTACION-PMV1.md` | Guion de sustentación del PMV1 ⚠️ (cifras desactualizadas: ver §12.2 del doc. 06) |
+| `06-estado-actual-implementado.md` | **Documento maestro** que consolida todo lo anterior |
 
 Los documentos transversales (HU, implementación por HU y guía de ejecución) viven ahora en
 `documentacion/00-documentos-rectores/`. `a.md` (documento original del proyecto) era la base a

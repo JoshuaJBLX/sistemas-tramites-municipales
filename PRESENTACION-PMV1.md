@@ -1,6 +1,6 @@
 # PMV1 — Demostración
 
-**Trámites Municipales · Municipalidad Provincial de Junín**
+**Trámites Municipales · Municipalidad Provincial de Huancayo (MPH)**
 
 ## Levantar el sistema
 
@@ -86,10 +86,11 @@ GET /api/tramites   →  22 trámites del TUPA 2023
 
 | HU | Qué demuestra | Estado |
 |---|---|:-:|
-| **HU-09** | Responde con fuentes y avisa cuando no sabe | 60 % |
-| **HU-05** | Flujo completo de consulta funcionando | 44 % |
-| **HU-06** | Detecta el tipo de pregunta | 40 % |
-| **HU-07** | Entrega los requisitos con su fuente | 40 % |
+| **HU-05** | Flujo completo de consulta funcionando | **100 %** |
+| **HU-06** | Detecta el tipo de pregunta | **100 %** |
+| **HU-07** | Entrega los requisitos con su fuente | **80 %** |
+| **HU-09** | Responde con fuentes y avisa cuando no sabe | **60 %** |
 
-**PMV1: 46 %** → detalle en
-[`05-trazabilidad-por-pmv.md`](documentacion/00-documentos-rectores/05-trazabilidad-por-pmv.md)
+**PMV1: 88 %** (21 de 24 puntos) → detalle en
+[`05-trazabilidad-por-pmv.md`](documentacion/00-documentos-rectores/05-trazabilidad-por-pmv.md) y en
+[`06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) §10
