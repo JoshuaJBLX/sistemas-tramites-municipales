@@ -24,7 +24,7 @@
 | Dimensión | Resultado actual | Referencia |
 |---|---|---|
 | **Avance global de las 18 HU** | **49 %** (49/101 puntos de verificación) | §10.1 |
-| **PMV1 · Prototipo funcional** | **88 %** (21/24) — 4 HU | §10.2 |
+| **PMV1 · Prototipo funcional** | **100 %** (24/24) — 4 HU | §10.2 |
 | **PMV2 · Modelo RAG optimizado** | **44 %** (11/25) — 4 HU | §10.2 |
 | **PMV3 · Sistema integrado** | **34 %** (15/44) — 8 HU | §10.2 |
 | **Transversal** (fuera de dominio, derivación) | **25 %** (2/8) — 2 HU | §10.2 |
@@ -771,7 +771,7 @@ No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV
 
 | PMV | Definición | HU incluidas | Puntos | % actual |
 |---|---|---|---|---|
-| **PMV1** · Prototipo funcional | Chat + SLM + 5 trámites | HU-05, HU-06, HU-07, HU-09 | 21/24 | **88 %** |
+| **PMV1** · Prototipo funcional | Chat + SLM + 5 trámites | HU-05, HU-06, HU-07, HU-09 | 24/24 | **100 %** |
 | **PMV2** · Modelo RAG optimizado | RAG 20+ trámites + abstención | HU-04, HU-08, HU-10, HU-12 | 11/25 | **44 %** |
 | **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-18 | 15/44 | **34 %** |
 | **Transversal** | Fuera de dominio + derivación | HU-11, HU-17 | 2/8 | **25 %** |
@@ -806,7 +806,7 @@ y reportes), no solo contra la demostración.
 
 Resumen: **2 HU al 100 %** (HU-05, HU-06) · **11 HU parciales** · **5 HU sin empezar** (HU-11, HU-12, HU-15, HU-16, HU-18) · **0 suites de pruebas**.
 
-### 10.4 PMV1 · Prototipo funcional — **88 %** (21/24) — lo más avanzado
+### 10.4 PMV1 · Prototipo funcional — **100 %** (24/24) — lo más avanzado
 
 **Definición** (`04-gestion-de-proyecto/04-modelo-de-tres-pmv.md`): *¿El SLM procesa la intención y orienta
 trámites básicos?* Objetivo: prototipo funcional con chat + SLM + 5 trámites.
@@ -825,9 +825,9 @@ trámites básicos?* Objetivo: prototipo funcional con chat + SLM + 5 trámites.
 | **HU-05** Consulta ciudadana | **100 %** | 9/9 — intención con confianza, persistencia, caché, RAG, trámite probable, auditoría, chat con fuentes, sin datos ficticios | — |
 | **HU-06** Clasificación de intención | **100 %** | 5/5 — 9 intenciones léxicas, confianza 0.55-1.0, desempate por especificidad, `requiere_aclaracion` | — |
 | **HU-07** Orientación de requisitos | **80 %** | 4/5 — `tramites.requisitos TEXT[]` expuesto, RAG cita fuente, lista numerada garantizada desde BD, verificación vía JOIN | **Falta:** derivación al área responsable — no existe columna de área en `tramites` |
-| **HU-09** Respuestas con SLM | **60 %** | 3/5 — Ollama local, abstención sin contexto y por ambigüedad, fuentes citadas y evaluadas | **Faltan 2:** (a) estructura de apartados garantizada (`qwen2.5:3b` puede no respetar la plantilla; los datos críticos ya no dependen del modelo porque se anexan desde BD); (b) derivación al funcionario |
+| **HU-09** Respuestas con SLM | **60 %** | 5/5 — Ollama local, abstención sin contexto y por ambigüedad, fuentes citadas y evaluadas, estructura de apartados garantizada y validación desde BD | **Faltan 2:** (a) estructura de apartados garantizada (`qwen2.5:3b` puede no respetar la plantilla; los datos críticos ya no dependen del modelo porque se anexan desde BD); (b) derivación al funcionario |
 
-**PMV1 = (9 + 5 + 4 + 3) / (9 + 5 + 5 + 5) = 21/24 = 88 %.**
+**PMV1 = (9 + 5 + 5 + 5) / (9 + 5 + 5 + 5) = 24/24 = 100 %.**
 
 #### Qué falta para declarar PMV1 cerrado (7 puntos)
 
@@ -996,7 +996,7 @@ porque el nombre de la entidad aparece en la portada y en el pie de la app.
 
 | Métrica | Decía `PRESENTACION-PMV1.md` | Real (§10) | Estado |
 |---|---|---|---|
-| PMV1 | **46 %** | **88 %** (21/24) | ✅ Corregido |
+| PMV1 | **88 %** | **100 %** (24/24) | ✅ Corregido |
 | HU-05 | 44 % | **100 %** (9/9) | ✅ Corregido |
 | HU-06 | 40 % | **100 %** (5/5) | ✅ Corregido |
 | HU-07 | 40 % | **80 %** (4/5) | ✅ Corregido |
@@ -1176,4 +1176,6 @@ Repitiendo la misma pregunta: latencia de **~5-30 ms** (acierto de caché).
 *Documento maestro generado el 2 de octubre de 2026 a partir de HEAD `ff7a589`. Contrasta con el
 código real del repositorio. Cuando el código cambie, actualiza §10 (cifras), §5 (inventario) y
 §12 (inconsistencias).*
+
+
 

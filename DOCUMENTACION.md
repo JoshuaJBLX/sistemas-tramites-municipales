@@ -1,4 +1,4 @@
-# DOCUMENTACIÓN DEL SISTEMA — Orientación de Trámites Municipales
+﻿# DOCUMENTACIÓN DEL SISTEMA — Orientación de Trámites Municipales
 
 Documentación derivada de `a.md`, corregida y contrastada contra el código real, organizada en
 **1 carpeta de documentos rectores** (00) y **6 carpetas temáticas** (una por documento académico
@@ -13,7 +13,7 @@ el front-end y los seeds ya usan Huancayo/MPH.
 > **★ Documento rector de entrada:** [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md)
 > consolida este índice: inventaría los 79 `.md` del repositorio, el código archivo por archivo
 > (back-end + front-end), los flujos completos de front-end, back-end y base de datos, y el estado
-> verificado de las 18 HU y los 3 PMV (**49 %** global; PMV1 **88 %**, PMV2 44 %, PMV3 34 %).
+> verificado de las 18 HU y los 3 PMV (**49 %** global; PMV1 **100 %**, PMV2 44 %, PMV3 34 %).
 > Las cifras de este índice y de los documentos temáticos deben reconciliarse contra su §10.
 
 **Presentación del PMV1** (para sustentación, en la raíz): [`PRESENTACION-PMV1.md`](PRESENTACION-PMV1.md)

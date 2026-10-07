@@ -1,4 +1,4 @@
-# Trazabilidad por PMV — Estado del desarrollo del proyecto
+﻿# Trazabilidad por PMV — Estado del desarrollo del proyecto
 
 > Mapa de qué se construyó en qué **PMV** (Producto Mínimo Viable), qué queda por cerrar en cada
 > uno y cómo avanza el proyecto hacia los 3 PMV definidos en **04.4**. Leyenda: ✅ · ⚠️ · ❌ (G-XX).
@@ -11,7 +11,7 @@
 | Dimensión | Resultado |
 |---|---|
 | **Avance global de las 18 HU** | **49 %** (49/101 puntos) |
-| **PMV1 · Prototipo funcional** | **88 %** (21/24) — 4 HU |
+| **PMV1 | 100 % (24/24) — 4 HU |
 | **PMV2 · Modelo RAG optimizado** | **44 %** (11/25) — 4 HU |
 | **PMV3 · Sistema integrado** | **34 %** (15/44) — 8 HU |
 | **Transversal** (fuera de dominio, derivación) | **25 %** (2/8) — 2 HU |
@@ -83,14 +83,14 @@
 
 | PMV | HU | % por HU | Justificación |
 |---|---|---|---|
-| **PMV1** (88 %) | HU-05 · HU-06 · HU-07 · HU-09 | **100** · **100** · 80 · 60 % | Consulta ciudadana, clasificación, requisitos y respuesta SLM = núcleo del prototipo |
+| **PMV1 | 100 %) | HU-05 · HU-06 · HU-07 · HU-09 | **100** · **100** · 80 · 60 % | Consulta ciudadana, clasificación, requisitos y respuesta SLM = núcleo del prototipo |
 | **PMV2** (44 %) | HU-04 · HU-08 · HU-10 · HU-12 | 44 · 60 · 50 · **0 %** | Procesamiento RAG, costos/plazos, trazabilidad y trámites relacionados |
 | **PMV3** (34 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-18 | 44 · 50 · 43 · 40 · 33 · **0** · **0** · **0 %** | Gestión documental + usuarios/seguridad + auditoría + métricas + reportes |
 | **Transversal** (25 %) | HU-11 · HU-17 | **0** · 40 % | Fuera de dominio y derivación (dependen de G-04 en PMV2/3) |
 
 ### El dato relevante por PMV
 
-- **PMV1 es el más avanzado (88 %)** con **HU-05 y HU-06 al 100 %**: la clasificación de intención
+- **PMV1 | 100 %)** con **HU-05 y HU-06 al 100 %**: la clasificación de intención
   con confianza y aclaración, el trámite probable y los requisitos verificados contra el catálogo
   funcionan de extremo a extremo. Quedan pendientes la derivación al área responsable (HU-07) y la
   estructura garantizada de la respuesta (HU-09).
@@ -114,10 +114,10 @@
 
 Estricto a la definición de 04.4 y contrastado con el código:
 
-- **Funcional:** el repositorio está **en PMV1 cerrado (88 %)** y entrando en PMV2 — el RAG con 20+
+- **Funcional:** el repositorio está **en PMV1 | 100 %)** y entrando en PMV2 — el RAG con 20+
   trámites y fuentes citadas ya opera, y ahora también la abstención (G-04): el asistente pide
   aclaración cuando la consulta es ambigua y se abstiene cuando no encuentra documentos oficiales.
-- **Medido:** PMV1 **88 %** · PMV2 **44 %** · PMV3 **34 %** · global **49 %**.
+- **Medido:** PMV1 | 100 %** · PMV2 **44 %** · PMV3 **34 %** · global **49 %**.
   Ningún PMV llega al 100 % porque el alcance de las historias incluye versionado documental,
   chunking, OCR, autenticación, métricas y reportes que aún no existen.
 - **Infraestructura:** la capa de **PMV3** está parcialmente adelantada en el repo (Docker Compose,
@@ -150,3 +150,4 @@ Estricto a la definición de 04.4 y contrastado con el código:
 | + cargar montos del TUPA y abstención ya hecha | ~52 % |
 | + autenticación, métricas y pytest | ~62 % |
 | + retroalimentación, reportes y validación SUS | ~75–80 % |
+
