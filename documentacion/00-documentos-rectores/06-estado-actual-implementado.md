@@ -996,7 +996,7 @@ porque el nombre de la entidad aparece en la portada y en el pie de la app.
 
 | Métrica | Decía `PRESENTACION-PMV1.md` | Real (§10) | Estado |
 |---|---|---|---|
-| PMV1 | **88 %** | **100 %** (24/24) | ✅ Corregido |
+| PMV1 | **100 %** | **100 %** (24/24) | ✅ Corregido |
 | HU-05 | 44 % | **100 %** (9/9) | ✅ Corregido |
 | HU-06 | 40 % | **100 %** (5/5) | ✅ Corregido |
 | HU-07 | 40 % | **80 %** (4/5) | ✅ Corregido |
@@ -1027,7 +1027,7 @@ la fuente de verdad y `PRESENTACION-PMV1.md` es una copia derivada.
 ### 12.4 ✅ `00/indice.md` y `DOCUMENTACION.md` — cifras corregidas al publicar este documento
 
 `documentacion/00-documentos-rectores/indice.md` decía *"37 % global"* y *"porcentajes
-(46 % / 36 % / 34 %)"`. Los valores reales son **49 % global** y **88 % / 44 % / 34 %**.
+(46 % / 36 % / 34 %)"`. Los valores reales son **49 % global** y **100 % / 44 % / 34 %**.
 Ambos archivos (`00/indice.md` y `DOCUMENTACION.md`) ya están corregidos, enlazan a este documento
 como fuente de verdad y añaden una fila para `06-estado-actual-implementado.md`.
 
@@ -1123,12 +1123,12 @@ bloqueante.
 
 | Escenario | Global | PMV1 | PMV2 | PMV3 |
 |---|---|---|---|---|
-| **Estado actual (verificado)** | **49 %** | **88 %** | **44 %** | **34 %** |
+| **Estado actual (verificado)** | **49 %** | **100 %** | **44 %** | **34 %** |
 | + montos TUPA y cierre HU-08 | ~52 % | 96 % | ~52 % | 34 % |
 | + HU-12 + G-21 | ~56 % | 96 % | ~72 % | 34 % |
 | + pytest + JWT (G-18, G-01) | ~62 % | 96 % | ~72 % | ~45 % |
 | + métricas + guardrails (G-16, G-20) | ~68 % | 96 % | ~80 % | ~55 % |
-| + retroalimentación + reportes + validación SUS | **75-80 %** | 100 % | ~88 % | ~70 % |
+| + retroalimentación + reportes + validación SUS | **75-80 %** | 100 % | ~100 % | ~70 % |
 
 ---
 
