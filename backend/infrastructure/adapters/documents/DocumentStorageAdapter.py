@@ -1,22 +1,28 @@
-"""Adaptador de almacenamiento de documentos (sistema de archivos local)."""
+"""Adaptador: DocumentStorageAdapter implementa AlmacenamientoDocumentosPort."""
 
 import os
 from pathlib import Path
+from uuid import uuid4
+
+from domain.ports.AlmacenamientoDocumentosPort import AlmacenamientoDocumentosPort
+from domain.value_objects.FormatoDocumento import extension_de
 
 
-class DocumentStorageAdapter:
-    """Guarda y recupera los archivos originales de los documentos oficiales."""
+class DocumentStorageAdapter(AlmacenamientoDocumentosPort):
+    """Guarda archivos originales con nombre seguro en el sistema de archivos."""
 
     def __init__(self, directorio_base: str | None = None) -> None:
         self._directorio_base = Path(
             directorio_base or os.getenv('DOCUMENTS_PATH', './storage/documentos')
         )
 
-    def guardar(self, nombre_archivo: str, contenido: bytes) -> Path:
+    def guardar(self, nombre_archivo: str, contenido: bytes) -> str:
         self._directorio_base.mkdir(parents=True, exist_ok=True)
-        ruta = self._directorio_base / nombre_archivo
+        ext = extension_de(nombre_archivo)
+        nombre_seguro = f'{uuid4().hex}{ext}'
+        ruta = self._directorio_base / nombre_seguro
         ruta.write_bytes(contenido)
-        return ruta
+        return nombre_seguro
 
     def leer(self, nombre_archivo: str) -> bytes:
         ruta = self._directorio_base / nombre_archivo

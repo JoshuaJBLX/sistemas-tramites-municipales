@@ -1,8 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// El RAG local (embeddings + SLM) puede tardar entre 4 y 15 segundos en la
-// primera consulta, por lo que el plazo debe ser holgado. Antes se agotaba a los
-// 6 s y la consulta se sustituía por una respuesta ficticia.
+// El RAG local puede tardar 4–17 segundos en la primera consulta.
 const TIMEOUT_CONSULTA_MS = 45000;
 const TIMEOUT_CATALOGO_MS = 10000;
 
@@ -65,8 +63,6 @@ async function pedir<T>(url: string, init: RequestInit, timeoutMs: number): Prom
   try {
     const response = await fetch(`${API_URL}${url}`, { ...init, signal: controller.signal });
     if (!response.ok) {
-      // Se conserva el detalle que explica el backend (p. ej. SLM no disponible)
-      // en lugar de mostrar un código HTTP sin contexto.
       const detalle = await leerDetalle(response);
       throw new Error(detalle ?? `El servidor respondió ${response.status}.`);
     }
@@ -81,12 +77,6 @@ async function pedir<T>(url: string, init: RequestInit, timeoutMs: number): Prom
   }
 }
 
-/**
- * Envía la consulta al backend RAG.
- *
- * No existe respuesta alternativa: si el servicio falla se propaga el error para
- * que el ciudadano lo vea, en lugar de mostrar información ficticia (D-1).
- */
 export async function enviarConsulta(pregunta: string): Promise<RespuestaConsulta> {
   const data = await pedir<Partial<RespuestaConsulta>>(
     '/api/consultas',
@@ -102,8 +92,6 @@ export async function enviarConsulta(pregunta: string): Promise<RespuestaConsult
     texto: data.texto ?? 'Sin respuesta del servidor.',
     fuentes: Array.isArray(data.fuentes) ? (data.fuentes as FuenteCitada[]) : [],
     confianza: data.confianza ?? 'desconocida',
-    // El groundedness es el valor real calculado por el evaluador; si el backend
-    // no lo entrega se informa 0 en vez de inventar una medición alta (D-2).
     groundedness: typeof data.groundedness === 'number' ? data.groundedness : 0,
     confianza_intencion: typeof data.confianza_intencion === 'number' ? data.confianza_intencion : 0,
     pide_aclaracion: Boolean(data.pide_aclaracion),
@@ -112,7 +100,6 @@ export async function enviarConsulta(pregunta: string): Promise<RespuestaConsult
   };
 }
 
-/** Fila cruda devuelta por `GET /api/tramites`. */
 interface TramiteCrudo {
   id: string;
   nombre: string;
@@ -135,7 +122,6 @@ function formatearPlazo(dias: number | null): string {
   return dias === 1 ? '1 día hábil' : `${dias} días hábiles`;
 }
 
-/** Traduce la fila del backend al modelo que usa la interfaz (D-5). */
 export function mapearTramite(fila: TramiteCrudo): Tramite {
   return {
     id: fila.id,
@@ -149,7 +135,6 @@ export function mapearTramite(fila: TramiteCrudo): Tramite {
   };
 }
 
-/** Obtiene el catálogo de trámites; propaga el error si el backend no responde. */
 export async function obtenerTramites(): Promise<Tramite[]> {
   const data = await pedir<TramiteCrudo[]>('/api/tramites', {}, TIMEOUT_CATALOGO_MS);
   return Array.isArray(data) ? data.map(mapearTramite) : [];
@@ -169,13 +154,6 @@ const SIN_VERIFICAR: EstadoServicios = {
   ollama: 'sin verificar',
 };
 
-/**
- * Consulta el estado real de los servicios.
- *
- * El backend expone `GET /health` (no `/api/health`) y solo verifica su propio
- * proceso; lo que no se comprueba se informa como "sin verificar" en lugar de
- * mostrarse como operativo (D-4).
- */
 export async function obtenerEstadoServicios(): Promise<EstadoServicios> {
   try {
     const data = await pedir<{ status?: string }>('/health', {}, TIMEOUT_CATALOGO_MS);
@@ -183,4 +161,65 @@ export async function obtenerEstadoServicios(): Promise<EstadoServicios> {
   } catch {
     return { ...SIN_VERIFICAR, api: 'no disponible' };
   }
+}
+
+// ---------- Administración de documentos (HU-01..HU-04, G-12) ----------
+export interface DocumentoAdmin {
+  id: string;
+  tramite_id: string;
+  titulo: string;
+  url_origen: string;
+  estado: 'vigente' | 'obsoleto' | 'en_revision' | 'derogado';
+  indexado: boolean;
+  version: string;
+  fecha_publicacion?: string | null;
+  fragmentado: boolean;
+  archivo_nombre?: string | null;
+  mime_type?: string | null;
+  hash_contenido?: string | null;
+  actualizado_en?: string | null;
+  eliminado_en?: string | null;
+}
+
+export async function listarDocumentosAdmin(params: {
+  tramite_id?: string;
+  estado?: string;
+  incluir_eliminados?: boolean;
+  limite?: number;
+  desde?: number;
+} = {}): Promise<DocumentoAdmin[]> {
+  const search = new URLSearchParams();
+  if (params.tramite_id) search.set('tramite_id', params.tramite_id);
+  if (params.estado) search.set('estado', params.estado);
+  if (params.incluir_eliminados) search.set('incluir_eliminados', 'true');
+  if (params.limite) search.set('limite', String(params.limite));
+  if (params.desde) search.set('desde', String(params.desde));
+  const qs = search.toString();
+  return pedir<DocumentoAdmin[]>(`/api/admin/documentos${qs ? `?${qs}` : ''}`, {}, TIMEOUT_CATALOGO_MS);
+}
+
+export async function subirDocumento(
+  form: FormData,
+): Promise<DocumentoAdmin> {
+  return pedir<DocumentoAdmin>(
+    '/api/admin/documentos/upload',
+    { method: 'POST', body: form },
+    120000, // subir archivos puede tardar un poco
+  );
+}
+
+export async function reprocesarDocumento(id: string): Promise<DocumentoAdmin> {
+  return pedir<DocumentoAdmin>(`/api/admin/documentos/${id}/procesar`, { method: 'POST' }, TIMEOUT_CATALOGO_MS);
+}
+
+export async function eliminarDocumentoLogico(id: string): Promise<void> {
+  await pedir(`/api/admin/documentos/${id}`, { method: 'DELETE' }, TIMEOUT_CATALOGO_MS);
+}
+
+export async function eliminarDocumentoFisico(id: string): Promise<void> {
+  await pedir(`/api/admin/documentos/${id}/fisico`, { method: 'DELETE' }, TIMEOUT_CATALOGO_MS);
+}
+
+export async function listarTramitesAdmin(): Promise<TramiteCrudo[]> {
+  return pedir<TramiteCrudo[]>('/api/tramites/admin', {}, TIMEOUT_CATALOGO_MS);
 }

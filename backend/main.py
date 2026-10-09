@@ -18,6 +18,9 @@ from infrastructure.container import Container, crear_container
 from infrastructure.controllers.consulta_controller import router as consulta_router
 from infrastructure.controllers.documento_controller import router as documento_router
 from infrastructure.controllers.tramite_controller import router as tramite_router
+from infrastructure.controllers.tramite_admin_controller import (
+    router as tramite_admin_router,
+)
 from infrastructure.controllers.usuario_controller import router as usuario_router
 
 
@@ -50,8 +53,17 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+from infrastructure.controllers.tramite_admin_controller import (
+    router as tramite_admin_router,
+)
+from infrastructure.controllers.documento_admin_controller import (
+    router as documento_admin_router,
+)
+
 app.include_router(consulta_router)
 app.include_router(tramite_router)
+app.include_router(tramite_admin_router)
+app.include_router(documento_admin_router)
 app.include_router(documento_router)
 app.include_router(usuario_router)
 
