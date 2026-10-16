@@ -11,10 +11,13 @@ inconsistencia pendiente de corregir (ver `06-estado-actual-implementado.md` §1
 el front-end y los seeds ya usan Huancayo/MPH.
 
 > **★ Documento rector de entrada:** [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md)
-> consolida este índice: inventaría los 79 `.md` del repositorio, el código archivo por archivo
+> consolida este índice: inventaría los 90 `.md` del repositorio, el código archivo por archivo
 > (back-end + front-end), los flujos completos de front-end, back-end y base de datos, y el estado
-> verificado de las 18 HU y los 3 PMV (**49 %** global; PMV1 **100 %**, PMV2 44 %, PMV3 34 %).
-> Las cifras de este índice y de los documentos temáticos deben reconciliarse contra su §10.
+> verificado de las 18 HU y los 3 PMV (**59 %** global — 60/101; PMV1 **88 %**, PMV2 **56 %**,
+> PMV3 **52 %**). ⚠️ **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`):** el código del PMV2
+> está escrito pero **la API no arranca** (defectos **D-14..D-21**, ver
+> [`PMV2_DOCUMENTOS.md`](PMV2_DOCUMENTOS.md)). Las cifras de este índice y de los documentos
+> temáticos deben reconciliarse contra su §10.
 
 **Presentación del PMV1** (para sustentación, en la raíz): [`PRESENTACION-PMV1.md`](PRESENTACION-PMV1.md)
 — contiene los ejemplos reales de consulta, el diagrama del flujo y el rendimiento medido.
@@ -30,7 +33,7 @@ documentacion/
 │   ├── 03-ejecucion.md             # Ejecución local: preparación + arranque — antes EJECUCION.md
 │   ├── 04-implementado-y-por-implementar.md  # Inventario real ✅/⚠️/❌ y brechas G-XX
 │   ├── 05-trazabilidad-por-pmv.md  # Avance por PMV1/PMV2/PMV3
-│   └── 06-estado-actual-implementado.md  # ★ Documento maestro: consolida los 79 .md,
+│   └── 06-estado-actual-implementado.md  # ★ Documento maestro: consolida los 90 .md,
 │                                       #   inventaría el código archivo por archivo,
 │                                       #   documenta los flujos front/back/BD y fija el
 │                                       #   estado real de las 18 HU y los 3 PMV
@@ -70,6 +73,7 @@ documentacion/
 |---|---|
 | `README.md` | Guía de puesta en marcha completa del repositorio |
 | `DOCUMENTACION.md` | Índice maestro de toda la documentación |
+| `PMV2_DOCUMENTOS.md` | **Alcance y estado del PMV2 (16-oct-2026):** lo implementado (metadatos, `derogado`, chunking, 6 endpoints admin, `DocumentManager.tsx`), los bloqueos **D-14..D-21** y la ruta de cierre |
 | `PRESENTACION-PMV1.md` | Guion de sustentación del PMV1 ⚠️ (cifras desactualizadas: ver §12.2 del doc. 06) |
 | `06-estado-actual-implementado.md` | **Documento maestro** que consolida todo lo anterior |
 
@@ -80,6 +84,34 @@ corregir y ya no se mantiene en el repositorio.
 ## Código de leyenda usado en los documentos
 
 - ✅ implementado · ⚠️ parcial/maqueta · ❌ no implementado (vacíos `G-XX`).
+
+## Endpoints de la API (22: 16 públicos + 6 admin)
+
+> ⚠️ **16-oct-2026:** son **22 endpoints declarados** (el recuento anterior era de 13 rutas), pero
+> **hoy 0 son servibles** porque `main.py` aborta con `ImportError` (**D-14**). Detalle archivo:línea de cada
+> uno en `06-estado-actual-implementado.md` §6.2.
+
+| Grupo | Nº | Rutas | Estado |
+|---|---|---|---|
+| Públicos | **16** | `POST /api/consultas`, `GET /api/consultas/{id}`, `GET /api/tramites`, `GET /api/tramites/{id}`, `POST /api/documentos`, `POST /api/documentos/upload`, `GET /api/documentos`, `GET /api/documentos/{id}`, `PUT /api/documentos/{id}/estado`, `POST /api/documentos/{id}/procesar`, `DELETE /api/documentos/{id}`, `DELETE /api/documentos/{id}/fisico`, `POST /api/usuarios`, `GET /api/usuarios/{id}`, `GET /api/usuarios/{id}/consultas`, `GET /health` | ⚠️ **0 servibles** (D-14) |
+| Administración | **6** | `GET /api/admin/documentos`, `POST /api/admin/documentos`, `POST /api/admin/documentos/upload`, `POST /api/admin/documentos/{id}/procesar`, `DELETE /api/admin/documentos/{id}`, `DELETE /api/admin/documentos/{id}/fisico` | ⚠️ **0 servibles** (D-14); además **sin autenticación ni rol** (D-8) |
+| **Total** | **22** | 6 controllers (1 es stub: `tramite_admin_controller`) | **0 servibles** hasta cerrar D-14 |
+
+## Defectos bloqueantes (D-14..D-21 — revisión del PMV2, 16-oct-2026)
+
+> Catálogo ampliado, ubicación exacta y ruta de cierre en `06-estado-actual-implementado.md`
+> (§13.1) y en [`PMV2_DOCUMENTOS.md`](PMV2_DOCUMENTOS.md).
+
+| # | Defecto | Impacto |
+|---|---|---|
+| D-14 | La API no arranca: `main.py:21` importa `router` de `tramite_admin_controller` (stub de 91 bytes sin `router`) → `ImportError` | 🔴 **0 de los 22 endpoints son servibles** |
+| D-15 | Migración `004_documentos_pmv2.sql` sin aplicar y con línea 1 inválida (docstring Python en vez de comentario SQL) | 🔴 Sin los 7 metadatos, sin `fragmentos_documento`, sin `derogado` en el `CHECK` |
+| D-16 | `instalar.ps1` no aplica la migración `004` | 🟠 Instalación limpia ≠ base preparada para PMV2 |
+| D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` | 🟠 Extracción de PDF/DOCX → 422 |
+| D-18 | `estado` inválido en el listado admin responde **500** en vez de **422** | 🟡 Error genérico |
+| D-19 | La baja física no borra el archivo en disco | 🟡 Archivos huérfanos en `storage/documentos` |
+| D-20 | `pedir()` hace `response.json()` incondicional pero los `DELETE` devuelven **204 sin cuerpo** | 🔴 Baja lógica/física fallan desde la UI |
+| D-21 | El front llama a `GET /api/tramites/admin` (inexistente) dentro de `Promise.all` | 🔴 El panel `DocumentManager.tsx` no carga |
 
 ## Catalogo global de vacíos de código (G-XX)
 
@@ -96,12 +128,12 @@ corregir y ya no se mantiene en el repositorio.
 | G-09 | Derivación a atención municipal (backend) |
 | G-10 | UI de historial ciudadano `/mis-consultas` (solo API) |
 | G-11 | Rutas `/login`, `/tramites/[id]`, `/404`, sub-rutas `/admin/*` |
-| G-12 | Carga de documentos conectada al backend (maqueta) |
-| G-13 | Chunking documental, campos `version`/`fecha_publicacion`/página |
+| G-12 | ⚠️ **Parcial:** carga de documentos conectada al backend (`DocumentManager.tsx` en `/admin` sube, lista y da de baja de verdad); siguen ficticios los KPIs y gráficos de `/admin` |
+| G-13 | ⚠️ **Parcial:** *chunking* (`ServicioChunking`) y tabla `fragmentos_documento` escritos (PMV2), pero **la migración 004 no está aplicada** (D-15) y faltan OCR y recuperación RAG por fragmento |
 | G-14 | Consistencia campos trámite `tipo`/`duracion_estimada_dias` vs frontend `categoria`/`plazo` |
 | G-15 | Fine-tuning QLoRA del SLM |
 | G-17 | Contenerización frontend/backend, balanceador, HTTPS, monitoreo |
-| G-18 | Suite de pruebas automatizadas (pytest) |
+| G-18 | Suite de pruebas automatizadas (pytest) — **0 suites hoy** |
 | G-20 | Guardrails anti prompt-injection |
 | G-21 | Artefactos de PoC (dataset sintético, resultados de experimentos) |
 | G-23 | Rate limiting / protección contra saturación |
@@ -116,11 +148,11 @@ corregir y ya no se mantiene en el repositorio.
 | Entidad: MPH (Huancayo) | ⚠️ Corregido: MPJ – Junín, TUPA 2023 (252 procedimientos) |
 | API `POST /api/v1/consulta` | ✅ Real: `POST /api/consultas` con `{pregunta}` |
 | Respuesta con `abstencion`/`groundedness`/`latencia_ms`/`pii_filtrado` | ⚠️ Solo `confianza` (alta/media/baja) |
-| Tablas `fragmentos_documentales`, `respuestas`, `evaluaciones_calidad` | ❌ No existen |
+| Tablas `fragmentos_documentales`, `respuestas`, `evaluaciones_calidad` | ⚠️ Existe `fragmentos_documento` (PMV2) pero su migración `004` **no está aplicada** (D-15); `evaluaciones_calidad` sigue sin existir |
 | 7 contenedores + monitoreo | ⚠️ 3 servicios (postgres, redis, ollama) |
 | Clasificador Random Forest + TF-IDF | ❌ Regex (`ServicioNLP.py`) |
 | 16 rutas frontend | ⚠️ 4 rutas (`/`, `/chat`, `/tramites`, `/admin`) |
 | Paleta azul institucional | ⚠️ Rediseñada: estilo cálido/orgánico |
 | SLM `qwen2.5:3b-instruct-q4_K_M` | ⚠️ `qwen2.5:3b` (Ollama) |
 | Groundedness coseno > 0.82 con rechazo | ⚠️ Confianza cualitativa sin rechazo |
-| Pruebas con pytest | ❌ Sin suite (pytest ausente) |
+| Pruebas con pytest | ❌ Sin suite: **0 suites de pruebas** (G-18) |

@@ -2,8 +2,8 @@
 
 Análisis detallado de las 18 HU contra el código real del repositorio.
 **Método:** revisión de `backend/` (controllers, use cases, services, adapters, repositorios,
-schema/migraciones), `database/` y `frontend-tramites/`. Verificado el **1 de octubre de 2026**
-(37 puntos verificados contra el código, 101 en total).
+schema/migraciones), `database/` y `frontend-tramites/`. Verificado el **16 de octubre de 2026**
+(HEAD `ea06c9a`; 101 puntos de verificación contra el código y la base de datos PostgreSQL local).
 
 **Leyenda:** ✅ Implementado · ⚠️ Parcial · ❌ No implementado
 
@@ -24,10 +24,10 @@ verificables con `grep` sobre el repositorio.
 
 | ID | Épica | Estado | ✅/Total | **% avance** |
 | -- | ----- | ------ | :------: | :-----------: |
-| HU-01 | Gestión documental | ⚠️ Parcial | 4/9 | **44 %** |
-| HU-02 | Gestión documental | ⚠️ Parcial | 4/8 | **50 %** |
-| HU-03 | Gestión documental | ⚠️ Parcial | 3/7 | **43 %** |
-| HU-04 | Procesamiento documental y RAG | ⚠️ Parcial | 4/9 | **44 %** |
+| HU-01 | Gestión documental | ⚠️ Parcial | 7/9 | **78 %** |
+| HU-02 | Gestión documental | ⚠️ Parcial | 7/8 | **88 %** |
+| HU-03 | Gestión documental | ⚠️ Parcial | 5/7 | **71 %** |
+| HU-04 | Procesamiento documental y RAG | ⚠️ Parcial | 7/9 | **78 %** |
 | HU-05 | Consulta ciudadana | ✅ Completa | 9/9 | **100 %** |
 | HU-06 | Clasificación de intención | ✅ Completa | 5/5 | **100 %** |
 | HU-07 | Orientación de requisitos | ✅ Completa | 4/5 | **80 %** |
@@ -47,20 +47,21 @@ verificables con `grep` sobre el repositorio.
 
 | Métrica | Valor |
 |---|---|
-| Puntos de verificación cumplidos | **49 / 101** |
-| **Avance total del alcance de las 18 HU** | **49 %** |
+| Puntos de verificación cumplidos | **60 / 101** |
+| **Avance total del alcance de las 18 HU** | **59 %** |
 | HU al 100 % | **2 de 18** — HU-05, HU-06 |
 | HU implementadas (⚠️ parcial o mejor) | **13 de 18 (72 %)** |
 | HU sin implementar (❌) | **5 de 18 (28 %)** — HU-11, HU-12, HU-15, HU-16, HU-18 |
-| HU más avançada | **HU-05 y HU-06 · 100 %** |
-| Pruebas automatizadas | **0 suites** (ningún `test_*.py`, `*.test.ts` ni `conftest.py` en el repo) |
+| HU más avanzada | **HU-05 y HU-06 · 100 %** |
+| Pruebas automatizadas | **0 suites** (ningún `test_*.py`, `*.test.ts` ni `conftest.py` en el repo; **G-18** sigue abierto) |
 
-> El 49 % mide el **alcance total contratado** de las 18 historias. El **núcleo RAG sí funciona de
+> El 59 % mide el **alcance total contratado** de las 18 historias. El **núcleo RAG sí funciona de
 > extremo a extremo** (verificado: 22 trámites, 20 documentos indexados, consulta en 4–17 s con 5
-> fuentes y acierto de caché inmediato). El porcentaje sube desde el 37 % gracias a HU-05, HU-06,
-> HU-07, HU-08 y el badge de groundedness; sigue bajo porque 5 HU no se empezaron, porque el
-> arancel real del TUPA no está cargado en la base de datos y porque el panel de administración
-> sigue siendo una maqueta.
+> fuentes y acierto de caché inmediato). El porcentaje subió del 37 % al 49 % con HU-05, HU-06 y
+> las correcciones D-1..D-5, y ahora al **59 %** con el PMV2 documental (HU-01, HU-02, HU-03 y
+> HU-04 ganaron 11 puntos en el commit `ea06c9a`). Sigue bajo porque 5 HU no se empezaron, porque
+> el arancel real del TUPA no está cargado en la base de datos y porque la API **no arranca en el
+> HEAD actual** (defecto bloqueante D-14).
 
 ---
 
@@ -70,14 +71,14 @@ verificables con `grep` sobre el repositorio.
 - [x] Endpoint `POST /api/documentos` registra un documento con `tramite_id`, `titulo`, `contenido`, `url_origen`, `estado` (`backend/infrastructure/controllers/documento_controller.py:44`).
 - [x] Al registrar se genera el embedding automáticamente (`GestionarDocumentos.registrar`, `backend/application/use_cases/GestionarDocumentos.py:22`).
 - [x] `POST /api/documentos/upload` guarda el archivo original en disco (`documento_controller.py:66`, `DocumentStorageAdapter`).
-- [ ] ❌ **Validación de formato PDF/DOCX:** el `upload` acepta cualquier archivo (`.bin` incluido); no restringe extensiones ni valida MIME.
-- [ ] ❌ **Extracción de texto del PDF:** el sistema espera el `contenido` como texto ya escrito en el JSON; no lee el contenido del PDF cargado.
-- [ ] ❌ **Ingreso de metadatos junto al archivo:** `upload` solo guarda bytes; los metadatos se envían aparte por JSON y no se asocian al archivo.
-- [ ] ❌ **Confirmación/firma de calidad:** el registro devuelve la respuesta, pero sin verificación previa del archivo.
+- [x] **Validación de formato PDF/DOCX:** `FormatoDocumento` rechaza con **422** formatos no admitidos (PMV2, commit `ea06c9a`).
+- [ ] ❌ **Extracción de texto del PDF/DOCX:** existe `ExtraccionTextoAdapter`, pero `pypdf` y `python-docx` no están en `requirements.txt` (**D-17**), por lo que la extracción real no funciona.
+- [x] **Ingreso de metadatos junto al archivo:** metadatos obligatorios (`version`, `fecha_publicacion`, `hash_contenido`, `archivo_nombre`, `mime_type`, `fragmentado`, `eliminado_en`); la migración que los define (**004**) aún no está aplicada (**D-15**).
+- [ ] ❌ **Confirmación/firma de calidad:** el registro devuelve la respuesta, pero sin verificación previa ni firma del archivo.
 
 **Frontend**
 - [x] `DragDropUpload` captura archivos arrastrados/seleccionados (`components/DragDropUpload.tsx`).
-- [ ] ❌ No llama a `/api/documentos/upload` ni a `/api/documentos`; solo guarda nombres en estado local (para demostración).
+- [x] **Carga conectada a la API real:** panel `DocumentManager.tsx` en `/admin` consume `GET /api/documentos` y `/api/admin/documentos` con filtros (hoy el panel no carga en runtime por **D-21** y la API no arranca por **D-14**).
 
 ---
 
@@ -88,12 +89,12 @@ verificables con `grep` sobre el repositorio.
 - [x] Estado de vigencia persistido: `vigente | obsoleto | en_revision` (`DocumentoRepositoryImpl`, `schema.sql:57`).
 - [x] `actualizado_en` se registra automáticamente (`NOW()` en upsert).
 - [x] La indexación usa solo documentos `vigente` (`BusquedaVectorialAdapter.py:14`, `ServicioRAG.recuperar`).
-- [ ] ❌ **Campo `versión`:** no existe columna ni campo `version` en el modelo.
-- [ ] ❌ **Campo `fecha` del documento:** solo hay `actualizado_en` (timestamp de sistema); no hay fecha normativa/emisión del documento.
-- [ ] ❌ **Validación de metadatos obligatorios:** `DocumentoRequest` exige `titulo`, `contenido`, `url_origen` pero **no** valida fecha/versión; no existe el concepto "publicar" con validaciones (la vigencia se asume por defecto `vigente`, `documento_controller.py:21`).
+- [x] **Campo `version`:** los metadatos obligatorios del PMV2 incluyen `version` (migración 004, pendiente de aplicar — **D-15**).
+- [x] **Campo de fecha del documento:** los metadatos obligatorios incluyen `fecha_publicacion` (normativa/emisión), además de `actualizado_en`.
+- [x] **Validación de metadatos obligatorios:** `version`, `fecha_publicacion`, `hash_contenido`, `archivo_nombre` y `mime_type` son obligatorios; la API responde **422** si faltan.
 
 **BD**
-- [ ] ❌ `documentos` carece de columnas `version` y `fecha_emision`. (`database/schema.sql`).
+- [ ] ❌ **Columnas en la base de datos:** la migración `004_documentos_pmv2.sql` define las columnas de metadatos y la tabla `fragmentos_documento`, pero **no está aplicada** y su línea 1 usa docstring de Python en vez de `--` (**D-15**); la BD vigente aún no tiene esos campos.
 
 ---
 
@@ -103,10 +104,10 @@ verificables con `grep` sobre el repositorio.
 - [x] Cambio de estado: `PUT /api/documentos/{id}/estado` (`documento_controller.py:78`).
 - [x] Estados disponibles: `vigente`, `obsoleto`, `en_revision` (cubre "vigente", "derogado"≈obsoleto, "en revisión").
 - [x] El buscador excluye documentos no vigentes (no se usan en respuestas nuevas) (`BusquedaVectorialAdapter.py:14`).
-- [ ] ❌ **Estado "derogado":** no existe literalmente; se usa `obsoleto`.
-- [ ] ❌ **Modificación:** no hay endpoint para editar `titulo`/`contenido`/`url` (solo estado); el repo tiene `ON CONFLICT ... DO UPDATE` pero sin ruta HTTP que lo aproveche.
-- [ ] ❌ **Flujo de aprobación con revisor/roles:** cualquier llamada cambia el estado; no hay validación de quien actúa.
-- [ ] ❌ **Conservar para auditoría:** existe `DELETE /api/documentos/{id}` que **borra físicamente** (no es baja lógica).
+- [x] **Estado "derogado":** añadido en el PMV2 junto a los metadatos del documento.
+- [ ] ❌ **Modificación de contenido:** no hay endpoint para editar `titulo`/`contenido`/`url` (solo estado y reprocesado).
+- [ ] ❌ **Flujo de aprobación con revisor/roles:** cualquier llamada cambia el estado; no hay validación de quien actúa (**D-8**).
+- [x] **Conservar para auditoría (baja lógica):** `DELETE /api/documentos/{id}` marca `eliminado_en` en vez de borrar (**D-10 corregido**); existe además `DELETE /{id}/fisico` para borrado físico (con el hueco **D-19**: no borra el archivo de `storage/documentos`).
 
 ---
 
@@ -117,13 +118,15 @@ verificables con `grep` sobre el repositorio.
 - [x] Índice vectorial **HNSW** pgvector (`schema.sql:79`).
 - [x] Búsqueda por similitud de coseno (`BusquedaVectorialAdapter.py:9`) con umbral de similitud (0.3).
 - [x] Actualización del índice: upsert de `embedding` al guardar (`DocumentoRepositoryImpl.QUERY_UPSERT`).
-- [ ] ❌ **Extracción automática del texto:** no hay parser de PDF/DOCX (el texto debe venir ya en el JSON).
-- [ ] ❌ **División en fragmentos (chunking):** se genera **un** vector por documento completo; no existen chunks/bloques.
-- [ ] ❌ **Detección de páginas escaneadas / OCR:** no hay ningún módulo OCR ni aviso "requiere revisión manual".
-- [ ] ❌ **Procesamiento por lotes / "ejecutar procesamiento":** no hay job/tarea de reprocesamiento.
+- [ ] ❌ **Extracción automática del texto:** `ExtraccionTextoAdapter` existe, pero sin `pypdf`/`python-docx` en `requirements.txt` (**D-17**) no extrae PDF/DOCX reales.
+- [x] **División en fragmentos (chunking):** `ServicioChunking` (800/120) + tabla `fragmentos_documento` + repositorio `FragmentoRepositoryImpl` (migración 004 pendiente de aplicar, **D-15**).
+- [ ] ❌ **Detección de páginas escaneadas / OCR:** no hay ningún módulo OCR ni aviso "requiere revisión manual" (**G-13** parcial).
+- [x] **Procesamiento y reprocesamiento:** `POST /api/documentos/{id}/procesar` + casos de uso `CargarDocumento` y `ProcesarDocumento`.
 
 **Frontend**
-- [ ] ❌ No hay pantalla de "procesar documento" ni indicador de estado de indexación real (el ADN admin es mock).
+- [x] **Pantalla de gestión/procesamiento:** `DocumentManager.tsx` en `/admin` lista documentos con filtros y dispara acciones reales (en runtime bloqueado por **D-14** y **D-21**).
+
+> Nota **G-13** (parcial): el chunking existe, pero `ServicioRAG` sigue recuperando por el **embedding del documento completo**, no por fragmento; la recuperación RAG por chunk y el OCR siguen pendientes.
 
 ---
 
@@ -298,10 +301,10 @@ verificables con `grep` sobre el repositorio.
 
 | # | HU | Estado | % | Brecha principal |
 | -- | --- | ------ | :-: | ---------------- |
-| HU-01 | Carga de documentos | ⚠️ | 44 % | Sin validación PDF ni extracción de texto |
-| HU-02 | Vigencia/versión/fuente | ⚠️ | 50 % | Sin campos `version`/`fecha` ni validación de metadatos |
-| HU-03 | Aprobar/derogar documentos | ⚠️ | 43 % | Sin flujo por roles, sin baja lógica |
-| HU-04 | Procesamiento documental y RAG | ⚠️ | 44 % | Sin chunking, sin extracción ni OCR |
+| HU-01 | Carga de documentos | ⚠️ | 78 % | Sin extracción real de PDF/DOCX (D-17) ni firma de calidad |
+| HU-02 | Vigencia/versión/fuente | ⚠️ | 88 % | Metadatos en código; migración 004 sin aplicar en la BD (D-15) |
+| HU-03 | Aprobar/derogar documentos | ⚠️ | 71 % | Sin edición de contenido ni flujo de aprobación por roles |
+| HU-04 | Procesamiento documental y RAG | ⚠️ | 78 % | Sin OCR ni recuperación por fragmento; deps de extracción (D-17) |
 | HU-05 | Consulta ciudadana | ✅ | **100 %** | — (cerrada) |
 | HU-06 | Clasificación de intención | ✅ | **100 %** | — (cerrada) |
 | HU-07 | Orientación de requisitos | ✅ | **80 %** | Sin derivación al área responsable (no hay dato en BD) |
@@ -316,9 +319,9 @@ verificables con `grep` sobre el repositorio.
 | HU-16 | Métricas y monitoreo | ❌ | 0 % | Solo maqueta estática |
 | HU-17 | Derivación municipal | ⚠️ | 40 % | Solo nota genérica, sin canal/área |
 | HU-18 | Reportes y exportación | ❌ | 0 % | No existe |
-| | **TOTAL** | | **49 %** | 49 de 101 puntos de verificación |
+| | **TOTAL** | | **59 %** | 60 de 101 puntos de verificación |
 
-## Defectos detectados en esta revisión (1 de octubre de 2026)
+## Defectos detectados (1 y 16 de octubre de 2026)
 
 | # | Defecto | Ubicación | Estado |
 |---|---------|-----------|--------|
@@ -327,13 +330,29 @@ verificables con `grep` sobre el repositorio.
 | D-3 | Las fuentes nunca se muestran (`{url, fragmento}` vs `titulo`) | `consulta_controller.py` | ✅ Corregido — las fuentes incluyen `titulo` |
 | D-4 | El front llama `/api/health`, pero la ruta real es `/health` | `lib/api.ts` | ✅ Corregido — se consulta `/health`; lo no verificado se informa como "sin verificar" |
 | D-5 | Campos de trámites desalineados | `tramite_controller.py` vs `lib/api.ts` | ✅ Corregido — `mapearTramite` traduce `costo`, `duracion_estimada_dias` y `tipo` al modelo de la interfaz |
-| D-6 | Datos de demostración presentados como reales | `app/admin/page.tsx`, `app/page.tsx` | ⚠️ Parcial — se retiraron los KPI inventados de la portada; `app/admin` sigue siendo maqueta |
-| D-7 | `POST /api/documentos/upload` acepta cualquier archivo | `documento_controller.py:66` | ❌ Abierto — no valida extensión/MIME, no extrae texto y `tramite_id` no se usa |
+| D-6 | Datos de demostración presentados como reales | `app/admin/page.tsx`, `app/page.tsx` | ⚠️ Parcial — se retiraron los KPI inventados de la portada y `DocumentManager` ya consume la API, pero los KPIs/gráficos de `/admin` siguen siendo ficticios (252 / 1.236 / 98 %) |
+| D-7 | `POST /api/documentos/upload` acepta cualquier archivo | `documento_controller.py:66` | ⚠️ Parcial — `FormatoDocumento` valida la extensión con 422, pero faltan `pypdf`/`python-docx` (**D-17**) para extraer texto real |
 | D-8 | `es_administrador()` nunca se invoca | `domain/entities/Usuario.py:16` | ❌ Abierto — el campo `rol` existe pero no controla ningún acceso |
+| D-9 | `GET /api/consultas/{id}` no devuelve respuesta, fuentes ni confianza | `consulta_controller.py:90` | ❌ Abierto |
+| D-10 | `DELETE /api/documentos/{id}` borraba físicamente el documento | `documento_controller.py` | ✅ Corregido — baja lógica: marca `eliminado_en` (existe además `DELETE /{id}/fisico`) |
+| D-11 | `/health` no comprueba la base de datos, Redis ni Ollama | `main.py` / health | ❌ Abierto |
+| D-12 | Branding inconsistente (Huancayo vs. Junín) | frontend | ⚠️ Parcial |
+| D-13 | Normalización de la caché de consultas | `ServicioCache` | 🟡 Menor |
+| D-14 | **La API no arranca:** `main.py:21` importa `router` de `tramite_admin_controller`, que es un stub de 91 bytes sin `router` → `ImportError`; 0 de 22 endpoints servibles | `main.py:21`, `tramite_admin_controller.py` | 🔴 Bloqueante |
+| D-15 | Migración `004_documentos_pmv2.sql` **sin aplicar** y con línea 1 inválida (docstring de Python en vez de `--`); la BD no tiene los metadatos, `fragmentos_documento` ni `derogado` | `database/migrations/004_documentos_pmv2.sql` | 🔴 Bloqueante |
+| D-16 | `instalar.ps1` no aplica la migración 004 | `instalar.ps1` | 🔴 Bloqueante |
+| D-17 | `pypdf` y `python-docx` no están en `requirements.txt` (la extracción de PDF/DOCX no puede funcionar) | `requirements.txt` | 🔴 Bloqueante |
+| D-18 | `estado` inválido produce **500** en vez de 422 | `documento_admin_controller.py:48` | 🔴 Alto |
+| D-19 | La baja física no borra el archivo en `storage/documentos` | `DELETE /{id}/fisico` | 🟠 Medio |
+| D-20 | `lib/api.ts` `pedir()` hace `response.json()` incondicional, pero los DELETE devuelven **204 sin cuerpo** → `SyntaxError` | `lib/api.ts` | 🔴 Alto |
+| D-21 | El front llama a `GET /api/tramites/admin` (inexistente; cae en `GET /api/tramites/{id}` → 500) dentro de `Promise.all`, así que el panel de documentos no carga | `DocumentManager.tsx` / `lib/api.ts` | 🔴 Bloqueante |
 
 **Conclusión:** el backend tiene un núcleo RAG sólido y verificado (consulta, búsqueda vectorial,
 SLM, groundedness, caché, identificación de trámite probable y auditoría en BD). Con la corrección
-de D-1 a D-5, **HU-05 y HU-06 llegan al 100 %** y el avance global del alcance contratado sube del
-37 % al **49 %**. El frente abierto más urgente es la carga de los montos reales del TUPA en
-`tramites.costo`: mientras sean 0.00 la HU-08 no puede cerrarse. Después quedan D-6 (panel
-admin), D-7 (upload) y D-8 (autorización).
+de D-1 a D-5, **HU-05 y HU-06 llegaron al 100 %**; con el PMV2 documental del commit `ea06c9a`
+(validación de formato, metadatos obligatorios, estado `derogado`, baja lógica, chunking,
+reprocesado, listados con filtros, 6 endpoints admin y el panel `DocumentManager`) el avance global
+sube del 49 % al **59 %** (60/101). Sin embargo, el HEAD actual **no arranca la API (D-14)**, la
+migración 004 no está aplicada (D-15/D-16) y el panel de documentos no carga (D-21): son los
+bloqueos inmediatos. El frente funcional que sigue abierto es HU-12 (trámites relacionados al 0 %),
+los montos del TUPA en `tramites.costo`, el OCR y la recuperación RAG por fragmento.

@@ -1,5 +1,7 @@
 # 01 — Arquitectura de Software
 
+> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+
 > Sistema de Orientación de Trámites Municipales · MPJ (TUPA 2023)
 
 ## 1. Estilo arquitectónico: Hexagonal (Puertos y Adaptadores)
@@ -35,18 +37,24 @@ La regla de dependencias apunta siempre hacia adentro (del `infrastructure` haci
 └──────────────────┘ └─────────────────────────┘ └─────────────────────────┘
 ```
 
+Añadidos del **PMV2** (commit `ea06c9a`): en dominio, la entidad `FragmentoDocumento`, el VO
+`FormatoDocumento` y los errores de dominio (`errors.py`); en infraestructura, el adaptador
+`ExtraccionTextoAdapter` y el repositorio `FragmentoRepositoryImpl`, además de `DocumentStorageAdapter`
+ahora ligado al puerto `AlmacenamientoDocumentosPort`. El total de **puertos (interfaces ABC) pasó
+de 7 a 10**.
+
 ## 2. Capas del backend (rutas reales)
 
 | Capa | Carpeta | Contenido |
 |---|---|---|
-| Presentación | `backend/infrastructure/controllers/` | 4 routers FastAPI (consulta, tramite, documento, usuario) |
+| Presentación | `backend/infrastructure/controllers/` | 6 routers FastAPI (consulta, tramite, documento, usuario, documento_admin, tramite_admin [stub, D-14]) |
 | Composición | `backend/infrastructure/container.py` | `Container` + `crear_container()` — único lugar que cablea adaptadores y casos de uso |
-| Aplicación | `backend/application/use_cases/` | 7 casos de uso con una responsabilidad cada uno |
-| Aplicación | `backend/application/services/` | Servicios de aplicación (NLP, RAG, SLM, groundedness, caché, auditoría, orientación) |
-| Dominio | `backend/domain/entities/` · `domain/value_objects/` | Dataclasses puras + enums |
-| Dominio | `backend/domain/ports/` | Interfaces (ABC) que definen qué necesita la aplicación |
-| Infraestructura | `backend/infrastructure/adapters/` | Implementaciones concretas (BD → pgvector, embeddings, SLM, caché Redis, storage) |
-| Infraestructura | `backend/infrastructure/repositories/` | Acceso a datos con `asyncpg` |
+| Aplicación | `backend/application/use_cases/` | 10 casos de uso con una responsabilidad cada uno (`+ IdentificarTramiteProbable`, `CargarDocumento`, `ProcesarDocumento`) |
+| Aplicación | `backend/application/services/` | 8 servicios de aplicación (NLP, RAG, SLM, orientación, groundedness, caché, auditoría y **chunking**) |
+| Dominio | `backend/domain/entities/` · `domain/value_objects/` | Dataclasses puras + enums (8 entidades, 8 value objects) |
+| Dominio | `backend/domain/ports/` | 10 interfaces (ABC) que definen qué necesita la aplicación |
+| Infraestructura | `backend/infrastructure/adapters/` | Implementaciones concretas (BD → pgvector, embeddings, SLM, caché Redis, storage, **extracción de texto**) |
+| Infraestructura | `backend/infrastructure/repositories/` | Acceso a datos con `asyncpg` (documento, consulta y fragmentos) |
 
 ## 3. Inyección de dependencias
 
@@ -54,7 +62,11 @@ La regla de dependencias apunta siempre hacia adentro (del `infrastructure` haci
   `app.state.container` (`backend/main.py:27-29`).
 - Los controllers piden el contenedor con `Depends(obtener_container)`.
 - `crear_container()` construye todo el grafo: adaptadores → repositorios → servicios → casos de
-  uso (`backend/infrastructure/container.py:88-136`).
+  uso (`backend/infrastructure/container.py:104-171`).
+- ⚠️ **Hoy la app no arranca (D-14):** `main.py:21` importa `router` de
+  `tramite_admin_controller`, un stub de 91 bytes que no define `router` → `ImportError` antes de
+  montar ningún endpoint (0 de 22 servibles). Corregido ese import, el resto del cableado es el
+  descrito arriba.
 
 ## 4. Stack tecnológico
 
@@ -88,7 +100,7 @@ Servicios definidos en `docker-compose.yml`:
 ```
 Ciudadano ──> Next.js /chat ──> enviarConsulta() ──> POST /api/consultas
                                                           │
-        (controller) clasifica_intencion ──> ServicioNLP (regex, 6 intenciones)
+        (controller) clasifica_intencion ──> ServicioNLP (léxico, 9 intenciones)
                           │
                           ├─ registrar_consulta ──> tabla consultas
                           ├─ servicio_cache (¿respuesta en Redis? → HIT)

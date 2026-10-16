@@ -1,5 +1,7 @@
 # 03 — Backend
 
+> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+
 > FastAPI 0.111 · Python 3.11+ · Arquitectura hexagonal · RAG + SLM
 
 ## 1. Entry point (`backend/main.py`)
@@ -7,7 +9,11 @@
 - `load_dotenv()` lee `.env` de la raíz.
 - *lifespan* abre el **pool de PostgreSQL** y crea el contenedor de dependencias al arrancar;
   cierra el pool y la conexión Redis al apagar (`main.py:24-36`).
-- Aplica **CORS** (orígenes del frontend local), incluye 4 routers y expone `GET /health`.
+- Aplica **CORS** (orígenes del frontend local), incluye **6 routers** (consulta, tramite,
+  documento, usuario, documento_admin y tramite_admin) y expone `GET /health`.
+- ⚠️ **Hoy la app no arranca (D-14):** `main.py:21` importa `router` de `tramite_admin_controller`,
+  un stub de 91 bytes sin `router` → `ImportError` (verificado con `import main`). Resultado:
+  **0 de los 22 endpoints declarados son servibles** hasta corregir ese import.
 
 ## 2. Inyección de dependencias (`infrastructure/container.py`)
 
@@ -19,25 +25,33 @@ Connection (asyncpg pool)
 → BusquedaVectorialAdapter (pgvector)     → BusquedaSemanticaPort
 → OllamaAdapter (SLM)                     → GeneracionRespuestaPort
 → RedisAdapter                            → CachePort
-→ DocumentStorageAdapter (archivos)
+→ DocumentStorageAdapter (archivos)       → AlmacenamientoDocumentosPort  [PMV2]
+→ ExtraccionTextoAdapter (PDF/DOCX/TXT)   → ExtraccionTextoPort           [PMV2]
 → _AuditoriaPostgreSQL                    → AuditoriaPort
-→ DocumentoRepositoryImpl / ConsultaRepositoryImpl
-→ Servicios (NLP, SLM, RAG, Orientacion, Cache, Auditoria, Groundedness)
-→ 7 casos de uso
+→ DocumentoRepositoryImpl / ConsultaRepositoryImpl / FragmentoRepositoryImpl [PMV2]
+→ TramiteCatalogoAdapter                  → TramiteCatalogoPort
+→ 8 servicios (NLP, SLM, RAG, Orientacion, Cache, Auditoria, Groundedness, Chunking)
+→ 10 casos de uso (los 7 clásicos + IdentificarTramiteProbable, CargarDocumento y ProcesarDocumento)
 ```
 
-Parámetros configurables vía entorno: `RAG_TOP_K` (5), `CACHE_TTL_SEGUNDOS` (3600).
+El cableado vive en `container.py:104-171`. Parámetros configurables vía entorno: `RAG_TOP_K` (5),
+`CACHE_TTL_SEGUNDOS` (3600).
 
 ## 3. Endpoints de la API
+
+**22 endpoints declarados: 16 públicos + 6 de administración** (prefijo
+`/api/admin/documentos`), repartidos en 6 controllers. ⚠️ **Ninguno es servible hoy**: el
+`ImportError` de `main.py:21` (**D-14**) aborta el arranque antes de montar los routers.
 
 ### 3.1 Consultas (`/api/consultas`)
 
 | Método | Ruta | Descripción | Respuesta |
 |---|---|---|---|
-| POST | `/api/consultas` | Clasifica intención, registra, cachea, genera orientación RAG y audita | `{consulta_id, intencion, texto, confianza, fuentes[{url, fragmento}]}` |
+| POST | `/api/consultas` | Clasifica intención, registra, cachea, genera orientación RAG y audita | `{consulta_id, intencion, texto, confianza, groundedness, confianza_intencion, pide_aclaracion, tramite_probable, fuentes[{titulo, url, fragmento}]}` |
 | GET | `/api/consultas/{id}` | Trazabilidad básica de la consulta | `{id, usuario_id, pregunta, intencion, creada_en}` |
 
-Entrada: `{pregunta: str (min 3), usuario_id?: UUID}` — validada con Pydantic.
+Entrada: `{pregunta: str (min 3), usuario_id?: UUID}` — validada con Pydantic (la UI envía solo
+`pregunta`).
 
 ### 3.2 Trámites (`/api/tramites`)
 
@@ -50,13 +64,31 @@ Entrada: `{pregunta: str (min 3), usuario_id?: UUID}` — validada con Pydantic.
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| POST | `/api/documentos` | Registra documento por JSON; **genera embedding** automáticamente e indexa |
-| POST | `/api/documentos/upload` | Guarda el archivo original en disco (`storage/documentos`) |
-| PUT | `/api/documentos/{id}/estado` | Cambia vigencia (`vigente|obsoleto|en_revision`) |
+| POST | `/api/documentos` | Registra documento por JSON; **genera embedding** automáticamente e indexa; valida metadatos (`requiere_metadatos()`) |
+| POST | `/api/documentos/upload` | Valida extensión (`FormatoDocumento`), extrae texto, guarda el archivo en `storage/documentos`, registra, indexa y fragmenta (PMV2) |
+| GET | `/api/documentos` | Listado con filtros `tramite_id`/`estado`/`incluir_eliminados` + `limite`/`desde` (PMV2) |
+| PUT | `/api/documentos/{id}/estado` | Cambia vigencia (`vigente\|obsoleto\|en_revision\|derogado`) |
 | GET | `/api/documentos/{id}` | Consulta un documento |
-| DELETE | `/api/documentos/{id}` | Borra físicamente |
+| POST | `/api/documentos/{id}/procesar` | Reprocesa: `ServicioChunking` + embedding por fragmento, idempotente (PMV2) |
+| DELETE | `/api/documentos/{id}` | **Baja lógica**: marca `eliminado_en` y devuelve 204 (PMV2) |
+| DELETE | `/api/documentos/{id}/fisico` | **Baja física** de filas (borra fragmentos) y devuelve 204 (PMV2) |
 
-### 3.4 Usuarios (`/api/usuarios`)
+### 3.4 Administración de documentos (`/api/admin/documentos`) — PMV2
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/admin/documentos` | Listado con filtros y paginación (hasta 500) |
+| POST | `/api/admin/documentos` | Crea por JSON y procesa en segundo plano |
+| POST | `/api/admin/documentos/upload` | Carga `multipart/form-data` (`tramite_id`, `titulo`, `url_origen`, `version`, `fecha_publicacion`, `estado`, `archivo`) |
+| POST | `/api/admin/documentos/{id}/procesar` | Reprocesa un documento (404 si no existe) |
+| DELETE | `/api/admin/documentos/{id}` | Baja lógica; 204 |
+| DELETE | `/api/admin/documentos/{id}/fisico` | Baja física; 204 |
+
+Estos 6 repiten la funcionalidad pública bajo otro prefijo y son la superficie que consume
+`DocumentManager.tsx`. ⚠️ Ninguno valida autenticación ni rol (**D-8**); `documento_admin_controller.py:48`
+puede devolver 500 en vez de 422 ante un `estado` inválido (**D-18**).
+
+### 3.5 Usuarios (`/api/usuarios`)
 
 | Método | Ruta | Descripción |
 |---|---|---|
@@ -64,13 +96,14 @@ Entrada: `{pregunta: str (min 3), usuario_id?: UUID}` — validada con Pydantic.
 | GET | `/api/usuarios/{id}` | Detalle de usuario |
 | GET | `/api/usuarios/{id}/consultas` | Historial (últimas 50 consultas) |
 
-### 3.5 Operación
+### 3.6 Operación
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| GET | `/health` | `{status:'ok'}` |
+| GET | `/health` | `{status:'ok'}` — **no** comprueba BD, Redis ni Ollama (**D-11**) |
 
-Docs interactivas en `http://localhost:8000/docs` (OpenAPI automática de FastAPI).
+Docs interactivas en `http://localhost:8000/docs` (OpenAPI automática de FastAPI) — hoy
+inaccesibles mientras persista D-14.
 
 ## 4. Capa de aplicación
 
@@ -78,43 +111,60 @@ Docs interactivas en `http://localhost:8000/docs` (OpenAPI automática de FastAP
 
 | Caso de uso | Responsabilidad |
 |---|---|
-| `ClasificarIntencion` | Encapsula la clasificación de intención |
+| `ClasificarIntencion` | Devuelve la intención o la `ClasificacionIntencion` completa (intención + confianza) |
 | `RegistrarConsulta` | Valida y persiste la consulta |
+| `GenerarOrientacion` | Orquesta la orientación ciudadana (RAG + grounding) |
+| `IdentificarTramiteProbable` | Deduce el trámite del catálogo sumando similitudes; si nada domina, no propone ninguno |
 | `ConsultarTramite` | Documentos vigentes de un trámite (con caché Redis) |
 | `BuscarDocumentos` | Recuperación semántica de documentos vigentes |
-| `GenerarOrientacion` | Orquesta la orientación ciudadana (RAG + grounding) |
-| `GestionarDocumentos` | CRUD + indexación (embedding) de documentos |
+| `GestionarDocumentos` | CRUD + indexación (embedding) + `listar()` con filtros + baja lógica/física (PMV2) |
 | `AuditarConsulta` | Persiste y consulta trazabilidad |
+| `CargarDocumento` | **Nuevo (PMV2):** valida extensión → extrae texto → almacena → registra con metadatos → indexa → fragmenta |
+| `ProcesarDocumento` | **Nuevo (PMV2):** borra fragmentos, ejecuta `ServicioChunking`, embeddea y persiste en lote; idempotente |
 
 ### 4.2 Servicios (`application/services/`)
 
-- **`ServicioNLP`** — clasificador de intención **heurístico** (regex + normalización Unicode,
-  sin tildes/puntuación). 6 intenciones: `consultar_requisitos`, `consultar_costo`,
-  `consultar_estado`, `consultar_ubicacion`, `saludo`, `otro`. *(Si se cae a `OTRO`, responde
-  genérico; no usa ML, G-02.)*
+- **`ServicioNLP`** — clasificador de intención **heurístico** por raíces léxicas + normalización
+  Unicode (sin tildes/puntuación), con confianza `0.55 + 0.15 × (patrones−1)` y desempate por
+  especificidad. **9 intenciones**: `consultar_requisitos`, `consultar_costo`, `consultar_plazo`,
+  `consultar_pasos`, `consultar_area`, `consultar_estado`, `consultar_ubicacion`, `saludo`,
+  `otro`. *(Si se cae a `OTRO`, pide aclaración; no usa ML, G-02.)*
 - **`ServicioRAG`** — recupera con `BusquedaSemanticaPort` (top_k=5), filtra `vigente`, construye
-  fuentes (`url` + primer fragmento de 280 chars) y delega la respuesta al SLM.
+  fuentes (`titulo` + `url` + primer fragmento de 280 chars) y delega la respuesta al SLM.
 - **`ServicioSLM`** — plantilla de sistema anti-alucinación ("responde solo con el contexto") y
   abstención si no hay documentos recuperados.
 - **`EvaluadorGroundedness`** — **cobertura léxica**: proporción de términos (>3 letras) de la
   respuesta presentes en el contexto. Umbrales: **ALTA ≥ 0.75, MEDIA ≥ 0.40**, si no → BAJA.
-- **`ServicioOrientacion`** — si `BAJA` pero con fuentes, agrega nota de advertencia al texto.
+- **`ServicioOrientacion`** — orquesta el flujo completo: aclaración ambigua, recuperación,
+  generación, groundedness, nota de advertencia si `BAJA`, identificación del trámite probable y
+  anexo de datos estructurados (requisitos, arancel, plazo) tomados de la BD.
 - **`ServicioCache`** — clave `consulta:{sha256(pregunta.lower)}`, TTL configurable.
 - **`ServicioAuditoria`** — delega el registro en `AuditoriaPort`.
+- **`ServicioChunking`** — **nuevo (PMV2)**: segmentador determinista sin dependencias externas —
+  párrafos → oraciones → bloques de ~800 caracteres con **solape de 120**. Es el cumplimiento
+  parcial de G-13 (faltan OCR y la recuperación RAG *por fragmento*).
 
 ## 5. Capa de dominio
 
-### 5.1 Entidades (`domain/entities/`)
-`Tramite` · `Documento` (con `esta_vigente()` y `embedding`) · `Consulta` · `Respuesta`
-(con `es_confiable()`) · `Usuario` · `Municipalidad` · `Fuente`.
+### 5.1 Entidades (`domain/entities/`) — 8
+`Tramite` · `Documento` (con `esta_vigente()`, `esta_eliminado()`, `requiere_metadatos()` y los
+metadatos `version`, `fecha_publicacion`, `archivo_nombre`, `mime_type`, `hash_contenido`,
+`fragmentado`, `eliminado_en`) · **`FragmentoDocumento` (nuevo, PMV2)** · `Consulta` · `Respuesta`
+(con `es_confiable()` y `con_datos_estructurados()`) · `Usuario` · `Municipalidad` · `Fuente`.
+Además `domain/errors.py` define los errores de dominio `FormatoNoSoportadoError`,
+`DocumentoIlegibleError` y `DocumentoInvalidoError`.
 
-### 5.2 Value Objects (`domain/value_objects/`)
-`IntencionConsulta` (6) · `NivelConfianza` (alta/media/baja) · `EstadoDocumento`
-(vigente/obsoleto/en_revision) · `TipoTramite` (6 tipos) · `FuenteOficial`.
+### 5.2 Value Objects (`domain/value_objects/`) — 8
+`IntencionConsulta` (**9** valores) · `ClasificacionIntencion` · `TramiteProbable` ·
+`NivelConfianza` (alta/media/baja) · `EstadoDocumento` (vigente/obsoleto/en_revision/
+**derogado**) · **`FormatoDocumento`** (nuevo, PMV2: `.pdf/.docx/.txt/.md` → MIME) ·
+`TipoTramite` (6 tipos) · `FuenteOficial`.
 
-### 5.3 Puertos (`domain/ports/`) — interfaces ABC
+### 5.3 Puertos (`domain/ports/`) — 10 interfaces ABC
 `BusquedaSemanticaPort` · `GeneracionRespuestaPort` · `CachePort` · `AuditoriaPort` ·
-`DocumentoRepository` · `ConsultaRepository`.
+`DocumentoRepository` · `ConsultaRepository` · `TramiteCatalogoPort` · **`AlmacenamientoDocumentosPort`**
+· **`ExtraccionTextoPort`** · **`FragmentoRepository`** (los 3 últimos, nuevos en el PMV2; eran 7
+puertos antes de `ea06c9a`).
 
 ## 6. Adaptadores (`infrastructure/adapters/`)
 
@@ -123,16 +173,21 @@ Docs interactivas en `http://localhost:8000/docs` (OpenAPI automática de FastAP
 | `BusquedaVectorialAdapter` | PostgreSQL + pgvector | SQL con `embedding <=> $1::vector`, filtro `estado='vigente'`, `LIMIT`, umbral similitud **0.3**, reconstruye `Documento` |
 | `BGE_M3Adapter` | sentence-transformers | Modelo `BAAI/bge-m3`, 1024 dims, CPU (configurable `EMBEDDING_DEVICE`), ejecución en `asyncio.to_thread` para no bloquear el loop |
 | `OllamaAdapter` | httpx → Ollama | `qwen2.5:3b`, system prompt propio, `temperature=0.2`, `num_predict=512`, `stream=False`, timeout 120 s |
-| `RedisAdapter` | redis.asyncio | JSON serializado, TTL, cierre de cliente |
-| `DocumentStorageAdapter` | filesystem | Guarda/lee/elimina listado en `storage/documentos` |
+| `RedisAdapter` | redis.asyncio | JSON serializado, TTL, cierre de cliente; degradable (si Redis cae, sigue sin caché) |
+| `TramiteCatalogoAdapter` | PostgreSQL | Resuelve los trámites vinculados a los documentos recuperados (`JOIN documentos`), para `IdentificarTramiteProbable` |
+| `DocumentStorageAdapter` | filesystem | Guarda/lee/elimina/lista archivos en `storage/documentos` con nombre `uuid4.ext` — cumple `AlmacenamientoDocumentosPort` (PMV2). ⚠️ `eliminar()` no se invoca: la baja física deja el archivo en disco (**D-19**) |
+| `ExtraccionTextoAdapter` | pypdf / python-docx | **Nuevo (PMV2):** extrae texto de `.pdf`, `.docx`, `.txt` y `.md`; si falta la librería o el archivo es escaneado lanza `DocumentoIlegibleError`. ⚠️ `pypdf`/`python-docx` **no están en `requirements.txt`** → hoy solo txt/md (**D-17**) |
 
 ## 7. Repositorios (`infrastructure/repositories/`)
 
 - `Connection` — pool `asyncpg` (min 1, max 10), DSN desde entorno (`POSTGRES_*`).
 - `PostgreSQLRepository` — helpers `fetch`, `fetchrow`, `execute`.
 - `DocumentoRepositoryImpl` — **upsert** con `ON CONFLICT DO UPDATE` (incluye `embedding`),
-  listado por trámite, borrado.
+  listado por trámite, `listar()` con filtros, `marcar_eliminado()` y `eliminar_fisico()` (PMV2).
 - `ConsultaRepositoryImpl` — insert/upsert con actualización de intención, consultas por id/usuario.
+- `FragmentoRepositoryImpl` — **nuevo (PMV2):** `guardar_lote`, `listar_por_documento` y
+  `eliminar_por_documento` sobre `fragmentos_documento` (⚠️ la tabla aún no existe en la BD:
+  **D-15**).
 
 ## 8. Seguridad implementada
 
@@ -141,9 +196,16 @@ Docs interactivas en `http://localhost:8000/docs` (OpenAPI automática de FastAP
 - ✅ CORS solo para localhost:3000.
 - ⚠️ Pendiente: autenticación/JWT/roles (G-01), guardrails anti prompt-injection (G-20),
   rate limiting (G-23), enmascaramiento PII (G-03).
+- ⚠️ **`Usuario.es_administrador()` existe pero nunca se invoca (D-8):** ningún endpoint —ni los 6
+  de `/api/admin/documentos`— comprueba autenticación ni rol; `container.py` expone el contenedor
+  completo a cualquier petición.
 
 ## 9. Cómo se relaciona con el frontend
 
-El frontend consume **solo 3 endpoints** (`POST /api/consultas`, `GET /api/tramites`,
-`GET /api/health`) a través de `lib/api.ts`. El resto de la API (documentos, usuarios) existe
-para gestión y trazabilidad, y queda disponible para el panel administrativo futuro (G-16).
+El frontend consume **3 endpoints públicos** (`POST /api/consultas`, `GET /api/tramites`,
+`GET /health`) y, desde el PMV2, **6 de administración** (`/api/admin/documentos*` más
+`GET /api/tramites/admin`) a través de `lib/api.ts` (225 líneas, 9 funciones). El resto de la API
+(documentos públicos, usuarios) existe para gestión y trazabilidad.
+
+⚠️ **A día de hoy ninguna de esas llamadas puede funcionar:** la API no arranca (**D-14**), los
+`DELETE` rompen con `204` sin cuerpo (**D-20**) y `GET /api/tramites/admin` no existe (**D-21**).

@@ -1,22 +1,25 @@
 # 02 — Frontend
 
+> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+
 > Next.js 14 · React 18 · Tailwind CSS — "Muni", asistente de la Municipalidad Provincial de Junín
 
 ## 1. Objetivo del frontend
 
 Ser el **canal ciudadano** del asistente: un sitio público, responsive (móvil primero), cálido y
 de lenguaje claro, que da acceso al catálogo TUPA, al chat con el SLM y a un panel administrativo
-de métricas. Cuando el backend no está disponible, **degrada con datos demo** para que la
-presentación nunca se rompa.
+de métricas y **gestión documental**. El backend real es la única fuente de datos: si una petición
+falla o expira, la interfaz **muestra el error** en lugar de sustituirlo por datos inventados
+(`respuestaDemo()`/`TRAMITES_DEMO` se eliminaron en la revisión de octubre).
 
 ## 2. Estructura de rutas (App Router de Next.js)
 
 | Ruta | Archivo | Tipo | Contenido |
 |---|---|---|---|
-| `/` | `app/page.tsx` | Server | Landing "Tus trámites, guiados por Muni": hero, mockup móvil, KPIs (252/1,236/98%), catálogo destacado, chat compacto, estado de servicios y auditoría |
+| `/` | `app/page.tsx` | Server | Landing "Tus trámites, guiados por Muni": hero, mockup móvil, KPIs reales (nº de trámites del catálogo; consultas y satisfacción informadas como "—"), catálogo destacado, chat compacto, estado de servicios y auditoría |
 | `/chat` | `app/chat/page.tsx` | Client | Chat completo: `ChatBox` grande + mockup de teléfono + robot flotante |
 | `/tramites` | `app/tramites/page.tsx` | Client | Catálogo con buscador y filtros por categoría |
-| `/admin` | `app/admin/page.tsx` | Server | Dashboard: KPIs, gráficos, estado de servicios, logs y gestión documental |
+| `/admin` | `app/admin/page.tsx` | Server | Dashboard: KPIs (252/1,236/98 %, **ficticios**, D-6), gráficos, estado de servicios, logs y **`DocumentManager`** (gestión documental real) |
 | layout | `app/layout.tsx` | — | `Navbar`, `<main>` y footer institucional; metadata SEO |
 
 - `app/page.tsx` y `app/admin/page.tsx` usan `export const dynamic = 'force-dynamic'` (render
@@ -47,30 +50,48 @@ presentación nunca se rompa.
 // Fuente citada que acompaña a una respuesta (se muestra como badge en el chat)
 export interface FuenteCitada {
   titulo: string;
-  referencia?: string;   // entidad que emite la fuente (p. ej. "Municipalidad Provincial de Junín")
+  fragmento?: string;   // extracto del documento citado
   url?: string;
+}
+
+// Trámite probable identificado por el backend (HU-07)
+export interface TramiteProbable {
+  id: string;
+  nombre: string;
+  requisitos: string[];
+  costo: number;
+  duracion_estimada_dias: number;
+  fuente_url?: string | null;
 }
 
 // Respuesta normalizada que el chat muestra
 export interface RespuestaConsulta {
   texto: string;
-  fuentes?: FuenteCitada[] | string[];
-  confianza?: string;          // 'alta' | 'media' | 'baja'
-  groundedness?: number;       // 0..1 (porcentaje de respaldo documental)
+  fuentes: FuenteCitada[];
+  confianza: string;            // 'alta' | 'media' | 'baja' | 'desconocida'
+  groundedness: number;         // 0..1 — valor real, ya no fijo (D-2 corregido)
+  confianza_intencion: number;  // 0..1 — confianza del clasificador
+  pide_aclaracion: boolean;
+  intencion: string;
+  tramite_probable: TramiteProbable | null;
 }
 
-// Trámite del catálogo TUPA
+// Trámite del catálogo TUPA (forma ya traducida por mapearTramite)
 export interface Tramite {
-  id: string | number;
+  id: string;
   nombre: string;
   descripcion: string;
-  categoria?: string;          // ⚠️ el backend entrega "tipo" (ver G-14)
-  costo?: string;
-  plazo?: string;              // ⚠️ el backend entrega "duracion_estimada_dias" (G-14)
-  requisitos?: string[];
-  estado?: 'activo' | 'actualizando' | 'nuevo';
+  categoria: string;   // el backend entrega "tipo"; lo traduce mapearTramite (D-5)
+  costo: string;       // "S/ 150.00" o "Gratuito / según TUPA"
+  plazo: string;       // "5 días hábiles" (desde duracion_estimada_dias)
+  requisitos: string[];
+  municipalidad?: string;
 }
 ```
+
+`mapearTramite()` (`lib/api.ts:125`) traduce `tipo → categoria` y
+`duracion_estimada_dias → plazo`: **el desajuste de campos G-14 quedó cerrado (D-5)** y la UI ya
+no lee campos inexistentes.
 
 ### 4.2 Modelos internos de componentes
 
@@ -99,10 +120,10 @@ interface KpiProps {
 
 ### 4.3 Contratos HTTP con el backend (solicitudes y respuestas)
 
-**`POST /api/consultas`** — solicitud:
+**`POST /api/consultas`** — solicitud (la UI envía solo `pregunta`):
 
 ```json
-{ "pregunta": "¿Qué necesito para la licencia de funcionamiento?", "usuario_id": null }
+{ "pregunta": "¿Qué necesito para la licencia de funcionamiento?" }
 ```
 
 Respuesta real del backend:
@@ -113,45 +134,64 @@ Respuesta real del backend:
   "intencion": "consultar_requisitos",
   "texto": "…respuesta del SLM…",
   "confianza": "alta",
-  "fuentes": [ { "url": "https://…", "fragmento": "La licencia de funcionamiento …" } ]
+  "groundedness": 0.87,
+  "confianza_intencion": 0.85,
+  "pide_aclaracion": false,
+  "tramite_probable": { "id": "…", "nombre": "…", "requisitos": ["…"], "costo": 0, "duracion_estimada_dias": 10 },
+  "fuentes": [ { "titulo": "TUPA 2023 · Licencias", "url": "https://…", "fragmento": "La licencia de funcionamiento …" } ]
 }
 ```
 
-Mapeo en `enviarConsulta()`: `texto` → `respuesta.texto` · `fuentes` → `r.fuentes`
-· `confianza` → `r.confianza` · `groundedness` → `r.groundedness ?? 0.9` (la API aún no lo expone,
-G-16).
+Mapeo en `enviarConsulta()`: `texto`, `fuentes`, `confianza`, `groundedness` (valor real, ya no
+fijo en 0.9 — **D-2 corregido**), `confianza_intencion`, `pide_aclaracion`, `intencion` y
+`tramite_probable`; los ausentes caen en valores por defecto seguros.
 
-**`GET /api/tramites`** — devuelve `TRAMITE[]` del backend: `{id, municipalidad_id, nombre,
-descripcion, tipo, requisitos[], costo, duracion_estimada_dias, municipalidad}`.
+**`GET /api/tramites`** — devuelve `TramiteCrudo[]` del backend: `{id, municipalidad_id, nombre,
+descripcion, tipo, requisitos[], costo, duracion_estimada_dias, municipalidad}`, que
+`mapearTramite()` traduce a `categoria`/`plazo` (**D-5/G-14 cerrados**).
 
-⚠️ **Desajuste de contrato (G-14):** el backend usa `tipo` y `duracion_estimada_dias`; la UI lee
-`categoria` y `plazo`. Con backend real los chips de costo/plazo pueden quedar vacíos; con la demo
-funcionan porque `TRAMITES_DEMO` usa los campos del frontend.
+**`GET /health`** — `{status:'ok'}`; comprueba únicamente el proceso (**D-11**). Si falla,
+`obtenerEstadoServicios()` devuelve `sin verificar` para api/BD/Redis/Ollama y `no disponible`
+para la api, **nunca "operativo" inventado**.
 
-**`GET /api/health`** — `{status:'ok'}`; si falla, `obtenerEstadoServicios()` asume todo operativo.
+**`/api/admin/documentos*`** — 6 endpoints de administración (listado, alta, upload, reprocesar,
+baja lógica y baja física) consumidos por `DocumentManager`. ⚠️ Hoy **ninguno responde**: la API no
+arranca (**D-14**), y los `DELETE` devuelven `204` sin cuerpo que `pedir()` no sabe leer
+(**D-20**).
 
-### 4.4 Funciones de la capa de datos (`lib/api.ts`)
+### 4.4 Funciones de la capa de datos (`lib/api.ts` — 225 líneas, 9 funciones)
 
-| Función | Contrato | Timeout | Fallback |
+| Función | Endpoint | Timeout | Comportamiento en error |
 |---|---|---|---|
-| `enviarConsulta(pregunta)` | `Promise<RespuestaConsulta>` | 6 s (`AbortController`) | `respuestaDemo()` |
-| `obtenerTramites()` | `Promise<Tramite[]>` | 5 s | `TRAMITES_DEMO` |
-| `obtenerEstadoServicios()` | `Promise<Record<string,string>>` | — | `{api, database, redis, ollama: 'operativo'}` |
+| `enviarConsulta(pregunta)` | `POST /api/consultas` | 45 s | lanza `Error`; `ChatBox` lo muestra en la burbuja |
+| `obtenerTramites()` | `GET /api/tramites` | 10 s | lanza `Error`; `page.tsx` hace `.catch(() => [])` |
+| `obtenerEstadoServicios()` | `GET /health` | 10 s | devuelve `sin verificar` / `no disponible` |
+| `listarDocumentosAdmin(params)` | `GET /api/admin/documentos` | 10 s | lanza `Error` (PMV2) |
+| `subirDocumento(formData)` | `POST /api/admin/documentos/upload` | 120 s | lanza `Error` (PMV2) |
+| `reprocesarDocumento(id)` | `POST /api/admin/documentos/{id}/procesar` | 10 s | lanza `Error` (PMV2) |
+| `eliminarDocumentoLogico(id)` | `DELETE /api/admin/documentos/{id}` | 10 s | ⚠️ rompe con `204` sin cuerpo (**D-20**) |
+| `eliminarDocumentoFisico(id)` | `DELETE /api/admin/documentos/{id}/fisico` | 10 s | ⚠️ ídem (**D-20**) |
+| `listarTramitesAdmin()` | `GET /api/tramites/admin` | 10 s | ⚠️ ruta inexistente (**D-21**) |
 
-`respuestaDemo()` responde a: "nacimiento/partida", "licencia/funcionamiento", y genérico TUPA —
-con `confianza` y `groundedness` simulados.
+Todas comparten `pedir()` (`lib/api.ts:60-78`), que envuelve `fetch` con `AbortController`,
+traduce el `AbortError` a un mensaje en castellano y extrae el `detail` del backend. **No hay
+respuestas de demostración**: los timeouts eran de 6 s/5 s y `respuestaDemo()`/`TRAMITES_DEMO` se
+eliminaron (D-1); hoy el error se muestra tal cual.
 
 ### 4.5 Estado interno de componentes (unión de interfaces)
 
 - `ChatBox`: `mensajes: ChatMsg[]` + `entrada: string` + `cargando: boolean`.
 - `TramitesPage`: `todos: Tramite[]` + `q: string` + `cat: string ('Todas'|categoría)`.
 - `Navbar`: `path: string` (ruta activa) + `open: boolean` (menú móvil).
-- `ServiceStatus`: `state: Record<string, string>` (operativo/offline por servicio).
+- `ServiceStatus`: `state: {api, database, redis, ollama}` con valores `operativo`/`sin verificar`/
+  `no disponible`.
 - `DragDropUpload`: `drag: boolean` + `files: string[]` (nombres, sin subida real).
+- `DocumentManager`: `tramites` + `docs: DocumentoAdmin[]` + `loading` + `msg` + `form`
+  (`tramite_id`, `titulo`, `url_origen`, `version`, `fecha_publicacion`, `estado`, `archivo`).
 
 ---
 
-## 5. Componentes en detalle (15 + utilidades)
+## 5. Componentes en detalle (16 + utilidades)
 
 ### 5.1 `Navbar` — navegación principal (`components/Navbar.tsx`)
 - **Tipo**: Client (`'use client'`), usa `usePathname` y `useState`.
@@ -237,7 +277,8 @@ con `confianza` y `groundedness` simulados.
 - **Estado**: `state: {api, database, redis, ollama}` (inicial "operativo").
 - **Comportamiento**: en `useEffect` llama `obtenerEstadoServicios()`. Lista 4 servicios con
   `StatusDot` (verde con `pulse-ring` on / ámbar off) y etiqueta monospace `99.9% · {estado}`.
-- ⚠️ El health del backend solo expone `{status:'ok'}`; la BD/Redis/Ollama se **asumen** operativos.
+- ⚠️ El health del backend solo expone `{status:'ok'}` (**D-11**): BD/Redis/Ollama se informan
+  como **"sin verificar"**, nunca como "operativo"; si la ruta falla, la api aparece "no disponible".
 
 ### 5.11 `AuditLog` — auditoría/logs (`components/AuditLog.tsx`)
 - **Tipo**: puro.
@@ -253,7 +294,8 @@ con `confianza` y `groundedness` simulados.
   (`border-emerald`, escala 1.01); en `onDrop` agrega nombres de archivo a `files`. Opción
   "Seleccionar archivos" con `<input type=file multiple hidden>`. Los archivos aparecen como
   "listo para indexar".
-- ⚠️ **Maqueta**: solo nombres en estado local; **no** llama a `/api/documentos/upload` (G-12).
+- ⚠️ **Maqueta**: solo nombres en estado local; **no** llama a la API de documentos (G-12). El
+  componente que sí la consume es `DocumentManager` (5.15).
 
 ### 5.13 `Loading` — indicador de proceso (`components/Loading.tsx`)
 - **Tipo**: puro.
@@ -263,13 +305,32 @@ con `confianza` y `groundedness` simulados.
 
 ### 5.14 `icons.tsx` — set de iconos SVG volumétricos
 - `IconProps: { className?: string }` (default `h-6 w-6`).
-- **23 iconos** sin dependencias: `ShieldIcon`, `TramiteIcon`, `OrdenanzaIcon`, `DirectorioIcon`,
+- **20 iconos** sin dependencias: `ShieldIcon`, `TramiteIcon`, `OrdenanzaIcon`, `DirectorioIcon`,
   `AyudaIcon`, `ChatIcon`, `SendIcon`, `SparkIcon`, `CheckIcon`, `AlertIcon`, `UploadIcon`,
   `SearchIcon`, `ChartIcon`, `DocIcon`, `ClockIcon`, `UsersIcon`, `HeartIcon`, `MenuIcon`,
-  `CloseIcon`, `LinkIcon` (+ usados por utilidades SVG internas).
+  `CloseIcon`, `LinkIcon`.
 - Gradientes lineales/radiales propios; `aria-hidden="true"`.
 
-### 5.15 Composición por página (quién usa a quién)
+### 5.15 `DocumentManager` — panel de gestión documental (`components/DocumentManager.tsx`)
+- **Tipo**: Client (`'use client'`); **135 líneas**; componente **nuevo del PMV2** (`ea06c9a`).
+- **Props**: ninguna. Se monta en `/admin` (`app/admin/page.tsx:32`).
+- **Estado**: `tramites`, `docs: DocumentoAdmin[]`, `loading`, `msg` y `form` con los metadatos
+  (`tramite_id`, `titulo`, `url_origen`, `version`, `fecha_publicacion`, `estado`, `archivo`).
+- **Comportamiento**:
+  1. Al montar, `Promise.all([listarTramitesAdmin(), listarDocumentosAdmin({incluir_eliminados, limite:100})])`
+     para poblar el `<select>` de trámites y la tabla.
+  2. Formulario `FormData` → `subirDocumento()` (`POST /api/admin/documentos/upload`, acepta
+     `.pdf/.docx/.txt/.md`), mensaje de éxito/error y recarga de la tabla.
+  3. Fila con título, estado (incluye `derogado`), versión, fecha, `indexado`, `fragmentado` y
+     tres acciones: **Reprocesar** (`POST …/procesar`), **Dar de baja** (`DELETE` lógico) y
+     **Eliminar** (`DELETE` físico, con `confirm()`).
+- **Estado real**: es el **único panel que consume endpoints de administración de verdad**
+  (**G-12 ⬆️ parcial**). ⚠️ Hoy **no carga ni borra**: `listarTramitesAdmin()` llama a
+  `GET /api/tramites/admin`, ruta inexistente dentro de un `Promise.all` (**D-21**), y los
+  `DELETE` devuelven `204` sin cuerpo que `pedir()` intenta analizar como JSON (**D-20**); además
+  la API no arranca (**D-14**).
+
+### 5.16 Composición por página (quién usa a quién)
 
 ```
 app/layout.tsx        ──> Navbar
@@ -278,7 +339,7 @@ app/page.tsx          ──> RobotAgent · QuickAccessCard · ChatBox(compact) 
                           GroundednessBadge · icons
 app/chat/page.tsx     ──> ChatBox · RobotAgent · GroundednessBadge · ShieldIcon
 app/tramites/page.tsx ──> TramiteCard · SearchIcon
-app/admin/page.tsx    ──> KpiCard · MiniCharts · ServiceStatus · AuditLog · DragDropUpload · icons
+app/admin/page.tsx    ──> KpiCard · MiniCharts · ServiceStatus · AuditLog · DocumentManager · icons
 ChatBox               ──> Loading · ChatThread · icons
 ChatThread            ──> GroundednessBadge
 ```
@@ -288,8 +349,8 @@ ChatThread            ──> GroundednessBadge
 ## 6. Trazabilidad con las Historias de Usuario (HU)
 
 El frontend es la **cara visible de las HU ciudadanas** (HU-05 a HU-10) y el **vehículo de
-visualización** de las HU de funcionario (HU-13 a HU-16), aunque varias de estas últimas están
-solo a nivel de maqueta (datos demo).
+visualización** de las HU de gestión (HU-01 a HU-04, HU-13 a HU-16): `DocumentManager` ya habla con
+los endpoints reales, mientras que métricas, gráficos y logs siguen siendo maquetas (G-06/G-07).
 
 ### 6.1 Componente → HU(s) que satisface
 
@@ -300,29 +361,29 @@ solo a nivel de maqueta (datos demo).
 | `ChatThread` (burbujas usuario/asistente, saludo de Muni) | HU-05, HU-09 | Presenta la conversación y el texto de la respuesta |
 | `GroundednessBadge` (% + confianza + fuentes) | HU-10, HU-16 | Muestra nivel de respaldo documental y las fuentes (trazabilidad) |
 | `TramiteCard` (costo, plazo, requisitos) | HU-07, HU-08 | Lista de requisitos con check y chips de costo/plazo |
-| `DragDropUpload` | HU-01 (parcial), HU-03 (parcial) | Zona de carga y "listo para indexar" — **maqueta**, no sube al backend (G-12) |
+| `DragDropUpload` | HU-01 (parcial) | Zona de carga y "listo para indexar" — **maqueta**, no sube al backend (G-12) |
+| `DocumentManager` | HU-01, HU-02, HU-03, HU-04 | Carga con metadatos + tabla + reprocesar/bajas reales sobre `/api/admin/documentos` — ⚠️ bloqueado (D-14/D-20/D-21) |
 | `AuditLog` | HU-14 | Log de interacciones con hora y punto de color — **datos demo** (G-07) |
 | `KpiCard` / `MiniCharts` | HU-16 | KPIs (252 trámites, 1,236 consultas, 98%) y gráficos — **datos demo** (G-06) |
-| `ServiceStatus` | HU-16 | Estado de api/BD/Redis/Ollama (usa `/api/health`) |
+| `ServiceStatus` | HU-16 | Estado de api/BD/Redis/Ollama (usa `/health`; lo no verificado, "sin verificar") |
 | `/admin` (dashboard) | HU-13 (admin), HU-16 | Panel de funcionario; **acceso sin login real** (G-01/G-11) |
 | `/tramites` (buscador + filtros) | HU-05, HU-07 | Descubrimiento del catálogo TUPA |
-| `respuestaDemo()` (fallback) | HU-05, HU-09 | Mantiene el chat "vivo" sin backend durante la presentación |
 
 ### 6.2 HU → estado de soporte visual en el frontend
 
 | ID | Historia | Soporte en UI | Estado |
 |---|---|---|---|
-| HU-01 | Cargar documentos | `DragDropUpload` (solo nombres) | ⚠️ Maqueta — G-12 |
-| HU-02 | Vigencia/versión/fuente | — | ❌ No visible (G-13)* |
-| HU-03 | Aprobar/derogar | — | ❌ No visible (solo estado interno) |
-| HU-04 | Procesamiento RAG | — | ❌ No visible (solo backend) |
+| HU-01 | Cargar documentos | `DragDropUpload` (maqueta) + `DocumentManager` (real, bloqueado) | ⚠️ G-12 ⬆️ parcial — D-14/D-20/D-21 |
+| HU-02 | Vigencia/versión/fuente | `DocumentManager` (muestra versión/fecha/estado) | ⚠️ Parcial — columnas sin crear (004 sin aplicar, D-15) |
+| HU-03 | Aprobar/derogar | `DocumentManager` (baja lógica y física con `confirm()`) | ⚠️ Parcial — sin roles ni flujo de revisión (D-8) |
+| HU-04 | Procesamiento RAG | `DocumentManager` (índice `indexado`/`fragmentado` + *Reprocesar*) | ⚠️ Parcial — la tabla `fragmentos_documento` no existe en BD (D-15) |
 | HU-05 | Consulta ciudadana | Chat completo `/chat` + chat compacto en `/` | ✅ Implementado |
 | HU-06 | Clasificación de intención | Chat (respuesta) | ⚠️ La intención no se muestra al ciudadano (G-02) |
 | HU-07 | Orientación de requisitos | `TramiteCard` + respuesta del chat | ✅/⚠️ Puntual por sustento documental |
-| HU-08 | Costos y plazos | `TramiteCard` chips | ⚠️ Desajuste de campo G-14 |
+| HU-08 | Costos y plazos | `TramiteCard` chips | ✅/⚠️ Campos alineados (D-5); faltan montos reales del TUPA (HU-08 = 60 %) |
 | HU-09 | Respuestas con SLM | Burbujas del asistente | ✅ Implementado |
-| HU-10 | Trazabilidad / anti-alucinación | `GroundednessBadge` + fuentes | ✅/⚠️ La API aún no expone `groundedness` (G-16) |
-| HU-11 | Fuera de dominio | — | ❌ (solo caso en demo) |
+| HU-10 | Trazabilidad / anti-alucinación | `GroundednessBadge` + fuentes | ✅ La API sí devuelve `groundedness` (D-2 corregido); falta trazabilidad por `GET /api/consultas/{id}` (D-9) |
+| HU-11 | Fuera de dominio | — | ❌ Sin clasificador de dominio (G-04) |
 | HU-12 | Trámites relacionados | — | ❌ G-08 |
 | HU-13 | Usuarios y seguridad | Ruta `/admin` | ⚠️ Sin login/roles (G-01, G-11) |
 | HU-14 | Auditoría | `AuditLog` | ⚠️ Maqueta (G-07) |
@@ -331,45 +392,54 @@ solo a nivel de maqueta (datos demo).
 | HU-17 | Derivación municipal | Texto de respuesta | ⚠️ Solo nota genérica (G-09) |
 | HU-18 | Reportes y exportación | — | ❌ G-07 |
 
-\* El backend sí guarda `url_origen`/`estado`, pero la UI no ofrece pantalla de metadatos.
+Esta tabla describe el **soporte visual** en el frontend; el estado global de cada HU con su %
+de puntos de verificación está en [05-implementaciones.md](05-implementaciones.md) (global **59 %**,
+60/101).
 
 ### 6.3 Conclusión de trazabilidad
 
 - **HU ciudadanas centrales (HU-05 → HU-10):** cubiertas visualmente de punta a punta
-  (escribir → recibir → ver fuentes/confianza), con las salvedades G-14 (costos/plazos) y G-16
-  (groundedness no expuesto).
-- **HU de gestión/admin (HU-01 → HU-04, HU-13 → HU-18):** presentes como **maquetas** en el
-  frontend (`DragDropUpload`, `AuditLog`, `KpiCard`, `MiniCharts`) o ausentes; ninguna conecta aún
-  con los endpoints reales de administración (G-12, G-07).
+  (escribir → recibir → ver fuentes/confianza); G-14 quedó cerrado con `mapearTramite` y el
+  `groundedness` real sí viaja en la respuesta (D-2/D-5 corregidos). Queda pendiente la
+  trazabilidad por `GET /api/consultas/{id}` (D-9).
+- **HU de gestión/admin (HU-01 → HU-04, HU-13 → HU-18):** desde `ea06c9a` **`DocumentManager`
+  sí conecta con los endpoints reales de administración** (G-12 ⬆️ parcial), pero hoy no funciona:
+  la API no arranca (D-14) y el panel tiene dos errores de integración (D-20, D-21). El resto
+  (`DragDropUpload`, `AuditLog`, `KpiCard`, `MiniCharts`) sigue siendo maqueta (G-06/G-07).
 
 ---
 
 ## 7. Integración frontend ↔ backend
 
-### 6.1 Único punto de acceso (`lib/api.ts`)
+### 7.1 Único punto de acceso (`lib/api.ts`)
 
 | Función | Endpoint | Comportamiento |
 |---|---|---|
-| `enviarConsulta(pregunta)` | `POST /api/consultas` | Timeout 6 s; mapea `texto`, `fuentes`, `confianza`, `groundedness` |
-| `obtenerTramites()` | `GET /api/tramites` | Timeout 5 s; catálogo o `TRAMITES_DEMO` |
-| `obtenerEstadoServicios()` | `GET /api/health` | Estado; si falla, todo "operativo" |
+| `enviarConsulta(pregunta)` | `POST /api/consultas` | Timeout 45 s; mapea `texto`, `fuentes`, `confianza`, `groundedness`, `tramite_probable` |
+| `obtenerTramites()` | `GET /api/tramites` | Timeout 10 s; `mapearTramite()` traduce `tipo`→`categoria` y `duracion_estimada_dias`→`plazo` |
+| `obtenerEstadoServicios()` | `GET /health` | Estado; lo no comprobado se informa "sin verificar" |
+| 6 funciones admin (PMV2) | `/api/admin/documentos*` · `GET /api/tramites/admin` | Listado, upload, reprocesado y bajas; ⚠️ bloqueadas por D-14/D-20/D-21 |
 
-### 6.2 Base URL y CORS
+### 7.2 Base URL y CORS
 - `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).
 - El backend fija `allow_origins=["http://localhost:3000","http://127.0.0.1:3000"]`
   (`backend/main.py`).
 
-### 6.3 Degradación elegante (fallback demo)
-- Si el fetch falla o expira (`AbortController`), `respuestaDemo(pregunta)` devuelve respuestas
-  fundamentadas en TUPA 2023 (nacimiento, licencia de funcionamiento) y `TRAMITES_DEMO` llena el
-  catálogo → la presentación es robusta aunque el backend esté apagado.
+### 7.3 Manejo de fallos (sin respuestas ficticias)
+- Si el fetch falla o expira (`AbortController`), `pedir()` lanza un `Error` con mensaje en
+  castellano: el chat muestra la burbuja de error y la portada muestra un catálogo vacío
+  (`.catch(() => [])`). **No hay `respuestaDemo()` ni `TRAMITES_DEMO`** (eliminados, D-1) → la
+  interfaz nunca presenta datos inventados como reales.
 
 ## 8. Demo para la presentación
 
 1. Backend (8000) + frontend (3000) levantados.
-2. `/` → hero, KPIs y catálogo destacado **en vivo**.
+2. `/` → hero, catálogo real de la BD y estado de servicios.
 3. `/chat` → "¿Qué necesito para la licencia de funcionamiento?" → burbuja + **badge de
-   groundedness** + fuentes TUPA.
+   groundedness** + fuentes TUPA + trámite probable.
 4. `/tramites` → buscar "impuesto predial", filtrar por categoría.
-5. Apagar backend → repetir la consulta → la **demo** mantiene la experiencia (fallback).
-6. `/admin` → mostrar dashboard, aunque las métricas son de demostración (G-16).
+5. ⚠️ **Hoy el paso 1 no puede completarse:** la API no arranca por D-14 → todo el frontend
+   mostrará errores/catálogo vacío; sin backend, `/chat` responde con el error real (ya no hay
+   demo de respaldo).
+6. `/admin` → el dashboard muestra los KPIs **ficticios** (252 / 1,236 / 98 %, D-6) y
+   `DocumentManager`, que hoy no carga la tabla (D-20/D-21).

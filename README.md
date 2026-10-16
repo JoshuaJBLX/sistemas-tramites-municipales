@@ -8,6 +8,21 @@ asistente conversacional basado en **RAG** (PostgreSQL + búsqueda semántica) y
 La base de datos de conocimiento se alimenta del TUPA 2023 (252 procedimientos) y de
 la documentación oficial publicada en <https://www.gob.pe/munijunin>.
 
+## Estado del proyecto (16 de octubre de 2026, HEAD `ea06c9a`)
+
+| Métrica | Valor |
+| --- | --- |
+| Avance global | **60/101 = 59 %** (PMV1 21/24 = **88 %** · PMV2 14/25 = **56 %** · PMV3 23/44 = **52 %** · Transversal 2/8 = 25 %) |
+| Inventario | 86 `.py` de backend · 25 `.ts`/`.tsx` · 9 `.sql` · 90 `.md` · 6 controllers (1 stub) · 10 puertos · 16 componentes front-end |
+| Endpoints | **22** declarados (16 públicos + 6 admin) — **0 servibles** hoy |
+| Pruebas | 0 suites (`pytest` ausente, G-18) |
+
+> ⚠️ **El backend PMV2 está escrito pero hoy no arranca**: `main.py` falla con `ImportError`
+> (`tramite_admin_controller` es un stub), la migración `004` no está aplicada y faltan
+> `pypdf`/`python-docx` en `requirements.txt`. Hasta cerrar los defectos **D-14..D-21** la
+> demostración de carga y fragmentación de documentos está bloqueada.
+> Detalle y plan de cierre en [`PMV2_DOCUMENTOS.md`](PMV2_DOCUMENTOS.md).
+
 ## Estructura del proyecto
 
 ```
@@ -69,18 +84,44 @@ disponible; si no, la columna `documentos.embedding` se crea como `double precis
 `BusquedaVectorialAdapter` calcula la similitud de coseno en Python. El flujo RAG es idéntico
 en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomendado para producción).
 
-## API principal
+## API principal (22 endpoints: 16 públicos + 6 admin)
 
-| Método | Ruta                       | Descripción                                    |
-| ------ | -------------------------- | ---------------------------------------------- |
-| POST   | `/api/consultas`           | Consulta en lenguaje natural (RAG + SLM)       |
-| GET    | `/api/consultas/{id}`      | Trazabilidad de una consulta                   |
-| GET    | `/api/tramites`            | Catálogo de trámites                           |
-| GET    | `/api/tramites/{id}`       | Detalle del trámite y documentos vigentes      |
-| POST   | `/api/documentos`          | Registra e indexa un documento (embeddings)    |
-| PUT    | `/api/documentos/{id}/estado` | Cambia el estado de vigencia                |
-| POST   | `/api/usuarios`            | Registro de usuarios                           |
-| GET    | `/health`                  | Estado del servicio                            |
+> ⚠️ **16-oct-2026:** el recuento publicado antes era de 13 rutas; hoy hay **22 endpoints
+> declarados** (ver `documentacion/00-documentos-rectores/06-estado-actual-implementado.md` §6.2), pero
+> **0 son servibles** hasta resolver **D-14** (la API no arranca) y **D-15** (migración `004`
+> sin aplicar). Ninguno valida autenticación ni rol (D-8).
+
+**Públicos (16):**
+
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| POST | `/api/consultas` | Consulta en lenguaje natural (RAG + SLM) |
+| GET | `/api/consultas/{id}` | Trazabilidad de una consulta |
+| GET | `/api/tramites` | Catálogo de trámites |
+| GET | `/api/tramites/{id}` | Detalle del trámite y documentos vigentes |
+| POST | `/api/documentos` | Registra e indexa un documento (embeddings) |
+| POST | `/api/documentos/upload` | Carga con validación de formato y extracción de texto (PMV2) |
+| GET | `/api/documentos` | Listado con filtros `tramite_id`/`estado`/`incluir_eliminados` (PMV2) |
+| GET | `/api/documentos/{id}` | Detalle de un documento |
+| PUT | `/api/documentos/{id}/estado` | Cambia el estado (`vigente`/`obsoleto`/`en_revision`/`derogado`) |
+| POST | `/api/documentos/{id}/procesar` | Reprocesa: fragmenta + embeddea (PMV2) |
+| DELETE | `/api/documentos/{id}` | Baja lógica (marca `eliminado_en`) |
+| DELETE | `/api/documentos/{id}/fisico` | Baja física de filas (borra fragmentos) |
+| POST | `/api/usuarios` | Registro de usuarios |
+| GET | `/api/usuarios/{id}` | Detalle de usuario |
+| GET | `/api/usuarios/{id}/consultas` | Historial del usuario |
+| GET | `/health` | Estado del servicio |
+
+**Administración (6) — prefijo `/api/admin/documentos`:**
+
+| Método | Ruta | Descripción |
+| ------ | ---- | ----------- |
+| GET | `/api/admin/documentos` | Listado con filtros y paginación |
+| POST | `/api/admin/documentos` | Crea por JSON y procesa en segundo plano |
+| POST | `/api/admin/documentos/upload` | Carga `multipart/form-data` con metadatos (PMV2) |
+| POST | `/api/admin/documentos/{id}/procesar` | Reprocesa un documento |
+| DELETE | `/api/admin/documentos/{id}` | Baja lógica |
+| DELETE | `/api/admin/documentos/{id}/fisico` | Baja física |
 
 ## Flujo de una consulta (RAG)
 

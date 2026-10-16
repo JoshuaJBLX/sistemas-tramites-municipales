@@ -1,5 +1,7 @@
 # 04 — Base de Datos
 
+> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+
 > PostgreSQL 16 + pgvector · base `tramites_municipales`
 
 ## 1. Migraciones (`database/migrations/`)
@@ -9,22 +11,29 @@
 | `001_create_database.sql` | Crea la BD `tramites_municipales` (si no existe) y habilita `CREATE EXTENSION vector` |
 | `002_create_tables.sql` | Crea las 6 tablas del dominio + índices B-tree de apoyo |
 | `003_create_vectors.sql` | Índice **HNSW** por similitud de coseno sobre `documentos.embedding` |
+| `004_documentos_pmv2.sql` | **Nuevo (PMV2), 29 líneas — ⚠️ NO APLICADA (D-15):** añade 7 columnas a `documentos`, crea la tabla `fragmentos_documento` y amplía el `CHECK` de `estado` con `derogado` |
 
-Las migraciones se ejecutan **automáticamente al primer arranque** del contenedor postgres en
-`docker-compose.yml` (montadas en `/docker-entrypoint-initdb.d`).
+Las migraciones `001`-`003` se ejecutan **automáticamente al primer arranque** del contenedor
+postgres en `docker-compose.yml` (montadas en `/docker-entrypoint-initdb.d`).
 
-`database/schema.sql` es la **referencia consolidada** del esquema (mismo modelo).
+> ⚠️ **La `004` no está aplicada en ninguna BD y hoy ni siquiera es ejecutable:** su **línea 1 es
+> un docstring de Python (`"""…"""`)** en lugar de un comentario `--`, así que `psql` la rechaza
+> (**D-15**). `instalar.ps1` tampoco la incluye en su paso de migraciones (**D-16**). Verificado el
+> 16-oct-2026 contra la BD local: `documentos` sigue con **8 columnas**, `fragmentos_documento`
+> **no existe** y el `CHECK` de `estado` sigue en `(vigente, obsoleto, en_revision)`.
+
+`database/schema.sql` es la **referencia consolidada** del esquema (mismo modelo; no se ejecuta).
 
 ## 2. Modelo entidad-relación
 
 ```
-municipalidades (1) ────< (N) tramites (1) ────< (N) documentos
-                              │
+municipalidades (1) ────< (N) tramites (1) ────< (N) documentos (1) ────< (N) fragmentos_documento
+                              │                                              (PMV2, 004 sin aplicar)
 usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
                            (1)        (N-1)
 ```
 
-## 3. Tablas, columnas y relaciones
+## 3. Tablas, columnas y relaciones (6 base + 1 del PMV2)
 
 ### municipalidades
 | Columna | Tipo | Notas |
@@ -63,9 +72,17 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 | titulo | VARCHAR(300) | — |
 | contenido | TEXT | Texto que alimenta al RAG |
 | url_origen | VARCHAR(500) | Fuente oficial citada |
-| estado | VARCHAR(20) | CHECK IN ('vigente','obsoleto','en_revision') |
+| estado | VARCHAR(20) | CHECK IN ('vigente','obsoleto','en_revision') → **PMV2 añade `derogado`** |
 | **embedding** | **vector(1024)**¹ | Embedding BGE-M3; NULL si no indexado |
 | actualizado_en | TIMESTAMPTZ | default NOW() |
+| **PMV2 (+7)** ↓ | — | ⚠️ **solo en la migración 004, sin aplicar (D-15)** |
+| version | VARCHAR(20) | Versión del documento |
+| fecha_publicacion | DATE | Fecha de publicación (opcional) |
+| archivo_nombre | VARCHAR(300) | Nombre original del archivo subido |
+| mime_type | VARCHAR(100) | Tipo MIME detectado |
+| hash_contenido | VARCHAR(64) | SHA-256 del contenido |
+| fragmentado | BOOLEAN | ¿Tiene fragmentos en `fragmentos_documento`? |
+| eliminado_en | TIMESTAMPTZ | Marca de **baja lógica**; NULL = activo |
 
 ### consultas
 | Columna | Tipo | Notas |
@@ -73,7 +90,7 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 | id | UUID PK | — |
 | usuario_id | UUID FK → usuarios | ON DELETE SET NULL |
 | pregunta | TEXT | — |
-| intencion | VARCHAR(50) | 6 intenciones del dominio |
+| intencion | VARCHAR(50) | 9 intenciones del dominio |
 | creada_en | TIMESTAMPTZ | — |
 
 ### auditoria_consultas (trazabilidad)
@@ -86,10 +103,21 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 | fuentes | TEXT | URLs separadas por comas |
 | registrado_en | TIMESTAMPTZ | — |
 
+### fragmentos_documento (PMV2 — ⚠️ tabla aún inexistente en la BD, D-15)
+| Columna | Tipo | Notas |
+|---|---|---|
+| id | UUID PK | — |
+| documento_id | UUID FK → documentos | ON DELETE CASCADE |
+| orden | INT | Posición del fragmento en el documento |
+| contenido | TEXT | Bloque de ~800 caracteres con 120 de solape (`ServicioChunking`) |
+| **embedding** | **vector(1024)** | Embedding del fragmento (BGE-M3) |
+| creado_en | TIMESTAMPTZ | default NOW() |
+
 ## 4. Índices
 
 **B-tree** (`002`): `idx_tramites_municipalidad`, `idx_documentos_tramite`, `idx_documentos_estado`,
 `idx_consultas_usuario`, `idx_consultas_creada_en`, `idx_tramites_tipo` (en `003`).
+`idx_fragmentos_documento` se crea en la migración `004` (**sin aplicar**).
 
 **Vectorial HNSW** (`003`):
 ```sql
@@ -143,3 +171,7 @@ según a.md) y citan el portal <https://www.gob.pe/munijunin>.
 
 - Datos persistentes en el volumen `pgdata` de Docker Compose.
 - `docker compose down -v` borra la BD (full reset); las migraciones y seeds se re-aplican desde cero.
+- ⚠️ **Para habilitar el PMV2** hay que corregir la línea 1 de `004_documentos_pmv2.sql` (docstring
+  Python → comentario `--`) y aplicarla con `psql -f`: ni el montaje de `/docker-entrypoint-initdb.d`
+  (solo corre en volumen nuevo) ni `instalar.ps1` la ejecutan hoy (**D-15/D-16**). Sin ella, las
+  consultas que filtran `eliminado_en IS NULL` fallan con `UndefinedColumn`.
