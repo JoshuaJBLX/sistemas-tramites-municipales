@@ -11,8 +11,10 @@
 > y `05-trazabilidad-por-pmv.md` en cuanto a cifras. Esos tres `.md` se conservan como respaldo
 > histórico y se remiten desde aquí.
 >
-> **Fecha de verificación: 16 de octubre de 2026** · HEAD `ea06c9a`
-> (`feat(documents): PMV2 - carga con metadatos, extracción, chunking, baja lógica y panel admin`).
+> **Fecha de verificación: 16 de octubre de 2026** · HEAD `619a11d`
+> (`docs: actualización documentación PMV2 y presentación`), que no modificó código — el último
+> commit de código es `ea06c9a` (`feat(documents): PMV2 - carga con metadatos, extracción, chunking,
+> baja lógica y panel admin`).
 > Método: lectura íntegra de los 86 `.py`, 25 `.ts`/`.tsx` de fuente, 9 `.sql`, `instalar.ps1`,
 > `docker-compose.yml` y de los 90 `.md`; **más consulta directa a PostgreSQL local** (esquema real,
 > conteos de `tramites`/`documentos`) y ejecución de `import main`. Cada afirmación de este
