@@ -48,6 +48,55 @@
 | **PMV2 · Modelo RAG optimizado** (50 %) | HU-04 · HU-08 · HU-10 · HU-11 · HU-12 | 78 · 60 · 50 · 0 · 0 % | S1, S2, S3, S4 |
 | **PMV3 · Sistema integrado** (51 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | 78 · 88 · 71 · 40 · 33 · 0 · 0 · 40 · 0 % | S2, S3, S4 |
 
+### Responsable principal de cada HU (por PMV)
+
+#### PMV1 — Prototipo funcional (4 HU)
+
+| HU | Nombre | Responsable | Por qué |
+|---|---|---|---|
+| HU-05 ✅ | Consulta ciudadana | **Oscar** | Es el corazón del RAG/IA |
+| HU-06 ✅ | Clasificación de intención | **Oscar** | Clasificador NLP = suyo |
+| HU-07 | Orientación de requisitos | **Brayan** | Requiere conectar la respuesta con el catálogo (back-end) |
+| HU-09 | Generación con SLM | **Oscar** | Integración con Ollama |
+
+#### PMV2 — Modelo RAG optimizado (5 HU)
+
+| HU | Nombre | Responsable | Por qué |
+|---|---|---|---|
+| HU-04 | Procesamiento y RAG por fragmento | **Oscar** | Embeddings + chunking + recuperación |
+| HU-08 | Costos y plazos | **Pedro** | Falta cargar los montos reales del TUPA en la BD |
+| HU-10 | Trazabilidad y control de alucinaciones | **Ciro** | Es el responsable de la calidad del sistema |
+| HU-11 | Consultas fuera de dominio | **Oscar** | Extensión del clasificador de intención |
+| HU-12 | Trámites relacionados | **Oscar** | Motor de recomendación semántica |
+
+#### PMV3 — Sistema integrado (9 HU)
+
+| HU | Nombre | Responsable | Por qué |
+|---|---|---|---|
+| HU-01 | Carga de documentos | **Brayan** | Casos de uso + endpoints de carga |
+| HU-02 | Metadatos de vigencia | **Pedro** | Migración 004, columnas de la BD |
+| HU-03 | Aprobación/derogación | **Jack** | Panel admin + interfaz de estados |
+| HU-13 | Usuarios y seguridad (JWT) | **Brayan** | Autenticación y middleware |
+| HU-14 | Auditoría | **Pedro** | Tablas de auditoría y búsquedas SQL |
+| HU-15 | Retroalimentación ciudadana | **Jack** | UI de calificación 👍/👎 |
+| HU-16 | Métricas y monitoreo | **Jack** | Dashboard de `/admin` (reemplazar KPIs ficticios) |
+| HU-17 | Derivación a área municipal | **Jack** | Mostrar canal/área en la respuesta |
+| HU-18 | Reportes y exportación | **Pedro** | Consultas agregadas + exportación PDF/Excel |
+
+#### Balance final
+
+| Integrante | HU como responsable | Total |
+|---|---|---|
+| **Oscar** (Integración IA/API) | HU-04, HU-05, HU-06, HU-09, HU-11, HU-12 | **6** |
+| **Pedro** (Base de Datos) | HU-02, HU-08, HU-14, HU-18 | **4** |
+| **Jack** (Front-End / Scrum Master) | HU-03, HU-15, HU-16, HU-17 | **4** |
+| **Brayan** (Back-End) | HU-01, HU-07, HU-13 | **3** |
+| **Ciro** (Arquitecto de Software) | HU-10 + supervisión de calidad de todas | **1** |
+
+> **Nota:** Oscar concentra 6 porque las 6 son de IA/RAG (su especialidad) — pero 3 de ellas
+> (HU-05, HU-06, HU-09) ya están **cerradas al 100 %**, así que su carga real del plan es
+> HU-04, HU-11 y HU-12. Brayan tiene 3 pesadas (HU-01 y HU-13 son de las más complejas del PMV3).
+
 ---
 
 ## 2. Columna 1 — Product Backlog (HU organizadas por código)
