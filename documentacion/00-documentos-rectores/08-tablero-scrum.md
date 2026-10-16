@@ -36,6 +36,18 @@
 | **Sprint 3** ⏳ *en curso* | 6 oct – 24 oct 2026 | 3 semanas | Rescate del PMV2: arranque de la API, ciclo documental E2E y autenticación |
 | **Sprint 4** | 27 oct – 20 nov 2026 | 4 semanas | Consolidación: métricas, auditoría, pruebas y entrega final a la MPH |
 
+### Distribución de las 18 HU por PMV
+
+> **Reasignación (16-oct-2026):** la antigua categoría "Transversal" se eliminó: **HU-11 → PMV2** y
+> **HU-17 → PMV3**. El global no cambia (60/101 = 59 %). Detalle y justificación en
+> [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) §10.7.
+
+| PMV | HU | Avance | Sprint(s) donde trabaja |
+|---|---|---|---|
+| **PMV1 · Prototipo funcional** (88 %) | HU-05 ✅ · HU-06 ✅ · HU-07 · HU-09 | 100 · 100 · 80 · 60 % | S1, S2 |
+| **PMV2 · Modelo RAG optimizado** (50 %) | HU-04 · HU-08 · HU-10 · HU-11 · HU-12 | 78 · 60 · 50 · 0 · 0 % | S1, S2, S3, S4 |
+| **PMV3 · Sistema integrado** (51 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | 78 · 88 · 71 · 40 · 33 · 0 · 0 · 40 · 0 % | S2, S3, S4 |
+
 ---
 
 ## 2. Columna 1 — Product Backlog (HU organizadas por código)

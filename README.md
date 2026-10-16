@@ -12,7 +12,7 @@ la documentación oficial publicada en <https://www.gob.pe/munijunin>.
 
 | Métrica | Valor |
 | --- | --- |
-| Avance global | **60/101 = 59 %** (PMV1 21/24 = **88 %** · PMV2 14/25 = **56 %** · PMV3 23/44 = **52 %** · Transversal 2/8 = 25 %) |
+| Avance global | **60/101 = 59 %** (PMV1 21/24 = **88 %** · PMV2 14/28 = **50 %** incl. HU-11 · PMV3 25/49 = **51 %** incl. HU-17) |
 | Inventario | 86 `.py` de backend · 25 `.ts`/`.tsx` · 9 `.sql` · 90 `.md` · 6 controllers (1 stub) · 10 puertos · 16 componentes front-end |
 | Endpoints | **22** declarados (16 públicos + 6 admin) — **0 servibles** hoy |
 | Pruebas | 0 suites (`pytest` ausente, G-18) |

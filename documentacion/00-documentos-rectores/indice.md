@@ -13,9 +13,8 @@ verdad de requisitos (HU), su estado de implementación y la guía de ejecución
 |---|---|
 | Avance global | **59 %** — **60/101** puntos |
 | PMV1 · Prototipo funcional | **88 %** — 21/24 (antes se publicaba 100 %; error de suma, ver §10.4 del doc. 06) |
-| PMV2 · Modelo RAG optimizado | **56 %** — 14/25 |
-| PMV3 · Sistema integrado | **52 %** — 23/44 |
-| Transversal (HU-11, HU-17) | **25 %** — 2/8 |
+| PMV2 · Modelo RAG optimizado | **50 %** — 14/28 (incluye HU-11, reasignada de "Transversal" el 16-oct-2026) |
+| PMV3 · Sistema integrado | **51 %** — 25/49 (incluye HU-17, reasignada de "Transversal" el 16-oct-2026) |
 | Endpoints | **22** declarados (16 públicos + 6 admin) — **0 servibles** hoy por D-14 |
 | Inventario | 86 `.py` · 25 `.ts`/`.tsx` · 9 `.sql` · 90 `.md` · 6 controllers (1 stub) · 10 puertos · 16 componentes |
 | Estado de la demostración PMV2 | 🔴 Bloqueada por los defectos **D-14..D-21** (la API no arranca): ver [`../../PMV2_DOCUMENTOS.md`](../../PMV2_DOCUMENTOS.md) |

@@ -59,8 +59,8 @@
 ## 2. Estado por Historia de Usuario (las 18)
 
 Puntos de verificación y % medidos (método en `06-estado-actual-implementado.md` §10):
-**60/101 = 59 % global** · PMV1 **88 %** (21/24) · PMV2 **56 %** (14/25) · PMV3 **52 %** (23/44) ·
-Transversal **25 %** (2/8).
+**60/101 = 59 % global** · PMV1 **88 %** (21/24) · PMV2 **50 %** (14/28, incl. HU-11) ·
+PMV3 **51 %** (25/49, incl. HU-17). *(HU-11 y HU-17, antes "Transversal", se reasignaron el 16-oct-2026.)*
 
 | ID | Historia | Estado | ✅/Total | % | Brecha principal |
 |---|---|---|---|---|---|

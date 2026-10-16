@@ -32,9 +32,8 @@
 |---|---|---|
 | **Avance global de las 18 HU** | **59 %** (60/101 puntos de verificación) | §10.1 |
 | **PMV1 · Prototipo funcional** | **88 %** (21/24) — 4 HU (componentes del prototipo: 4/4 ✅) | §10.4 |
-| **PMV2 · Modelo RAG optimizado** | **56 %** (14/25) — 4 HU | §10.5 |
-| **PMV3 · Sistema integrado** | **52 %** (23/44) — 8 HU | §10.6 |
-| **Transversal** (fuera de dominio, derivación) | **25 %** (2/8) — 2 HU | §10.7 |
+| **PMV2 · Modelo RAG optimizado** | **50 %** (14/28) — 5 HU | §10.5 |
+| **PMV3 · Sistema integrado** | **51 %** (25/49) — 9 HU | §10.6 |
 | HU completas al 100 % | **2 / 18** — HU-05, HU-06 | §10.3 |
 | HU iniciadas (⚠️ o ✅) | **13 / 18** | §10.3 |
 | HU sin empezar (❌) | **5 / 18** — HU-11, HU-12, HU-15, HU-16, HU-18 | §10.3 |
@@ -845,7 +844,7 @@ punto corresponde a un archivo o una comprobación concreta, verificable con `gr
 ```
 
 No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV, de modo que
-`PMV1 + PMV2 + PMV3 + Transversal = global` de forma exacta.
+`PMV1 + PMV2 + PMV3 = global` de forma exacta.
 
 **Leyenda:** ✅ implementado · ⚠️ parcial · ❌ no implementado
 
@@ -859,12 +858,15 @@ No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV
 | PMV | Definición | HU incluidas | Puntos | % actual |
 |---|---|---|---|---|
 | **PMV1** · Prototipo funcional | Chat + SLM + 5 trámites | HU-05, HU-06, HU-07, HU-09 | 21/24 | **88 %** |
-| **PMV2** · Modelo RAG optimizado | RAG 20+ trámites + abstención | HU-04, HU-08, HU-10, HU-12 | 14/25 | **56 %** |
-| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-18 | 23/44 | **52 %** |
-| **Transversal** | Fuera de dominio + derivación | HU-11, HU-17 | 2/8 | **25 %** |
+| **PMV2** · Modelo RAG optimizado | RAG 20+ trámites + abstención | HU-04, HU-08, HU-10, HU-11, HU-12 | 14/28 | **50 %** |
+| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | 25/49 | **51 %** |
 | **TOTAL** | | 18 HU | **60/101** | **59 %** |
 
-**Ninguna HU del PMV2/PMV3/Transversal llega al 100 %** porque el avance se mide contra el alcance
+> **Reasignación (16-oct-2026):** la antigua fila "Transversal" se disolvió: **HU-11 → PMV2** y
+> **HU-17 → PMV3**. El total global no cambia (60/101 = 59 %); solo se redistribuyen sus puntos
+> (HU-11: 0/3, HU-17: 2/5). Detalle en §10.7.
+
+**Ninguna HU del PMV2/PMV3 llega al 100 %** porque el avance se mide contra el alcance
 completo de cada historia (que incluye versionado documental, OCR, autenticación, métricas
 y reportes), no solo contra la demostración.
 
@@ -936,7 +938,7 @@ trámites básicos?* Objetivo: prototipo funcional con chat + SLM + 5 trámites.
 | 6 | Confirmar los 252 procedimientos del TUPA, no solo 22 | `seeds/tramites.sql` | Medio (dato) |
 | 7 | Prueba automatizada del flujo RAG completo | nuevo `backend/tests/` | Medio |
 
-### 10.5 PMV2 · Modelo RAG optimizado — **56 %** (14/25)
+### 10.5 PMV2 · Modelo RAG optimizado — **50 %** (14/28)
 
 **Definición:** *¿La RAG reduce alucinaciones?* Objetivo: RAG con 20+ trámites, abstención y citas.
 
@@ -956,14 +958,15 @@ trámites básicos?* Objetivo: prototipo funcional con chat + SLM + 5 trámites.
 | HU-04 RAG | 78 % (7/9) | extracción de PDF/DOCX (deps), OCR, recuperación por fragmento |
 | HU-08 Costos y plazos | 60 % (3/5) | montos del TUPA sin cargar; validación "no inventar" |
 | HU-10 Trazabilidad | 50 % (4/8) | API de trazabilidad incompleta; fuentes detalladas |
+| HU-11 Fuera de dominio | **0 %** (0/3) | clasificador de dominio (municipal vs. externo) y derivación a la entidad correspondiente |
 | HU-12 Trámites relacionados | **0 %** (0/3) | motor de recomendación inexistente (G-08) |
 
-**PMV2 = (7 + 3 + 4 + 0) / (9 + 5 + 8 + 3) = 14/25 = 56 %.**
+**PMV2 = (7 + 3 + 4 + 0 + 0) / (9 + 5 + 8 + 3 + 3) = 14/28 = 50 %.**
 
 **Qué bloquea cerrar PMV2:** los defectos de arranque D-14..D-17 (el código del PMV2 existe pero la
 API no arranca), HU-12 al 0 %, dataset de la PoC (G-21) y los montos reales del TUPA.
 
-### 10.6 PMV3 · Sistema integrado — **52 %** (23/44)
+### 10.6 PMV3 · Sistema integrado — **51 %** (25/49)
 
 **Definición:** *¿Producto seguro, accesible y de baja latencia?* Objetivo: API completa + seguridad + UX desplegable.
 
@@ -985,20 +988,25 @@ API no arranca), HU-12 al 0 %, dataset de la PoC (G-21) y los montos reales del 
 | HU-14 | 33 % | búsqueda de auditoría, panel real |
 | HU-15 | 0 % | retroalimentación ciudadana |
 | HU-16 | 0 % | métricas agregadas |
+| HU-17 | 40 % (2/5) | umbral de derivación, área/teléfono/canal, directorio de oficinas, casos de decisión |
 | HU-18 | 0 % | reportes y exportación |
 
-**PMV3 = (7+7+5+2+2+0+0+0) / (9+8+7+5+6+3+3+3) = 23/44 = 52 %.**
+**PMV3 = (7+7+5+2+2+0+0+2+0) / (9+8+7+5+6+3+3+5+3) = 25/49 = 51 %.**
 
-**Tres de sus ocho HU (HU-15, HU-16, HU-18) están en 0 %** — es el frente con más trabajo.
+**Cuatro de sus nueve HU (HU-15, HU-16, HU-18 y HU-11 en PMV2) están en 0 %** — y HU-17 solo
+tiene una nota genérica; es el frente con más trabajo.
 
-### 10.7 Transversal — **25 %** (2/8)
+### 10.7 Reasignación de HU-11 y HU-17 — **categoría "Transversal" eliminada** (16-oct-2026)
 
-| HU | % | Falta |
-|---|---|---|
-| HU-11 Consultas fuera de dominio | 0 % | clasificador de dominio (municipal vs. externo), respuesta de derivación a la entidad correspondiente |
-| HU-17 Derivación a atención municipal | 40 % | umbral de derivación, área/teléfono/canal, directorio de oficinas, casos de decisión |
+| HU | PMV anterior | PMV nuevo | Puntos |
+|---|---|---|---|
+| HU-11 Consultas fuera de dominio | Transversal | **PMV2** (§10.5) | 0/3 |
+| HU-17 Derivación a atención municipal | Transversal | **PMV3** (§10.6) | 2/5 |
 
-**Transversal = (0 + 2) / (3 + 5) = 2/8 = 25 %.**
+**Justificación:** ambas dependen de funcionalidades de un PMV concreto — HU-11 del clasificador
+de intención y la abstención (PMV2), HU-17 del catálogo y la capa de seguridad (PMV3) — por lo que
+se integraron a ellos en lugar de mantener una cuarta categoría. **El total global no cambia:
+60/101 = 59 %.** Las cifras anteriores (Transversal 2/8 = 25 %) quedan históricas en este documento.
 
 ---
 

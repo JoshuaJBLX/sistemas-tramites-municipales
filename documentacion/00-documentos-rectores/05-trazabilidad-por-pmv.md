@@ -13,9 +13,8 @@
 |---|---|
 | **Avance global de las 18 HU** | **59 %** (60/101 puntos) |
 | **PMV1** · Prototipo funcional | **88 %** (21/24) — 4 HU |
-| **PMV2 · Modelo RAG optimizado** | **56 %** (14/25) — 4 HU |
-| **PMV3 · Sistema integrado** | **52 %** (23/44) — 8 HU |
-| **Transversal** (fuera de dominio, derivación) | **25 %** (2/8) — 2 HU |
+| **PMV2 · Modelo RAG optimizado** | **50 %** (14/28) — 5 HU |
+| **PMV3 · Sistema integrado** | **51 %** (25/49) — 9 HU |
 | HU completas al 100 % | 2 / 18 — HU-05, HU-06 |
 | HU iniciadas | 13 / 18 |
 | HU sin empezar | 5 / 18 (HU-11, HU-12, HU-15, HU-16, HU-18) |
@@ -83,13 +82,16 @@
 > Las 18 HU del documento 02 no tienen PMV asignado explícito; esta tabla propone uno coherente
 > con los objetivos de cada PMV (validable en la planificación de sprints, 04.5).
 > Los **% por HU** son los verificados en el documento 02.
+>
+> **Reasignación (16-oct-2026):** se elimina la categoría "Transversal" y se distribuye: **HU-11
+> (consultas fuera de dominio) → PMV2** y **HU-17 (derivación a atención municipal) → PMV3**.
+> El global no cambia (60/101 = 59 %); solo se redistribuyen sus puntos (HU-11: 0/3, HU-17: 2/5).
 
 | PMV | HU | % por HU | Justificación |
 |---|---|---|---|
 | **PMV1** (88 %) | HU-05 · HU-06 · HU-07 · HU-09 | **100** · **100** · 80 · 60 % | Consulta ciudadana, clasificación, requisitos y respuesta SLM = núcleo del prototipo |
-| **PMV2** (56 %) | HU-04 · HU-08 · HU-10 · HU-12 | 78 · 60 · 50 · **0 %** | Procesamiento RAG, costos/plazos, trazabilidad y trámites relacionados |
-| **PMV3** (52 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-18 | 78 · 88 · 71 · 40 · 33 · **0** · **0** · **0 %** | Gestión documental + usuarios/seguridad + auditoría + métricas + reportes |
-| **Transversal** (25 %) | HU-11 · HU-17 | **0** · 40 % | Fuera de dominio y derivación (dependen de G-04 en PMV2/3) |
+| **PMV2** (50 %) | HU-04 · HU-08 · HU-10 · HU-11 · HU-12 | 78 · 60 · 50 · **0** · **0 %** | Procesamiento RAG, costos/plazos, trazabilidad, consultas fuera de dominio y trámites relacionados |
+| **PMV3** (51 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | 78 · 88 · 71 · 40 · 33 · **0** · **0** · 40 · **0 %** | Gestión documental + usuarios/seguridad + auditoría + métricas + derivación + reportes |
 
 ### El dato relevante por PMV
 
@@ -97,24 +99,24 @@
   con confianza y aclaración, el trámite probable y los requisitos verificados contra el catálogo
   funcionan de extremo a extremo. Quedan pendientes la derivación al área responsable (HU-07) y la
   estructura garantizada de la respuesta (HU-09).
-- **PMV2 (56 %)** ganó el PMV2 documental del commit `ea06c9a`: HU-04 subió a **78 %** (chunking,
-  reprocesado, panel de documentos) y el PMV2 pasó de 11/25 a **14/25**. Sigue arrastrando a
-  **HU-12 = 0 %** (el motor de trámites relacionados no existe) y HU-08 en 60 % (los montos del
-  TUPA no están cargados en la base de datos). Además, los defectos **D-14..D-21** impiden
-  arrancar la API y desplegar lo construido.
-- **PMV3 (52 %)** subió porque HU-01 (78 %), HU-02 (88 %) y HU-03 (71 %) recogieron el avance del
-  PMV2 documental; aún **3 de sus 8 HU están en 0 %** (HU-15 retroalimentación, HU-16 métricas y
-  HU-18 reportes), y las otras 5 siguen en estado parcial.
-- **Transversal (25 %)**: HU-11 sin clasificador de dominio y HU-17 solo con una nota genérica.
+- **PMV2 (50 %)** ganó el PMV2 documental del commit `ea06c9a`: HU-04 subió a **78 %** (chunking,
+  reprocesado, panel de documentos). Desde la reasignación del 16-oct-2026 incluye **HU-11 (0 %)** —
+  el clasificador de consultas fuera de dominio no existe — y sigue arrastrando a **HU-12 = 0 %** (el
+  motor de trámites relacionados no existe) y HU-08 en 60 % (los montos del TUPA no están cargados en
+  la base de datos). Además, los defectos **D-14..D-21** impiden arrancar la API y desplegar lo
+  construido.
+- **PMV3 (51 %)** subió porque HU-01 (78 %), HU-02 (88 %) y HU-03 (71 %) recogieron el avance del
+  PMV2 documental; desde la reasignación del 16-oct-2026 incluye **HU-17 (40 %)** —derivación con
+  solo una nota genérica—; aún **3 de sus 9 HU están en 0 %** (HU-15 retroalimentación, HU-16
+  métricas y HU-18 reportes), y las otras 6 siguen en estado parcial.
 
 ## 5. Catálogo G-XX por PMV bloqueado
 
 | Bloquea | Vacíos |
 |---|---|
 | **PMV1** | — (ninguno crítico; prototipo funcional) |
-| **PMV2** | G-04 (abstención), G-08 (relacionados), G-13 (chunking ⬆️ parcial: falta OCR y recuperación por fragmento), G-21 (artefactos PoC) |
-| **PMV3** | G-01 (auth), G-20 (guardrails), G-16 (métricas), G-18 (pytest), G-23 (rate limit), G-26 (accesibilidad/carga) |
-| Transversal | G-05 (feedback), G-07 (reportes), G-09 (derivación), G-11/G-10 (rutas UI), G-14 (consistentación campos) |
+| **PMV2** | G-04 (abstención), G-08 (relacionados), G-13 (chunking ⬆️ parcial: falta OCR y recuperación por fragmento), G-14 (consistentación de campos de trámite), G-21 (artefactos PoC) |
+| **PMV3** | G-01 (auth), G-20 (guardrails), G-16 (métricas), G-18 (pytest), G-23 (rate limit), G-26 (accesibilidad/carga), G-05 (feedback), G-07 (reportes), G-09 (derivación), G-11/G-10 (rutas UI) |
 
 ## 6. Ubicación actual del avance
 
@@ -125,7 +127,7 @@ Estricto a la definición de 04.4 y contrastado con el código:
   ya tiene validación de formato, metadatos, `derogado`, baja lógica, chunking, reprocesado y el
   panel `DocumentManager` en código. **Pero el HEAD `ea06c9a` no arranca la API (D-14)**: hasta
   corregirlo, 0 de 22 endpoints son servibles.
-- **Medido:** PMV1 **88 %** · PMV2 **56 %** · PMV3 **52 %** · global **59 %**.
+- **Medido:** PMV1 **88 %** · PMV2 **50 %** · PMV3 **51 %** · global **59 %**.
   Ningún PMV llega al 100 % porque el alcance de las historias incluye OCR, recuperación RAG por
   fragmento, autenticación, métricas y reportes que aún no existen (el versionado y el chunking ya
   sí existen en código).
