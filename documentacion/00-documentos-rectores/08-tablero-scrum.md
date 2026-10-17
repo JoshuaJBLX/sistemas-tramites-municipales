@@ -19,10 +19,10 @@
 |---|---|
 | Período del plan | 4 de septiembre – 20 de noviembre de 2026 |
 | Número de sprints | 4 (Sprint 3 en curso al momento de elaborar este documento) |
-| Historias de usuario | 18 (HU-01 a HU-18) — 2 completadas al 100% (HU-05, HU-06) |
+| Historias de usuario | 18 (HU-01 a HU-18) — 11 completadas al 100% (HU-01, HU-02, HU-04–HU-12) |
 | Equipo | 6 integrantes + representante del cliente (Product Owner interesado) |
-| Avance global al cierre del Sprint 2 | 59% (60/101 puntos de verificación) |
-| Proyección al 20 de noviembre | ~90% |
+| Avance global (17-oct-2026, verificado) | **82 %** (83/101 puntos de verificación) — Sprint 3: PMV1 y PMV2 cerrados al **100 %**, PMV3 **63 %** |
+| Proyección al 20 de noviembre | ~95% |
 | Entrega final | Viernes 20 de noviembre de 2026 |
 
 ---
@@ -39,14 +39,15 @@
 ### Distribución de las 18 HU por PMV
 
 > **Reasignación (16-oct-2026):** la antigua categoría "Transversal" se eliminó: **HU-11 → PMV2** y
-> **HU-17 → PMV3**. El global no cambia (60/101 = 59 %). Detalle y justificación en
+> **HU-17 → PMV3**. Detalle y justificación en
 > [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) §10.7.
+> **Cifras verificadas el 17-oct-2026:** global **82 %** (83/101).
 
 | PMV | HU | Avance | Sprint(s) donde trabaja |
 |---|---|---|---|
-| **PMV1 · Prototipo funcional** (88 %) | HU-05 ✅ · HU-06 ✅ · HU-07 · HU-09 | 100 · 100 · 80 · 60 % | S1, S2 |
-| **PMV2 · Modelo RAG optimizado** (50 %) | HU-04 · HU-08 · HU-10 · HU-11 · HU-12 | 78 · 60 · 50 · 0 · 0 % | S1, S2, S3, S4 |
-| **PMV3 · Sistema integrado** (51 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | 78 · 88 · 71 · 40 · 33 · 0 · 0 · 40 · 0 % | S2, S3, S4 |
+| **PMV1 · Prototipo funcional** (**100 %** ✅) | HU-05 ✅ · HU-06 ✅ · HU-07 ✅ · HU-09 ✅ | 100 · 100 · 100 · 100 % | S1, S2, S3 |
+| **PMV2 · Modelo RAG optimizado** (**100 %** ✅) | HU-04 ✅ · HU-08 ✅ · HU-10 ✅ · HU-11 ✅ · HU-12 ✅ | 100 · 100 · 100 · 100 · 100 % | S1, S2, S3 |
+| **PMV3 · Sistema integrado** (63 %) | HU-01 ✅ · HU-02 ✅ · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | 100 · 100 · 86 · 40 · 67 · 0 · 0 · 40 · 0 % | S2, S3, S4 |
 
 ### Responsable principal de cada HU (por PMV)
 
@@ -262,7 +263,7 @@ Escenario 2: Requisitos no confirmados
 
 ---
 
-#### HU-08 — Orientación de costos y plazos 🟠
+#### HU-08 — Orientación de costos y plazos ✅ *(cerrada 17-oct-2026)*
 
 > Como ciudadano necesito conocer el costo y el plazo de atención de un trámite para
 > planificar mi solicitud.
@@ -307,7 +308,7 @@ Escenario 2: Contexto insuficiente
 
 ---
 
-#### HU-10 — Trazabilidad y control de alucinaciones 🟠
+#### HU-10 — Trazabilidad y control de alucinaciones ✅ *(cerrada 17-oct-2026)*
 
 > Como ciudadano necesito saber que la respuesta que recibo está respaldada en documentos
 > oficiales vigentes.
@@ -324,11 +325,11 @@ Escenario 2: Respuesta no fundamentada
   Then   el sistema bloquea la afirmación, muestra una advertencia o deriva la consulta
 ```
 
-*Responsables:* Oscar + Ciro (Arquitectura) · *Sprint:* S2 · *Brecha abierta:* `GET /api/consultas/{id}` no devuelve respuesta ni fuentes todavía
+*Responsables:* Oscar + Ciro (Arquitectura) · *Sprint:* S2–S3 · *Cerrada:* 17-oct-2026 (`GET /api/consultas/{id}` devuelve respuesta/fuentes/confianza, bloqueo de afirmaciones y fuentes con metadatos; D-9)
 
 ---
 
-#### HU-11 — Consultas fuera de dominio 🟢 *(sin empezar)*
+#### HU-11 — Consultas fuera de dominio ✅ *(cerrada 17-oct-2026)*
 
 > Como ciudadano necesito saber cuándo una consulta no corresponde a trámites municipales
 > para recibir orientación adecuada.
@@ -345,7 +346,7 @@ Escenario 2: Consulta municipal
   Then   continúa con la clasificación y recuperación de información
 ```
 
-*Responsable:* Oscar · *Sprint:* S4
+*Responsable:* Oscar · *Sprint:* S3 · *Cerrada:* 17-oct-2026 (`ServicioDominio` clasifica municipal vs. externo y deriva a la entidad — SUNAT, RENIEC, pensiones, etc.)
 
 ---
 
@@ -399,7 +400,7 @@ Escenario 3: Control de rol
 
 ---
 
-#### HU-14 — Auditoría de interacciones 🟡
+#### HU-14 — Auditoría de interacciones ⚠️ *(parcial — 4/6)*
 
 > Como funcionario necesito consultar el historial de interacciones para revisar la
 > calidad y trazabilidad de las respuestas.
@@ -564,14 +565,14 @@ Escenario 2: Exportación exitosa
 
 | Tarea | HU | Responsable | Estimación | Estado |
 |---|---|---|---|---|
-| T-3.1: Corregir **D-14** — definir `router` en `tramite_admin_controller.py` (la API no arranca) | transversal | Brayan | 1 h | 🔴 Máxima prioridad |
-| T-3.2: Corregir **D-15** — aplicar migración `004_documentos_pmv2.sql` en la BD local | HU-01/02 | Pedro | 1 h | 🔴 |
-| T-3.3: Corregir **D-16** — el upsert envía `int` a una columna `BOOLEAN` | HU-01 | Pedro + Brayan | 2 h | 🔴 |
-| T-3.4: Añadir `pypdf` y `python-docx` a `requirements.txt` (**D-17**) | HU-04 | Brayan | 0.5 h | ⚪ |
-| T-3.5: Arreglar `pedir()` en `api.ts` — `response.json()` incondicional (**D-20**) | HU-01 | Jack | 2 h | ⚪ |
-| T-3.6: Corregir `listarTramitesAdmin()` → endpoint real (**D-21**) | HU-01 | Jack | 1 h | ⚪ |
-| T-3.7: Demo E2E: subir → procesar → consultar documento | HU-01/04 | Ciro (lidera) | 4 h | ⚪ |
-| T-3.8: Recuperación RAG **por fragmento** en `BusquedaVectorialAdapter` | HU-04 | Oscar | 6 h | ⚪ |
+| T-3.1: Corregir **D-14** — definir `router` en `tramite_admin_controller.py` | transversal | Brayan | 1 h | ✅ Done (30 rutas) |
+| T-3.2: Corregir **D-15** — aplicar migración `004_documentos_pmv2.sql` (+ `005`) | HU-01/02 | Pedro | 1 h | ✅ Done (20/20 con metadatos) |
+| T-3.3: Corregir **D-22** — el upsert envía `int` a una columna `BOOLEAN` | HU-01 | Pedro + Brayan | 2 h | ✅ Done (`bool(...)`) |
+| T-3.4: Añadir `pypdf` y `python-docx` a `requirements.txt` (**D-17**) | HU-04 | Brayan | 0.5 h | ✅ Done (+ PyMuPDF, rapidocr) |
+| T-3.5: Arreglar `pedir()` en `api.ts` — `response.json()` incondicional (**D-20**) | HU-01 | Jack | 2 h | ✅ Done |
+| T-3.6: Corregir `listarTramitesAdmin()` → endpoint real (**D-21**) | HU-01 | Jack | 1 h | ✅ Done (panel carga) |
+| T-3.7: Demo E2E: subir → procesar → consultar documento | HU-01/04 | Ciro (lidera) | 4 h | ✅ Done (PDF real → 201; 20/20 fragmentados) |
+| T-3.8: Recuperación RAG **por fragmento** en `BusquedaVectorialAdapter` | HU-04 | Oscar | 6 h | ✅ Done (G-13) |
 | T-3.9: JWT — `POST /api/auth/login` + middleware | HU-13 | Brayan | 8 h | ⚪ |
 | T-3.10: Tabla `usuarios` + hash bcrypt + roles | HU-13 | Pedro | 4 h | ⚪ |
 | T-3.11: Pantalla de Login + guard de rutas `/admin` | HU-13 | Jack | 6 h | ⚪ |
@@ -588,11 +589,11 @@ Escenario 2: Exportación exitosa
 | Tarea | HU | Responsable | Estado |
 |---|---|---|---|
 | T-4.1: Flujo de aprobación/derogación de documentos (estado + resolución) | HU-03 | Brayan + Jack | 📋 Planificada |
-| T-4.2: Panel de auditoría real (reemplazar `AuditLog` hardcodeado) | HU-14 | Pedro + Jack | 📋 |
+| T-4.2: Panel de auditoría real (reemplazar `AuditLog` hardcodeado) | HU-14 | Pedro + Jack | ✅ Done (17-oct-2026, `GET /api/consultas`) |
 | T-4.3: Métricas reales (reemplazar KPIs ficticios D-6) | HU-16 | Jack + Pedro | 📋 |
-| T-4.4: Trazabilidad completa en `GET /api/consultas/{id}` (respuesta + fuentes) | HU-10/14 | Brayan | 📋 |
+| T-4.4: Trazabilidad completa en `GET /api/consultas/{id}` (respuesta + fuentes) | HU-10/14 | Brayan | ✅ Done (17-oct-2026, D-9) |
 | T-4.5: Derivación a área municipal con datos de contacto | HU-17 | Jack + Brayan | 📋 |
-| T-4.6: Clasificador de consultas fuera de dominio | HU-11 | Oscar | 📋 |
+| T-4.6: Clasificador de consultas fuera de dominio | HU-11 | Oscar | ✅ Done (17-oct-2026, `ServicioDominio`) |
 | T-4.7: Trámites relacionados (relación manual en BD) | HU-12 | Oscar + Pedro | 📋 |
 | T-4.8: Retroalimentación ciudadana (👍/👎 + comentario) | HU-15 | Jack | 📋 *opcional* |
 | T-4.9: Reportes con exportación PDF/Excel | HU-18 | Brayan + Pedro | 📋 *deseable* |

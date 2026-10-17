@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import TramiteCard from '../../components/TramiteCard';
 import { SearchIcon } from '../../components/icons';
-import { obtenerTramites, Tramite } from '../../lib/api';
+import { obtenerTramites, obtenerTramitesRelacionados, Tramite, TramiteRelacionado } from '../../lib/api';
 
 export default function TramitesPage() {
   const [todos, setTodos] = useState<Tramite[]>([]);
@@ -11,12 +11,37 @@ export default function TramitesPage() {
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
 
+  const [seleccion, setSeleccion] = useState<Tramite | null>(null);
+  const [relacionados, setRelacionados] = useState<TramiteRelacionado[]>([]);
+  const [cargandoRel, setCargandoRel] = useState(false);
+  const [errorRel, setErrorRel] = useState<string | null>(null);
+
   useEffect(() => {
     obtenerTramites()
       .then(setTodos)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : 'No se pudo cargar el catálogo.'))
       .finally(() => setCargando(false));
   }, []);
+
+  const seleccionar = async (tramite: Tramite) => {
+    if (seleccion?.id === tramite.id) {
+      setSeleccion(null);
+      setRelacionados([]);
+      return;
+    }
+    setSeleccion(tramite);
+    setRelacionados([]);
+    setErrorRel(null);
+    setCargandoRel(true);
+    try {
+      setRelacionados(await obtenerTramitesRelacionados(tramite.id));
+    } catch (e: unknown) {
+      setErrorRel(e instanceof Error ? e.message : 'No se pudieron cargar los trámites relacionados.');
+    } finally {
+      setCargandoRel(false);
+    }
+  };
+
   const cats = ['Todas', ...Array.from(new Set(todos.map((t) => t.categoria).filter(Boolean) as string[]))];
   const list = todos.filter((t) =>
     (cat === 'Todas' || t.categoria === cat) &&
@@ -44,6 +69,48 @@ export default function TramitesPage() {
           ))}
         </div>
       </div>
+      {seleccion && (
+        <section className="glass mt-5 rounded-3xl p-5" aria-live="polite">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="eyebrow !text-[10px]">Recomendación · HU-12</p>
+              <h2 className="text-lg font-extrabold tracking-tight text-ink">
+                Trámites relacionados con «{seleccion.nombre}»
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setSeleccion(null); setRelacionados([]); }}
+              className="rounded-full bg-white/80 px-4 py-2 text-xs font-bold text-primary-700 shadow-sm"
+            >
+              Cerrar
+            </button>
+          </div>
+          {cargandoRel && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[0, 1, 2].map((i) => <div key={i} className="skeleton h-40" />)}
+            </div>
+          )}
+          {!cargandoRel && errorRel && (
+            <p className="mt-3 text-sm font-semibold text-amber-800">{errorRel}</p>
+          )}
+          {!cargandoRel && !errorRel && relacionados.length === 0 && (
+            <p className="mt-3 text-sm text-mist-500">Sin recomendaciones para este trámite.</p>
+          )}
+          {!cargandoRel && relacionados.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {relacionados.map((t, i) => (
+                <div key={t.id} className="relative">
+                  <TramiteCard tramite={t} index={i} onSeleccionar={seleccionar} />
+                  <span className="absolute right-4 top-4 rounded-full bg-white/90 px-2 py-1 text-[10px] font-bold text-primary-700 shadow-sm">
+                    {Math.round(t.similitud * 100)} % afín
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
       {error && (
         <div className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
           No se pudo cargar el catálogo de trámites: {error}
@@ -56,7 +123,13 @@ export default function TramitesPage() {
       {!error && list.length > 0 && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((t, i) => (
-            <TramiteCard key={t.id} tramite={t} index={i} />
+            <TramiteCard
+              key={t.id}
+              tramite={t}
+              index={i}
+              seleccionado={seleccion?.id === t.id}
+              onSeleccionar={seleccionar}
+            />
           ))}
         </div>
       )}

@@ -1,0 +1,201 @@
+id,intencion_objetivo,pregunta,tramite_esperado_id,tramite_esperado_nombre
+poc-0019,consultar_requisitos,¿Qué llevar para Autorización de Vehículo Fuera de Ruta la primera vez?,8c0eba1c-5996-5f15-a78b-91a620e4ea62,Autorización de Vehículo Fuera de Ruta
+poc-0150,consultar_estado,¿Cómo saber el estado de mi Certificado de Finca Ruinosa?,67ce8b7c-59d3-5b3c-8551-7f721160883c,Certificado de Finca Ruinosa
+poc-0055,consultar_costo,¿El Anotación Marginal de Rectificación de Matrimonio sale caro?,edd1fe8b-416b-508b-bf58-b1ed9dd263fc,Anotación Marginal de Rectificación de Matrimonio
+poc-0023,consultar_requisitos,Para Autorización para Colocación de Casetas/Cabinas Telefónicas ¿qué papeles llevo?,48ee9758-6ca0-5122-bb61-142662cf001c,Autorización para Colocación de Casetas/Cabinas Telefónicas
+poc-0059,consultar_costo,¿Cuánto pagan en Autorización de Cambio de Uso según el TUPA?,51b4f7bc-216f-5cd2-ae08-d651b01830de,Autorización de Cambio de Uso
+poc-0119,consultar_estado,Quiero revisar el estado de mi Autorización de Vehículo Fuera de Ruta.,8c0eba1c-5996-5f15-a78b-91a620e4ea62,Autorización de Vehículo Fuera de Ruta
+poc-0098,consultar_costo,Necesito ayuda con Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones): ¿cuánto debo pagar?,60f81bc1-4eec-563b-8e5b-f6080f6e33e7,Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones)
+poc-0010,consultar_requisitos,¿Qué documentos necesito para Autorización de Construcción de Porta Cruces?,985e75e5-c203-5967-ba5e-ed982792a371,Autorización de Construcción de Porta Cruces
+poc-0162,consultar_ubicacion,¿A qué unidad voy para Autorización de Construcción por Plazo de Ejecución?,34bd9492-3d4c-5bed-8817-2db1e9c246a3,Autorización de Construcción por Plazo de Ejecución
+poc-0116,consultar_estado,"porfa ¿cómo checo el estado de Autorización de Obra: Cámaras, Registros, Subestaciones?",1f05ff2d-3bc3-5ccf-a2f9-53b5066c51a1,"Autorización de Obra: Cámaras, Registros, Subestaciones"
+poc-0156,consultar_ubicacion,porfa dime a qué oficina voy para Anulación de Servicios Básicos,8a8ba2bc-041d-54fe-8b16-8abd315288be,Anulación de Servicios Básicos
+poc-0118,consultar_estado,¿Hay forma de saber en qué va mi Autorización de Retiro de Avisos?,8d535641-e3ff-552b-b69b-2a43afa39d9b,Autorización de Retiro de Avisos
+poc-0074,consultar_costo,Precio del trámite Autorización para Colocación de Postes de Líneas Telefónicas.,d30c7af3-bd74-5bb4-b775-1a046663dec4,Autorización para Colocación de Postes de Líneas Telefónicas
+poc-0140,consultar_estado,¿Cómo saber el estado de mi Carné de Comercio Ambulatorio?,f9a45a33-9e11-5491-92ee-f3976a011259,Carné de Comercio Ambulatorio
+poc-0025,consultar_requisitos,Me falta saber qué llevar para Autorización para Colocar Banderolas.,ca3cadc6-961e-5e8a-82fc-ae1042fb2fc6,Autorización para Colocar Banderolas
+poc-0075,consultar_costo,¿El Autorización para Colocar Banderolas sale caro?,ca3cadc6-961e-5e8a-82fc-ae1042fb2fc6,Autorización para Colocar Banderolas
+poc-0021,consultar_requisitos,¿Cuáles son los requisitos de Autorización para Apertura de Puerta?,2d97672d-1faa-5601-ae68-b809247c4792,Autorización para Apertura de Puerta
+poc-0198,consultar_ubicacion,¿Cuál es la dirección para hacer Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones)?,60f81bc1-4eec-563b-8e5b-f6080f6e33e7,Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones)
+poc-0046,consultar_requisitos,"oye, para Certificado de Compatibilidad de Uso Comercial ¿qué papeles piden?",a7e54214-9bfc-518a-b1fd-47971d0c8b2e,Certificado de Compatibilidad de Uso Comercial
+poc-0200,consultar_ubicacion,¿Dónde hago Certificado de Finca Ruinosa?,67ce8b7c-59d3-5b3c-8551-7f721160883c,Certificado de Finca Ruinosa
+poc-0085,consultar_costo,¿El Autorización Zanjado de Tubería Matriz sale caro?,3f924951-f10f-569a-9b42-aef091e6bd3f,Autorización Zanjado de Tubería Matriz
+poc-0033,consultar_requisitos,Para Autorización para Tendido de Cable en Vía Pública ¿qué papeles llevo?,b13b0e06-77ca-545c-8656-4bb5413a3c25,Autorización para Tendido de Cable en Vía Pública
+poc-0096,consultar_costo,oye ¿cuánto es para Certificado de Compatibilidad de Uso Comercial?,a7e54214-9bfc-518a-b1fd-47971d0c8b2e,Certificado de Compatibilidad de Uso Comercial
+poc-0044,consultar_requisitos,Requisitos del trámite Certificado de Cambio de Uso.,579828fe-780b-5927-bd7f-64d5bd15382e,Certificado de Cambio de Uso
+poc-0072,consultar_costo,¿Cuánto es el arancel de Autorización para Avisos Simples/Luminosos?,94aa31a3-e27b-5a1b-972d-9dd347070ecd,Autorización para Avisos Simples/Luminosos
+poc-0070,consultar_costo,¿Cuánto cuesta Autorización Funcionamiento Infraestructura-Residuos Sólidos?,2221457c-2d04-5b29-bc58-0fbc20870473,Autorización Funcionamiento Infraestructura-Residuos Sólidos
+poc-0030,consultar_requisitos,¿Qué documentos necesito para Autorización para Instalación de Antenas Tipo Torre?,dadcfdee-93c2-58bf-b2bd-0c0df3677846,Autorización para Instalación de Antenas Tipo Torre
+poc-0158,consultar_ubicacion,¿Cuál es la dirección para hacer Autorización de Actividades Varias?,1c2d0ef4-6a10-5705-88b8-b6fed139b39e,Autorización de Actividades Varias
+poc-0138,consultar_estado,¿Hay forma de saber en qué va mi Beneficio Tributario para Pensionistas?,3bfc9325-6c39-530f-a4bd-0b228598f701,Beneficio Tributario para Pensionistas
+poc-0018,consultar_requisitos,Necesito ayuda con Autorización de Retiro de Avisos: ¿qué documentos debo presentar?,8d535641-e3ff-552b-b69b-2a43afa39d9b,Autorización de Retiro de Avisos
+poc-0086,consultar_costo,oye ¿cuánto es para Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres?,7a28f862-7114-5001-a6d5-d90f968e0146,Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres
+poc-0180,consultar_ubicacion,¿Dónde hago Autorización para Instalación de Antenas Tipo Torre?,dadcfdee-93c2-58bf-b2bd-0c0df3677846,Autorización para Instalación de Antenas Tipo Torre
+poc-0022,consultar_requisitos,"Quiero hacer Autorización para Avisos Simples/Luminosos, ¿qué piden?",94aa31a3-e27b-5a1b-972d-9dd347070ecd,Autorización para Avisos Simples/Luminosos
+poc-0087,consultar_costo,porfa dime cuánto cuesta Beneficio Tributario Adulto Mayor (Ley 30490),f46a21c3-67c7-56c3-a698-c49fba13b5cb,Beneficio Tributario Adulto Mayor (Ley 30490)
+poc-0002,consultar_requisitos,"Quiero hacer Actualización de Licencia Municipal, ¿qué piden?",d29ba451-ce69-53c2-8c0e-ebc7315c6637,Actualización de Licencia Municipal
+poc-0005,consultar_requisitos,Me falta saber qué llevar para Anotación Marginal de Rectificación de Matrimonio.,edd1fe8b-416b-508b-bf58-b1ed9dd263fc,Anotación Marginal de Rectificación de Matrimonio
+poc-0197,consultar_ubicacion,Necesito ayuda con Certificado de Conformidad de Obra: ¿a quién le pregunto?,3375c705-778d-5010-aa21-36c1eb49b0a1,Certificado de Conformidad de Obra
+poc-0117,consultar_estado,Necesito ayuda con Autorización de Ocupación de Vía Pública: ¿dónde consulto si avanzó?,11111111-1111-ffff-2222-333333333333,Autorización de Ocupación de Vía Pública
+poc-0082,consultar_costo,¿Cuánto es el arancel de Autorización para Reinstalación de Agua y Alcantarillado?,0fe1a1bc-4514-5a75-b388-5c9735bef109,Autorización para Reinstalación de Agua y Alcantarillado
+poc-0099,consultar_costo,¿Cuánto pagan en Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones) según el TUPA?,1e450147-3967-546d-8667-0ed512ff1743,Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones)
+poc-0100,consultar_costo,¿Cuánto cuesta Certificado de Finca Ruinosa?,67ce8b7c-59d3-5b3c-8551-7f721160883c,Certificado de Finca Ruinosa
+poc-0192,consultar_ubicacion,¿A qué unidad voy para Certificaciones Diversas de Registro Civil?,eab211f4-5704-5962-8845-d53dfe35207a,Certificaciones Diversas de Registro Civil
+poc-0007,consultar_requisitos,porfa ¿qué documentos piden en Aprobación de Expediente Técnico - Infraestructura Residuos?,e7d68759-10cb-5f58-8bd8-1ee1c9b0d177,Aprobación de Expediente Técnico - Infraestructura Residuos
+poc-0049,consultar_requisitos,¿Qué llevar para Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones) la primera vez?,1e450147-3967-546d-8667-0ed512ff1743,Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones)
+poc-0080,consultar_costo,¿Cuánto cuesta Autorización para Instalación de Antenas Tipo Torre?,dadcfdee-93c2-58bf-b2bd-0c0df3677846,Autorización para Instalación de Antenas Tipo Torre
+poc-0103,consultar_estado,"Ya subí mi Adopción Judicial o Notarial, ¿cómo veo si está listo?",cec8a55b-593c-5942-80d9-569c0c41621e,Adopción Judicial o Notarial
+poc-0084,consultar_costo,Precio del trámite Autorización para Uso de Zona de Paradero.,17b31db4-3991-5609-a1f9-7b6a0d3513ab,Autorización para Uso de Zona de Paradero
+poc-0177,consultar_ubicacion,Necesito ayuda con Autorización para el Uso de Agua (Construcción y Eventos): ¿a quién le pregunto?,10dc957d-f921-58f1-9d19-d1f077ea36e2,Autorización para el Uso de Agua (Construcción y Eventos)
+poc-0013,consultar_requisitos,Para Autorización de Espectáculos Públicos Deportivos ¿qué papeles llevo?,c239cefe-1f40-5430-889d-9713ab2602f3,Autorización de Espectáculos Públicos Deportivos
+poc-0171,consultar_ubicacion,¿En qué oficina tramito Autorización para Apertura de Puerta?,2d97672d-1faa-5601-ae68-b809247c4792,Autorización para Apertura de Puerta
+poc-0094,consultar_costo,Precio del trámite Certificado de Cambio de Uso.,579828fe-780b-5927-bd7f-64d5bd15382e,Certificado de Cambio de Uso
+poc-0064,consultar_costo,Precio del trámite Autorización de Espectáculos Públicos No Deportivos.,960d2663-b42f-519a-9c35-5ffdc0df8c1c,Autorización de Espectáculos Públicos No Deportivos
+poc-0125,consultar_estado,oye ¿dónde veo si ya avanzó mi Autorización para Colocar Banderolas?,ca3cadc6-961e-5e8a-82fc-ae1042fb2fc6,Autorización para Colocar Banderolas
+poc-0137,consultar_estado,Necesito ayuda con Beneficio Tributario Adulto Mayor (Ley 30490): ¿dónde consulto si avanzó?,f46a21c3-67c7-56c3-a698-c49fba13b5cb,Beneficio Tributario Adulto Mayor (Ley 30490)
+poc-0173,consultar_ubicacion,Ubicación del área que atiende Autorización para Colocación de Casetas/Cabinas Telefónicas.,48ee9758-6ca0-5122-bb61-142662cf001c,Autorización para Colocación de Casetas/Cabinas Telefónicas
+poc-0047,consultar_requisitos,porfa ¿qué documentos piden en Certificado de Conformidad de Obra?,3375c705-778d-5010-aa21-36c1eb49b0a1,Certificado de Conformidad de Obra
+poc-0037,consultar_requisitos,porfa ¿qué documentos piden en Beneficio Tributario Adulto Mayor (Ley 30490)?,f46a21c3-67c7-56c3-a698-c49fba13b5cb,Beneficio Tributario Adulto Mayor (Ley 30490)
+poc-0109,consultar_estado,Quiero revisar el estado de mi Autorización de Cambio de Uso.,51b4f7bc-216f-5cd2-ae08-d651b01830de,Autorización de Cambio de Uso
+poc-0067,consultar_costo,porfa dime cuánto cuesta Autorización de Ocupación de Vía Pública,11111111-1111-ffff-2222-333333333333,Autorización de Ocupación de Vía Pública
+poc-0149,consultar_estado,Quiero revisar el estado de mi Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones).,1e450147-3967-546d-8667-0ed512ff1743,Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones)
+poc-0159,consultar_ubicacion,¿En qué local municipal atienden Autorización de Cambio de Uso?,51b4f7bc-216f-5cd2-ae08-d651b01830de,Autorización de Cambio de Uso
+poc-0097,consultar_costo,porfa dime cuánto cuesta Certificado de Conformidad de Obra,3375c705-778d-5010-aa21-36c1eb49b0a1,Certificado de Conformidad de Obra
+poc-0034,consultar_requisitos,Requisitos del trámite Autorización para Uso de Zona de Paradero.,17b31db4-3991-5609-a1f9-7b6a0d3513ab,Autorización para Uso de Zona de Paradero
+poc-0028,consultar_requisitos,Necesito ayuda con Autorización para Instalación de Agua y Alcantarillado: ¿qué documentos debo presentar?,0bc23e17-9201-5bf3-a41c-d4e256c2a616,Autorización para Instalación de Agua y Alcantarillado
+poc-0157,consultar_ubicacion,Necesito ayuda con Aprobación de Expediente Técnico - Infraestructura Residuos: ¿a quién le pregunto?,e7d68759-10cb-5f58-8bd8-1ee1c9b0d177,Aprobación de Expediente Técnico - Infraestructura Residuos
+poc-0112,consultar_estado,Seguimiento del trámite Autorización de Construcción por Plazo de Ejecución.,34bd9492-3d4c-5bed-8817-2db1e9c246a3,Autorización de Construcción por Plazo de Ejecución
+poc-0003,consultar_requisitos,Para Adopción Judicial o Notarial ¿qué papeles llevo?,cec8a55b-593c-5942-80d9-569c0c41621e,Adopción Judicial o Notarial
+poc-0195,consultar_ubicacion,oye ¿dónde queda Certificado de Código Catastral?,ce19ee6f-482d-552f-b4e8-b1d021116d48,Certificado de Código Catastral
+poc-0124,consultar_estado,¿Qué pasos llevo en Autorización para Colocación de Postes de Líneas Telefónicas?,d30c7af3-bd74-5bb4-b775-1a046663dec4,Autorización para Colocación de Postes de Líneas Telefónicas
+poc-0048,consultar_requisitos,Necesito ayuda con Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones): ¿qué documentos debo presentar?,60f81bc1-4eec-563b-8e5b-f6080f6e33e7,Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones)
+poc-0167,consultar_ubicacion,Necesito ayuda con Autorización de Ocupación de Vía Pública: ¿a quién le pregunto?,11111111-1111-ffff-2222-333333333333,Autorización de Ocupación de Vía Pública
+poc-0196,consultar_ubicacion,porfa dime a qué oficina voy para Certificado de Compatibilidad de Uso Comercial,a7e54214-9bfc-518a-b1fd-47971d0c8b2e,Certificado de Compatibilidad de Uso Comercial
+poc-0090,consultar_costo,¿Cuánto cuesta Carné de Comercio Ambulatorio?,f9a45a33-9e11-5491-92ee-f3976a011259,Carné de Comercio Ambulatorio
+poc-0189,consultar_ubicacion,¿En qué local municipal atienden Búsqueda de Documentos?,3ac3ce81-9de1-5aaf-915e-c303316a96ab,Búsqueda de Documentos
+poc-0142,consultar_estado,Seguimiento del trámite Certificaciones Diversas de Registro Civil.,eab211f4-5704-5962-8845-d53dfe35207a,Certificaciones Diversas de Registro Civil
+poc-0068,consultar_costo,Necesito ayuda con Autorización de Retiro de Avisos: ¿cuánto debo pagar?,8d535641-e3ff-552b-b69b-2a43afa39d9b,Autorización de Retiro de Avisos
+poc-0183,consultar_ubicacion,Ubicación del área que atiende Autorización para Tendido de Cable en Vía Pública.,b13b0e06-77ca-545c-8656-4bb5413a3c25,Autorización para Tendido de Cable en Vía Pública
+poc-0194,consultar_ubicacion,¿Dónde presento los papeles de Certificado de Cambio de Uso?,579828fe-780b-5927-bd7f-64d5bd15382e,Certificado de Cambio de Uso
+poc-0052,consultar_costo,¿Cuánto es el arancel de Actualización de Licencia Municipal?,d29ba451-ce69-53c2-8c0e-ebc7315c6637,Actualización de Licencia Municipal
+poc-0062,consultar_costo,¿Cuánto es el arancel de Autorización de Construcción por Plazo de Ejecución?,34bd9492-3d4c-5bed-8817-2db1e9c246a3,Autorización de Construcción por Plazo de Ejecución
+poc-0011,consultar_requisitos,¿Cuáles son los requisitos de Autorización de Construcción por 30 Días?,ca95ec31-87df-5755-b615-f2156d18e14b,Autorización de Construcción por 30 Días
+poc-0054,consultar_costo,Precio del trámite Ampliación de Plazo de Licencia de Edificación.,15ceadf4-45aa-5f05-8df3-878016388e1e,Ampliación de Plazo de Licencia de Edificación
+poc-0107,consultar_estado,Necesito ayuda con Aprobación de Expediente Técnico - Infraestructura Residuos: ¿dónde consulto si avanzó?,e7d68759-10cb-5f58-8bd8-1ee1c9b0d177,Aprobación de Expediente Técnico - Infraestructura Residuos
+poc-0006,consultar_requisitos,"oye, para Anulación de Servicios Básicos ¿qué papeles piden?",8a8ba2bc-041d-54fe-8b16-8abd315288be,Anulación de Servicios Básicos
+poc-0056,consultar_costo,oye ¿cuánto es para Anulación de Servicios Básicos?,8a8ba2bc-041d-54fe-8b16-8abd315288be,Anulación de Servicios Básicos
+poc-0051,consultar_costo,¿Cuál es el costo de Acceso a la Información Pública creada u obtenida por la entidad?,8d00d343-db53-55c8-8f51-540aa9169532,Acceso a la Información Pública creada u obtenida por la entidad
+poc-0169,consultar_ubicacion,¿En qué local municipal atienden Autorización de Vehículo Fuera de Ruta?,8c0eba1c-5996-5f15-a78b-91a620e4ea62,Autorización de Vehículo Fuera de Ruta
+poc-0063,consultar_costo,Para Autorización de Espectáculos Públicos Deportivos ¿cuánto hay que pagar?,c239cefe-1f40-5430-889d-9713ab2602f3,Autorización de Espectáculos Públicos Deportivos
+poc-0153,consultar_ubicacion,Ubicación del área que atiende Adopción Judicial o Notarial.,cec8a55b-593c-5942-80d9-569c0c41621e,Adopción Judicial o Notarial
+poc-0004,consultar_requisitos,Requisitos del trámite Ampliación de Plazo de Licencia de Edificación.,15ceadf4-45aa-5f05-8df3-878016388e1e,Ampliación de Plazo de Licencia de Edificación
+poc-0083,consultar_costo,Para Autorización para Tendido de Cable en Vía Pública ¿cuánto hay que pagar?,b13b0e06-77ca-545c-8656-4bb5413a3c25,Autorización para Tendido de Cable en Vía Pública
+poc-0061,consultar_costo,¿Cuál es el costo de Autorización de Construcción por 30 Días?,ca95ec31-87df-5755-b615-f2156d18e14b,Autorización de Construcción por 30 Días
+poc-0027,consultar_requisitos,porfa ¿qué documentos piden en Autorización para el Uso de Agua (Construcción y Eventos)?,10dc957d-f921-58f1-9d19-d1f077ea36e2,Autorización para el Uso de Agua (Construcción y Eventos)
+poc-0181,consultar_ubicacion,¿En qué oficina tramito Autorización para Instalación de Buzones/Medidores?,ce56b592-aa47-56b7-b813-242e364f0abb,Autorización para Instalación de Buzones/Medidores
+poc-0078,consultar_costo,Necesito ayuda con Autorización para Instalación de Agua y Alcantarillado: ¿cuánto debo pagar?,0bc23e17-9201-5bf3-a41c-d4e256c2a616,Autorización para Instalación de Agua y Alcantarillado
+poc-0191,consultar_ubicacion,¿En qué oficina tramito Certificación de Documentos?,58537ca5-499c-58fa-ba7d-876b3ddcf945,Certificación de Documentos
+poc-0077,consultar_costo,porfa dime cuánto cuesta Autorización para el Uso de Agua (Construcción y Eventos),10dc957d-f921-58f1-9d19-d1f077ea36e2,Autorización para el Uso de Agua (Construcción y Eventos)
+poc-0095,consultar_costo,¿El Certificado de Código Catastral sale caro?,ce19ee6f-482d-552f-b4e8-b1d021116d48,Certificado de Código Catastral
+poc-0066,consultar_costo,"oye ¿cuánto es para Autorización de Obra: Cámaras, Registros, Subestaciones?",1f05ff2d-3bc3-5ccf-a2f9-53b5066c51a1,"Autorización de Obra: Cámaras, Registros, Subestaciones"
+poc-0113,consultar_estado,"Ya subí mi Autorización de Espectáculos Públicos Deportivos, ¿cómo veo si está listo?",c239cefe-1f40-5430-889d-9713ab2602f3,Autorización de Espectáculos Públicos Deportivos
+poc-0193,consultar_ubicacion,Ubicación del área que atiende Certificado de Alineamiento.,098f2f2e-b76c-5d8f-8b2d-34097385c470,Certificado de Alineamiento
+poc-0057,consultar_costo,porfa dime cuánto cuesta Aprobación de Expediente Técnico - Infraestructura Residuos,e7d68759-10cb-5f58-8bd8-1ee1c9b0d177,Aprobación de Expediente Técnico - Infraestructura Residuos
+poc-0127,consultar_estado,Necesito ayuda con Autorización para el Uso de Agua (Construcción y Eventos): ¿dónde consulto si avanzó?,10dc957d-f921-58f1-9d19-d1f077ea36e2,Autorización para el Uso de Agua (Construcción y Eventos)
+poc-0186,consultar_ubicacion,porfa dime a qué oficina voy para Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres,7a28f862-7114-5001-a6d5-d90f968e0146,Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres
+poc-0184,consultar_ubicacion,¿Dónde presento los papeles de Autorización para Uso de Zona de Paradero?,17b31db4-3991-5609-a1f9-7b6a0d3513ab,Autorización para Uso de Zona de Paradero
+poc-0146,consultar_estado,porfa ¿cómo checo el estado de Certificado de Compatibilidad de Uso Comercial?,a7e54214-9bfc-518a-b1fd-47971d0c8b2e,Certificado de Compatibilidad de Uso Comercial
+poc-0040,consultar_requisitos,¿Qué documentos necesito para Carné de Comercio Ambulatorio?,f9a45a33-9e11-5491-92ee-f3976a011259,Carné de Comercio Ambulatorio
+poc-0166,consultar_ubicacion,"porfa dime a qué oficina voy para Autorización de Obra: Cámaras, Registros, Subestaciones",1f05ff2d-3bc3-5ccf-a2f9-53b5066c51a1,"Autorización de Obra: Cámaras, Registros, Subestaciones"
+poc-0091,consultar_costo,¿Cuál es el costo de Certificación de Documentos?,58537ca5-499c-58fa-ba7d-876b3ddcf945,Certificación de Documentos
+poc-0015,consultar_requisitos,Me falta saber qué llevar para Autorización de Matrimonio con Orquesta y Uso de Bar.,b857c449-31e2-58b7-9379-9cb61498bff0,Autorización de Matrimonio con Orquesta y Uso de Bar
+poc-0147,consultar_estado,Necesito ayuda con Certificado de Conformidad de Obra: ¿dónde consulto si avanzó?,3375c705-778d-5010-aa21-36c1eb49b0a1,Certificado de Conformidad de Obra
+poc-0053,consultar_costo,Para Adopción Judicial o Notarial ¿cuánto hay que pagar?,cec8a55b-593c-5942-80d9-569c0c41621e,Adopción Judicial o Notarial
+poc-0128,consultar_estado,¿Hay forma de saber en qué va mi Autorización para Instalación de Agua y Alcantarillado?,0bc23e17-9201-5bf3-a41c-d4e256c2a616,Autorización para Instalación de Agua y Alcantarillado
+poc-0102,consultar_estado,Seguimiento del trámite Actualización de Licencia Municipal.,d29ba451-ce69-53c2-8c0e-ebc7315c6637,Actualización de Licencia Municipal
+poc-0199,consultar_ubicacion,¿En qué local municipal atienden Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones)?,1e450147-3967-546d-8667-0ed512ff1743,Certificado de Conformidad de Obra y Declaratoria de Fábrica (sin variaciones)
+poc-0130,consultar_estado,¿Cómo saber el estado de mi Autorización para Instalación de Antenas Tipo Torre?,dadcfdee-93c2-58bf-b2bd-0c0df3677846,Autorización para Instalación de Antenas Tipo Torre
+poc-0133,consultar_estado,"Ya subí mi Autorización para Tendido de Cable en Vía Pública, ¿cómo veo si está listo?",b13b0e06-77ca-545c-8656-4bb5413a3c25,Autorización para Tendido de Cable en Vía Pública
+poc-0172,consultar_ubicacion,¿A qué unidad voy para Autorización para Avisos Simples/Luminosos?,94aa31a3-e27b-5a1b-972d-9dd347070ecd,Autorización para Avisos Simples/Luminosos
+poc-0050,consultar_requisitos,¿Qué documentos necesito para Certificado de Finca Ruinosa?,67ce8b7c-59d3-5b3c-8551-7f721160883c,Certificado de Finca Ruinosa
+poc-0123,consultar_estado,"Ya subí mi Autorización para Colocación de Casetas/Cabinas Telefónicas, ¿cómo veo si está listo?",48ee9758-6ca0-5122-bb61-142662cf001c,Autorización para Colocación de Casetas/Cabinas Telefónicas
+poc-0110,consultar_estado,¿Cómo saber el estado de mi Autorización de Construcción de Porta Cruces?,985e75e5-c203-5967-ba5e-ed982792a371,Autorización de Construcción de Porta Cruces
+poc-0071,consultar_costo,¿Cuál es el costo de Autorización para Apertura de Puerta?,2d97672d-1faa-5601-ae68-b809247c4792,Autorización para Apertura de Puerta
+poc-0009,consultar_requisitos,¿Qué llevar para Autorización de Cambio de Uso la primera vez?,51b4f7bc-216f-5cd2-ae08-d651b01830de,Autorización de Cambio de Uso
+poc-0190,consultar_ubicacion,¿Dónde hago Carné de Comercio Ambulatorio?,f9a45a33-9e11-5491-92ee-f3976a011259,Carné de Comercio Ambulatorio
+poc-0012,consultar_requisitos,"Quiero hacer Autorización de Construcción por Plazo de Ejecución, ¿qué piden?",34bd9492-3d4c-5bed-8817-2db1e9c246a3,Autorización de Construcción por Plazo de Ejecución
+poc-0126,consultar_estado,porfa ¿cómo checo el estado de Autorización para Depositar Materiales en Vía Pública?,e69bf208-72a4-5410-9d50-6ea5d155555b,Autorización para Depositar Materiales en Vía Pública
+poc-0042,consultar_requisitos,"Quiero hacer Certificaciones Diversas de Registro Civil, ¿qué piden?",eab211f4-5704-5962-8845-d53dfe35207a,Certificaciones Diversas de Registro Civil
+poc-0017,consultar_requisitos,porfa ¿qué documentos piden en Autorización de Ocupación de Vía Pública?,11111111-1111-ffff-2222-333333333333,Autorización de Ocupación de Vía Pública
+poc-0188,consultar_ubicacion,¿Cuál es la dirección para hacer Beneficio Tributario para Pensionistas?,3bfc9325-6c39-530f-a4bd-0b228598f701,Beneficio Tributario para Pensionistas
+poc-0160,consultar_ubicacion,¿Dónde hago Autorización de Construcción de Porta Cruces?,985e75e5-c203-5967-ba5e-ed982792a371,Autorización de Construcción de Porta Cruces
+poc-0164,consultar_ubicacion,¿Dónde presento los papeles de Autorización de Espectáculos Públicos No Deportivos?,960d2663-b42f-519a-9c35-5ffdc0df8c1c,Autorización de Espectáculos Públicos No Deportivos
+poc-0029,consultar_requisitos,¿Qué llevar para Autorización para Instalación de Anclas de Poste la primera vez?,d28dc2ed-9d4e-58ac-b12d-e75cdce1f4dc,Autorización para Instalación de Anclas de Poste
+poc-0088,consultar_costo,Necesito ayuda con Beneficio Tributario para Pensionistas: ¿cuánto debo pagar?,3bfc9325-6c39-530f-a4bd-0b228598f701,Beneficio Tributario para Pensionistas
+poc-0079,consultar_costo,¿Cuánto pagan en Autorización para Instalación de Anclas de Poste según el TUPA?,d28dc2ed-9d4e-58ac-b12d-e75cdce1f4dc,Autorización para Instalación de Anclas de Poste
+poc-0041,consultar_requisitos,¿Cuáles son los requisitos de Certificación de Documentos?,58537ca5-499c-58fa-ba7d-876b3ddcf945,Certificación de Documentos
+poc-0032,consultar_requisitos,"Quiero hacer Autorización para Reinstalación de Agua y Alcantarillado, ¿qué piden?",0fe1a1bc-4514-5a75-b388-5c9735bef109,Autorización para Reinstalación de Agua y Alcantarillado
+poc-0148,consultar_estado,¿Hay forma de saber en qué va mi Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones)?,60f81bc1-4eec-563b-8e5b-f6080f6e33e7,Certificado de Conformidad de Obra y Declaratoria de Fábrica (con variaciones)
+poc-0073,consultar_costo,Para Autorización para Colocación de Casetas/Cabinas Telefónicas ¿cuánto hay que pagar?,48ee9758-6ca0-5122-bb61-142662cf001c,Autorización para Colocación de Casetas/Cabinas Telefónicas
+poc-0020,consultar_requisitos,¿Qué documentos necesito para Autorización Funcionamiento Infraestructura-Residuos Sólidos?,2221457c-2d04-5b29-bc58-0fbc20870473,Autorización Funcionamiento Infraestructura-Residuos Sólidos
+poc-0154,consultar_ubicacion,¿Dónde presento los papeles de Ampliación de Plazo de Licencia de Edificación?,15ceadf4-45aa-5f05-8df3-878016388e1e,Ampliación de Plazo de Licencia de Edificación
+poc-0115,consultar_estado,oye ¿dónde veo si ya avanzó mi Autorización de Matrimonio con Orquesta y Uso de Bar?,b857c449-31e2-58b7-9379-9cb61498bff0,Autorización de Matrimonio con Orquesta y Uso de Bar
+poc-0104,consultar_estado,¿Qué pasos llevo en Ampliación de Plazo de Licencia de Edificación?,15ceadf4-45aa-5f05-8df3-878016388e1e,Ampliación de Plazo de Licencia de Edificación
+poc-0024,consultar_requisitos,Requisitos del trámite Autorización para Colocación de Postes de Líneas Telefónicas.,d30c7af3-bd74-5bb4-b775-1a046663dec4,Autorización para Colocación de Postes de Líneas Telefónicas
+poc-0039,consultar_requisitos,¿Qué llevar para Búsqueda de Documentos la primera vez?,3ac3ce81-9de1-5aaf-915e-c303316a96ab,Búsqueda de Documentos
+poc-0139,consultar_estado,Quiero revisar el estado de mi Búsqueda de Documentos.,3ac3ce81-9de1-5aaf-915e-c303316a96ab,Búsqueda de Documentos
+poc-0134,consultar_estado,¿Qué pasos llevo en Autorización para Uso de Zona de Paradero?,17b31db4-3991-5609-a1f9-7b6a0d3513ab,Autorización para Uso de Zona de Paradero
+poc-0065,consultar_costo,¿El Autorización de Matrimonio con Orquesta y Uso de Bar sale caro?,b857c449-31e2-58b7-9379-9cb61498bff0,Autorización de Matrimonio con Orquesta y Uso de Bar
+poc-0036,consultar_requisitos,"oye, para Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres ¿qué papeles piden?",7a28f862-7114-5001-a6d5-d90f968e0146,Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres
+poc-0038,consultar_requisitos,Necesito ayuda con Beneficio Tributario para Pensionistas: ¿qué documentos debo presentar?,3bfc9325-6c39-530f-a4bd-0b228598f701,Beneficio Tributario para Pensionistas
+poc-0081,consultar_costo,¿Cuál es el costo de Autorización para Instalación de Buzones/Medidores?,ce56b592-aa47-56b7-b813-242e364f0abb,Autorización para Instalación de Buzones/Medidores
+poc-0131,consultar_estado,¿Dónde consulto el estado de Autorización para Instalación de Buzones/Medidores?,ce56b592-aa47-56b7-b813-242e364f0abb,Autorización para Instalación de Buzones/Medidores
+poc-0143,consultar_estado,"Ya subí mi Certificado de Alineamiento, ¿cómo veo si está listo?",098f2f2e-b76c-5d8f-8b2d-34097385c470,Certificado de Alineamiento
+poc-0058,consultar_costo,Necesito ayuda con Autorización de Actividades Varias: ¿cuánto debo pagar?,1c2d0ef4-6a10-5705-88b8-b6fed139b39e,Autorización de Actividades Varias
+poc-0122,consultar_estado,Seguimiento del trámite Autorización para Avisos Simples/Luminosos.,94aa31a3-e27b-5a1b-972d-9dd347070ecd,Autorización para Avisos Simples/Luminosos
+poc-0008,consultar_requisitos,Necesito ayuda con Autorización de Actividades Varias: ¿qué documentos debo presentar?,1c2d0ef4-6a10-5705-88b8-b6fed139b39e,Autorización de Actividades Varias
+poc-0185,consultar_ubicacion,oye ¿dónde queda Autorización Zanjado de Tubería Matriz?,3f924951-f10f-569a-9b42-aef091e6bd3f,Autorización Zanjado de Tubería Matriz
+poc-0174,consultar_ubicacion,¿Dónde presento los papeles de Autorización para Colocación de Postes de Líneas Telefónicas?,d30c7af3-bd74-5bb4-b775-1a046663dec4,Autorización para Colocación de Postes de Líneas Telefónicas
+poc-0129,consultar_estado,Quiero revisar el estado de mi Autorización para Instalación de Anclas de Poste.,d28dc2ed-9d4e-58ac-b12d-e75cdce1f4dc,Autorización para Instalación de Anclas de Poste
+poc-0176,consultar_ubicacion,porfa dime a qué oficina voy para Autorización para Depositar Materiales en Vía Pública,e69bf208-72a4-5410-9d50-6ea5d155555b,Autorización para Depositar Materiales en Vía Pública
+poc-0089,consultar_costo,¿Cuánto pagan en Búsqueda de Documentos según el TUPA?,3ac3ce81-9de1-5aaf-915e-c303316a96ab,Búsqueda de Documentos
+poc-0108,consultar_estado,¿Hay forma de saber en qué va mi Autorización de Actividades Varias?,1c2d0ef4-6a10-5705-88b8-b6fed139b39e,Autorización de Actividades Varias
+poc-0111,consultar_estado,¿Dónde consulto el estado de Autorización de Construcción por 30 Días?,ca95ec31-87df-5755-b615-f2156d18e14b,Autorización de Construcción por 30 Días
+poc-0031,consultar_requisitos,¿Cuáles son los requisitos de Autorización para Instalación de Buzones/Medidores?,ce56b592-aa47-56b7-b813-242e364f0abb,Autorización para Instalación de Buzones/Medidores
+poc-0120,consultar_estado,¿Cómo saber el estado de mi Autorización Funcionamiento Infraestructura-Residuos Sólidos?,2221457c-2d04-5b29-bc58-0fbc20870473,Autorización Funcionamiento Infraestructura-Residuos Sólidos
+poc-0101,consultar_estado,¿Dónde consulto el estado de Acceso a la Información Pública creada u obtenida por la entidad?,8d00d343-db53-55c8-8f51-540aa9169532,Acceso a la Información Pública creada u obtenida por la entidad
+poc-0152,consultar_ubicacion,¿A qué unidad voy para Actualización de Licencia Municipal?,d29ba451-ce69-53c2-8c0e-ebc7315c6637,Actualización de Licencia Municipal
+poc-0093,consultar_costo,Para Certificado de Alineamiento ¿cuánto hay que pagar?,098f2f2e-b76c-5d8f-8b2d-34097385c470,Certificado de Alineamiento
+poc-0179,consultar_ubicacion,¿En qué local municipal atienden Autorización para Instalación de Anclas de Poste?,d28dc2ed-9d4e-58ac-b12d-e75cdce1f4dc,Autorización para Instalación de Anclas de Poste
+poc-0178,consultar_ubicacion,¿Cuál es la dirección para hacer Autorización para Instalación de Agua y Alcantarillado?,0bc23e17-9201-5bf3-a41c-d4e256c2a616,Autorización para Instalación de Agua y Alcantarillado
+poc-0105,consultar_estado,oye ¿dónde veo si ya avanzó mi Anotación Marginal de Rectificación de Matrimonio?,edd1fe8b-416b-508b-bf58-b1ed9dd263fc,Anotación Marginal de Rectificación de Matrimonio
+poc-0145,consultar_estado,oye ¿dónde veo si ya avanzó mi Certificado de Código Catastral?,ce19ee6f-482d-552f-b4e8-b1d021116d48,Certificado de Código Catastral
+poc-0092,consultar_costo,¿Cuánto es el arancel de Certificaciones Diversas de Registro Civil?,eab211f4-5704-5962-8845-d53dfe35207a,Certificaciones Diversas de Registro Civil
+poc-0121,consultar_estado,¿Dónde consulto el estado de Autorización para Apertura de Puerta?,2d97672d-1faa-5601-ae68-b809247c4792,Autorización para Apertura de Puerta
+poc-0155,consultar_ubicacion,oye ¿dónde queda Anotación Marginal de Rectificación de Matrimonio?,edd1fe8b-416b-508b-bf58-b1ed9dd263fc,Anotación Marginal de Rectificación de Matrimonio
+poc-0001,consultar_requisitos,¿Cuáles son los requisitos de Acceso a la Información Pública creada u obtenida por la entidad?,8d00d343-db53-55c8-8f51-540aa9169532,Acceso a la Información Pública creada u obtenida por la entidad
+poc-0016,consultar_requisitos,"oye, para Autorización de Obra: Cámaras, Registros, Subestaciones ¿qué papeles piden?",1f05ff2d-3bc3-5ccf-a2f9-53b5066c51a1,"Autorización de Obra: Cámaras, Registros, Subestaciones"
+poc-0168,consultar_ubicacion,¿Cuál es la dirección para hacer Autorización de Retiro de Avisos?,8d535641-e3ff-552b-b69b-2a43afa39d9b,Autorización de Retiro de Avisos
+poc-0165,consultar_ubicacion,oye ¿dónde queda Autorización de Matrimonio con Orquesta y Uso de Bar?,b857c449-31e2-58b7-9379-9cb61498bff0,Autorización de Matrimonio con Orquesta y Uso de Bar
+poc-0163,consultar_ubicacion,Ubicación del área que atiende Autorización de Espectáculos Públicos Deportivos.,c239cefe-1f40-5430-889d-9713ab2602f3,Autorización de Espectáculos Públicos Deportivos
+poc-0161,consultar_ubicacion,¿En qué oficina tramito Autorización de Construcción por 30 Días?,ca95ec31-87df-5755-b615-f2156d18e14b,Autorización de Construcción por 30 Días
+poc-0043,consultar_requisitos,Para Certificado de Alineamiento ¿qué papeles llevo?,098f2f2e-b76c-5d8f-8b2d-34097385c470,Certificado de Alineamiento
+poc-0014,consultar_requisitos,Requisitos del trámite Autorización de Espectáculos Públicos No Deportivos.,960d2663-b42f-519a-9c35-5ffdc0df8c1c,Autorización de Espectáculos Públicos No Deportivos
+poc-0069,consultar_costo,¿Cuánto pagan en Autorización de Vehículo Fuera de Ruta según el TUPA?,8c0eba1c-5996-5f15-a78b-91a620e4ea62,Autorización de Vehículo Fuera de Ruta
+poc-0136,consultar_estado,porfa ¿cómo checo el estado de Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres?,7a28f862-7114-5001-a6d5-d90f968e0146,Autorización: Colocación de Postes Eléctricos/Teléfonos/Torres
+poc-0060,consultar_costo,¿Cuánto cuesta Autorización de Construcción de Porta Cruces?,985e75e5-c203-5967-ba5e-ed982792a371,Autorización de Construcción de Porta Cruces
+poc-0135,consultar_estado,oye ¿dónde veo si ya avanzó mi Autorización Zanjado de Tubería Matriz?,3f924951-f10f-569a-9b42-aef091e6bd3f,Autorización Zanjado de Tubería Matriz
+poc-0151,consultar_ubicacion,¿En qué oficina tramito Acceso a la Información Pública creada u obtenida por la entidad?,8d00d343-db53-55c8-8f51-540aa9169532,Acceso a la Información Pública creada u obtenida por la entidad
+poc-0182,consultar_ubicacion,¿A qué unidad voy para Autorización para Reinstalación de Agua y Alcantarillado?,0fe1a1bc-4514-5a75-b388-5c9735bef109,Autorización para Reinstalación de Agua y Alcantarillado
+poc-0026,consultar_requisitos,"oye, para Autorización para Depositar Materiales en Vía Pública ¿qué papeles piden?",e69bf208-72a4-5410-9d50-6ea5d155555b,Autorización para Depositar Materiales en Vía Pública
+poc-0045,consultar_requisitos,Me falta saber qué llevar para Certificado de Código Catastral.,ce19ee6f-482d-552f-b4e8-b1d021116d48,Certificado de Código Catastral
+poc-0114,consultar_estado,¿Qué pasos llevo en Autorización de Espectáculos Públicos No Deportivos?,960d2663-b42f-519a-9c35-5ffdc0df8c1c,Autorización de Espectáculos Públicos No Deportivos
+poc-0076,consultar_costo,oye ¿cuánto es para Autorización para Depositar Materiales en Vía Pública?,e69bf208-72a4-5410-9d50-6ea5d155555b,Autorización para Depositar Materiales en Vía Pública
+poc-0141,consultar_estado,¿Dónde consulto el estado de Certificación de Documentos?,58537ca5-499c-58fa-ba7d-876b3ddcf945,Certificación de Documentos
+poc-0106,consultar_estado,porfa ¿cómo checo el estado de Anulación de Servicios Básicos?,8a8ba2bc-041d-54fe-8b16-8abd315288be,Anulación de Servicios Básicos
+poc-0175,consultar_ubicacion,oye ¿dónde queda Autorización para Colocar Banderolas?,ca3cadc6-961e-5e8a-82fc-ae1042fb2fc6,Autorización para Colocar Banderolas
+poc-0170,consultar_ubicacion,¿Dónde hago Autorización Funcionamiento Infraestructura-Residuos Sólidos?,2221457c-2d04-5b29-bc58-0fbc20870473,Autorización Funcionamiento Infraestructura-Residuos Sólidos
+poc-0132,consultar_estado,Seguimiento del trámite Autorización para Reinstalación de Agua y Alcantarillado.,0fe1a1bc-4514-5a75-b388-5c9735bef109,Autorización para Reinstalación de Agua y Alcantarillado
+poc-0144,consultar_estado,¿Qué pasos llevo en Certificado de Cambio de Uso?,579828fe-780b-5927-bd7f-64d5bd15382e,Certificado de Cambio de Uso
+poc-0187,consultar_ubicacion,Necesito ayuda con Beneficio Tributario Adulto Mayor (Ley 30490): ¿a quién le pregunto?,f46a21c3-67c7-56c3-a698-c49fba13b5cb,Beneficio Tributario Adulto Mayor (Ley 30490)
+poc-0035,consultar_requisitos,Me falta saber qué llevar para Autorización Zanjado de Tubería Matriz.,3f924951-f10f-569a-9b42-aef091e6bd3f,Autorización Zanjado de Tubería Matriz

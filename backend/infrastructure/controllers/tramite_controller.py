@@ -1,6 +1,7 @@
 """Controlador REST del catálogo de trámites municipales."""
 
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -10,7 +11,7 @@ router = APIRouter(prefix='/api/tramites', tags=['tramites'])
 
 QUERY_LISTAR_TRAMITES = """
     SELECT t.id, t.municipalidad_id, t.nombre, t.descripcion, t.tipo,
-           t.requisitos, t.costo, t.duracion_estimada_dias,
+           t.requisitos, t.costo, t.duracion_estimada_dias, t.area_responsable,
            m.nombre AS municipalidad
     FROM tramites t
     JOIN municipalidades m ON m.id = t.municipalidad_id
@@ -20,11 +21,21 @@ QUERY_LISTAR_TRAMITES = """
 
 QUERY_OBTENER_TRAMITE = """
     SELECT t.id, t.municipalidad_id, t.nombre, t.descripcion, t.tipo,
-           t.requisitos, t.costo, t.duracion_estimada_dias,
+           t.requisitos, t.costo, t.duracion_estimada_dias, t.area_responsable,
            m.nombre AS municipalidad
     FROM tramites t
     JOIN municipalidades m ON m.id = t.municipalidad_id
     WHERE t.id = $1
+"""
+
+QUERY_LISTAR_POR_IDS = """
+    SELECT t.id, t.municipalidad_id, t.nombre, t.descripcion, t.tipo,
+           t.requisitos, t.costo, t.duracion_estimada_dias, t.area_responsable,
+           m.nombre AS municipalidad
+    FROM tramites t
+    JOIN municipalidades m ON m.id = t.municipalidad_id
+    WHERE t.id = ANY($1::uuid[])
+    ORDER BY t.nombre
 """
 
 
@@ -62,3 +73,38 @@ async def obtener_tramite(
         for documento in documentos
     ]
     return tramite
+
+
+@router.get('/{tramite_id}/relacionados')
+async def tramites_relacionados(
+    tramite_id: str,
+    limite: int = Query(default=4, ge=1, le=10),
+    container: Container = Depends(obtener_container),
+) -> list[dict[str, Any]]:
+    """Trámites complementarios al indicado, por similitud de embeddings (HU-12)."""
+    try:
+        uuid_tramite = UUID(tramite_id)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail='Identificador de trámite no válido') from error
+
+    recomendaciones = await container.recomendar_tramites.ejecutar(
+        uuid_tramite, limite=limite
+    )
+    if not recomendaciones:
+        return []
+
+    filas = await container.connection.pool.fetch(
+        QUERY_LISTAR_POR_IDS, [recomendacion.id for recomendacion in recomendaciones]
+    )
+    por_id = {fila['id']: fila for fila in filas}
+
+    # Se respeta el orden de similitud (mayor a menor), no el del `ORDER BY nombre`.
+    relacionados = []
+    for recomendacion in recomendaciones:
+        fila = por_id.get(recomendacion.id)
+        if fila is None:
+            continue
+        tramite = dict(fila)
+        tramite['similitud'] = recomendacion.puntaje_relevancia
+        relacionados.append(tramite)
+    return relacionados

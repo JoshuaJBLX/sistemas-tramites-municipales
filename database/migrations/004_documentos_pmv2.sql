@@ -1,4 +1,4 @@
-"""Migrations: expand documentos y agregar fragmentos (HU-02/HU-04)."""
+-- Migración PMV2: expande documentos y crea la tabla de fragmentos (HU-02/HU-04).
 
 -- Agregar metadatos a documentos
 ALTER TABLE documentos
@@ -16,9 +16,22 @@ CREATE TABLE IF NOT EXISTS fragmentos_documento (
     documento_id   UUID NOT NULL REFERENCES documentos (id) ON DELETE CASCADE,
     orden          INT NOT NULL,
     contenido      TEXT NOT NULL,
-    embedding      vector(1024),
     creado_en      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Columna de embedding: vector(1024) con pgvector, double precision[] sin él
+-- (mismo criterio que 002_create_tables.sql para la tabla documentos).
+DO $$
+DECLARE existe_pgvector BOOLEAN;
+BEGIN
+    SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector') INTO existe_pgvector;
+
+    IF existe_pgvector THEN
+        EXECUTE 'ALTER TABLE fragmentos_documento ADD COLUMN IF NOT EXISTS embedding vector(1024)';
+    ELSE
+        EXECUTE 'ALTER TABLE fragmentos_documento ADD COLUMN IF NOT EXISTS embedding double precision[]';
+    END IF;
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_fragmentos_documento ON fragmentos_documento (documento_id);
 

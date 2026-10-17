@@ -1,6 +1,6 @@
 # 02 — Frontend
 
-> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
 
 > Next.js 14 · React 18 · Tailwind CSS — "Muni", asistente de la Municipalidad Provincial de Junín
 
@@ -325,10 +325,8 @@ eliminaron (D-1); hoy el error se muestra tal cual.
      tres acciones: **Reprocesar** (`POST …/procesar`), **Dar de baja** (`DELETE` lógico) y
      **Eliminar** (`DELETE` físico, con `confirm()`).
 - **Estado real**: es el **único panel que consume endpoints de administración de verdad**
-  (**G-12 ⬆️ parcial**). ⚠️ Hoy **no carga ni borra**: `listarTramitesAdmin()` llama a
-  `GET /api/tramites/admin`, ruta inexistente dentro de un `Promise.all` (**D-21**), y los
-  `DELETE` devuelven `204` sin cuerpo que `pedir()` intenta analizar como JSON (**D-20**); además
-  la API no arranca (**D-14**).
+  (**G-12 ✅**). ✅ **Funciona (16-oct-2026):** carga la lista (265 trámites), sube archivos con
+  metadatos, reprocesa, aprueba (`PUT …/estado`) y borra (D-14..D-23 corregidos).
 
 ### 5.16 Composición por página (quién usa a quién)
 
@@ -362,8 +360,8 @@ los endpoints reales, mientras que métricas, gráficos y logs siguen siendo maq
 | `GroundednessBadge` (% + confianza + fuentes) | HU-10, HU-16 | Muestra nivel de respaldo documental y las fuentes (trazabilidad) |
 | `TramiteCard` (costo, plazo, requisitos) | HU-07, HU-08 | Lista de requisitos con check y chips de costo/plazo |
 | `DragDropUpload` | HU-01 (parcial) | Zona de carga y "listo para indexar" — **maqueta**, no sube al backend (G-12) |
-| `DocumentManager` | HU-01, HU-02, HU-03, HU-04 | Carga con metadatos + tabla + reprocesar/bajas reales sobre `/api/admin/documentos` — ⚠️ bloqueado (D-14/D-20/D-21) |
-| `AuditLog` | HU-14 | Log de interacciones con hora y punto de color — **datos demo** (G-07) |
+| `DocumentManager` | HU-01, HU-02, HU-03, HU-04 | Carga con metadatos + tabla + reprocesar/bajas reales sobre `/api/admin/documentos` — ✅ operativo (17-oct-2026) |
+| `AuditLog` | HU-14 | Log de interacciones reales vía `GET /api/consultas` — ✅ operativo (17-oct-2026) |
 | `KpiCard` / `MiniCharts` | HU-16 | KPIs (252 trámites, 1,236 consultas, 98%) y gráficos — **datos demo** (G-06) |
 | `ServiceStatus` | HU-16 | Estado de api/BD/Redis/Ollama (usa `/health`; lo no verificado, "sin verificar") |
 | `/admin` (dashboard) | HU-13 (admin), HU-16 | Panel de funcionario; **acceso sin login real** (G-01/G-11) |
@@ -373,38 +371,38 @@ los endpoints reales, mientras que métricas, gráficos y logs siguen siendo maq
 
 | ID | Historia | Soporte en UI | Estado |
 |---|---|---|---|
-| HU-01 | Cargar documentos | `DragDropUpload` (maqueta) + `DocumentManager` (real, bloqueado) | ⚠️ G-12 ⬆️ parcial — D-14/D-20/D-21 |
-| HU-02 | Vigencia/versión/fuente | `DocumentManager` (muestra versión/fecha/estado) | ⚠️ Parcial — columnas sin crear (004 sin aplicar, D-15) |
+| HU-01 | Cargar documentos | `DocumentManager` (carga con metadatos) | ✅ G-12 |
+| HU-02 | Vigencia/versión/fuente | `DocumentManager` (muestra versión/fecha/estado) | ✅ Columnas creadas y pobladas (004 aplicada, 16-oct-2026) |
 | HU-03 | Aprobar/derogar | `DocumentManager` (baja lógica y física con `confirm()`) | ⚠️ Parcial — sin roles ni flujo de revisión (D-8) |
-| HU-04 | Procesamiento RAG | `DocumentManager` (índice `indexado`/`fragmentado` + *Reprocesar*) | ⚠️ Parcial — la tabla `fragmentos_documento` no existe en BD (D-15) |
+| HU-04 | Procesamiento RAG | `DocumentManager` (índice `indexado`/`fragmentado` + *Reprocesar*) | ✅ 004 aplicada: 20/20 fragmentos |
 | HU-05 | Consulta ciudadana | Chat completo `/chat` + chat compacto en `/` | ✅ Implementado |
 | HU-06 | Clasificación de intención | Chat (respuesta) | ⚠️ La intención no se muestra al ciudadano (G-02) |
 | HU-07 | Orientación de requisitos | `TramiteCard` + respuesta del chat | ✅/⚠️ Puntual por sustento documental |
-| HU-08 | Costos y plazos | `TramiteCard` chips | ✅/⚠️ Campos alineados (D-5); faltan montos reales del TUPA (HU-08 = 60 %) |
+| HU-08 | Costos y plazos | `TramiteCard` chips | ✅ Montos reales del TUPA + umbral "no inventar" (G-04) |
 | HU-09 | Respuestas con SLM | Burbujas del asistente | ✅ Implementado |
-| HU-10 | Trazabilidad / anti-alucinación | `GroundednessBadge` + fuentes | ✅ La API sí devuelve `groundedness` (D-2 corregido); falta trazabilidad por `GET /api/consultas/{id}` (D-9) |
-| HU-11 | Fuera de dominio | — | ❌ Sin clasificador de dominio (G-04) |
-| HU-12 | Trámites relacionados | — | ❌ G-08 |
+| HU-10 | Trazabilidad / anti-alucinación | `GroundednessBadge` + fuentes | ✅ Trazabilidad completa (D-9 cerrado) + bloqueo de afirmaciones |
+| HU-11 | Fuera de dominio | Aviso en el chat (entidad sugerida) | ✅ Clasificador de dominio (G-04 cerrado) |
+| HU-12 | Trámites relacionados | Panel "Trámites relacionados" | ✅ G-08 |
 | HU-13 | Usuarios y seguridad | Ruta `/admin` | ⚠️ Sin login/roles (G-01, G-11) |
-| HU-14 | Auditoría | `AuditLog` | ⚠️ Maqueta (G-07) |
+| HU-14 | Auditoría | `AuditLog` (datos reales) | ✅ Panel real; falta búsqueda por filtros |
 | HU-15 | Retroalimentación | — | ❌ G-05 |
 | HU-16 | Métricas y monitoreo | `KpiCard`, `MiniCharts`, `ServiceStatus` | ⚠️ Maqueta (G-06/G-16) |
 | HU-17 | Derivación municipal | Texto de respuesta | ⚠️ Solo nota genérica (G-09) |
 | HU-18 | Reportes y exportación | — | ❌ G-07 |
 
 Esta tabla describe el **soporte visual** en el frontend; el estado global de cada HU con su %
-de puntos de verificación está en [05-implementaciones.md](05-implementaciones.md) (global **59 %**,
-60/101).
+de puntos de verificación está en [05-implementaciones.md](05-implementaciones.md) (global **82 %**,
+83/101).
 
 ### 6.3 Conclusión de trazabilidad
 
 - **HU ciudadanas centrales (HU-05 → HU-10):** cubiertas visualmente de punta a punta
   (escribir → recibir → ver fuentes/confianza); G-14 quedó cerrado con `mapearTramite` y el
   `groundedness` real sí viaja en la respuesta (D-2/D-5 corregidos). Queda pendiente la
-  trazabilidad por `GET /api/consultas/{id}` (D-9).
-- **HU de gestión/admin (HU-01 → HU-04, HU-13 → HU-18):** desde `ea06c9a` **`DocumentManager`
-  sí conecta con los endpoints reales de administración** (G-12 ⬆️ parcial), pero hoy no funciona:
-  la API no arranca (D-14) y el panel tiene dos errores de integración (D-20, D-21). El resto
+  trazabilidad completa por `GET /api/consultas/{id}` (D-9 ✅).
+- **HU de gestión/admin (HU-01 → HU-04, HU-13 → HU-18):** ✅ **`DocumentManager` conecta y
+  funciona** con los endpoints reales de administración (G-12 ✅; upload → 201, aprobar → 200,
+  bajas → 204) desde la corrección de D-14/D-20/D-21 (16-oct-2026). El resto
   (`DragDropUpload`, `AuditLog`, `KpiCard`, `MiniCharts`) sigue siendo maqueta (G-06/G-07).
 
 ---
@@ -418,7 +416,7 @@ de puntos de verificación está en [05-implementaciones.md](05-implementaciones
 | `enviarConsulta(pregunta)` | `POST /api/consultas` | Timeout 45 s; mapea `texto`, `fuentes`, `confianza`, `groundedness`, `tramite_probable` |
 | `obtenerTramites()` | `GET /api/tramites` | Timeout 10 s; `mapearTramite()` traduce `tipo`→`categoria` y `duracion_estimada_dias`→`plazo` |
 | `obtenerEstadoServicios()` | `GET /health` | Estado; lo no comprobado se informa "sin verificar" |
-| 6 funciones admin (PMV2) | `/api/admin/documentos*` · `GET /api/tramites/admin` | Listado, upload, reprocesado y bajas; ⚠️ bloqueadas por D-14/D-20/D-21 |
+| funciones admin + `obtenerAuditoria()` (PMV2) | `/api/admin/documentos*`, `GET /api/consultas` | Listado, upload, reprocesado, aprobación (`PUT …/estado`), bajas y auditoría; ✅ operativas (17-oct-2026) |
 
 ### 7.2 Base URL y CORS
 - `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).
@@ -438,8 +436,7 @@ de puntos de verificación está en [05-implementaciones.md](05-implementaciones
 3. `/chat` → "¿Qué necesito para la licencia de funcionamiento?" → burbuja + **badge de
    groundedness** + fuentes TUPA + trámite probable.
 4. `/tramites` → buscar "impuesto predial", filtrar por categoría.
-5. ⚠️ **Hoy el paso 1 no puede completarse:** la API no arranca por D-14 → todo el frontend
-   mostrará errores/catálogo vacío; sin backend, `/chat` responde con el error real (ya no hay
-   demo de respaldo).
+5. ✅ **El paso 1 funciona (17-oct-2026):** la API arranca (31 rutas) y el frontend consume
+   datos reales de la BD (catálogo de 265 trámites).
 6. `/admin` → el dashboard muestra los KPIs **ficticios** (252 / 1,236 / 98 %, D-6) y
-   `DocumentManager`, que hoy no carga la tabla (D-20/D-21).
+   `DocumentManager`, que **sí carga la tabla** (D-20/D-21 corregidos).

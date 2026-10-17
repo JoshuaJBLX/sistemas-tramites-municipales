@@ -6,7 +6,8 @@
 -- El embedding se genera al indexar (BGE-M3 + pgvector).
 -- =============================================================
 
-INSERT INTO documentos (id, tramite_id, titulo, contenido, url_origen, estado, embedding)
+INSERT INTO documentos (id, tramite_id, titulo, contenido, url_origen, estado,
+                        version, fecha_publicacion, embedding)
 VALUES
     -- Inscripción de Nacimiento (TUPA 2023, pág. 399)
     ('ffffffff-ffff-ffff-ffff-ffffffffffff',
@@ -19,6 +20,8 @@ VALUES
      'vigente (ver TUPA 2023, N.º 188).',
      'https://www.munihuancayo.gob.pe/tupa/inscripcion-nacimiento',
      'vigente',
+     '1.0', 
+     DATE '2023-08-01', 
      NULL),
 
     -- Certificado de Residencia (TUPA 2023, pág. 487)
@@ -31,6 +34,8 @@ VALUES
      '(N.º 232).',
      'https://www.munihuancayo.gob.pe/tupa/certificado-residencia',
      'vigente',
+     '1.0', 
+     DATE '2023-08-01', 
      NULL),
 
     -- Licencia de Funcionamiento (TUPA 2023)
@@ -45,6 +50,8 @@ VALUES
      'riesgo del giro. Arancel según TUPA 2023.',
      'https://www.munihuancayo.gob.pe/tupa/licencia-funcionamiento',
      'vigente',
+     '1.0', 
+     DATE '2023-08-01', 
      NULL),
 
     -- Licencia de Edificación (TUPA 2023, pág. 58)
@@ -58,6 +65,8 @@ VALUES
      'TUPA 2023 (N.º 30).',
      'https://www.munihuancayo.gob.pe/tupa/licencia-edificacion',
      'vigente',
+     '1.0', 
+     DATE '2023-08-01', 
      NULL),
 
     -- Certificado de No Adeudo (TUPA 2023, pág. 397)
@@ -70,6 +79,8 @@ VALUES
      'días hábiles. Arancel según TUPA 2023 (N.º 109).',
      'https://www.munihuancayo.gob.pe/tupa/certificado-no-adeudo',
      'vigente',
+     '1.0', 
+     DATE '2023-08-01', 
      NULL),
 
     -- Inscripción de Defunción (TUPA 2023, pág. 463)
@@ -82,6 +93,8 @@ VALUES
      'Civil. Arancel según TUPA 2023 (N.º 220).',
 'https://www.munihuancayo.gob.pe/tupa/inscripcion-defuncion',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Asignación de Numeración Municipal (TUPA 2023, N.º 42)
@@ -94,6 +107,8 @@ VALUES
      'hábiles. Arancel según TUPA 2023 (N.º 42).',
      'https://www.munihuancayo.gob.pe/tupa/numeracion-municipal',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Certificado de Posesión (TUPA 2023, N.º 233)
@@ -106,6 +121,8 @@ VALUES
      '(N.º 233).',
      'https://www.munihuancayo.gob.pe/tupa/certificado-posesion',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Zonificación y Compatibilidad de Uso (TUPA 2023, N.º 34)
@@ -118,6 +135,8 @@ VALUES
      'según TUPA 2023 (N.º 34).',
      'https://www.munihuancayo.gob.pe/tupa/zonificacion-compatibilidad',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Parámetros Urbanísticos (TUPA 2023, N.º 36)
@@ -130,6 +149,8 @@ VALUES
      '2023 (N.º 36).',
      'https://www.munihuancayo.gob.pe/tupa/parametros-urbanisticos',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Habilitación Urbana (TUPA 2023, N.º 27)
@@ -142,6 +163,8 @@ VALUES
      'según modalidad. Arancel según TUPA 2023 (N.º 27).',
      'https://www.munihuancayo.gob.pe/tupa/habilitacion-urbana',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Declaratoria de Fábrica (TUPA 2023, N.º 47)
@@ -154,6 +177,8 @@ VALUES
      'hábiles. Arancel según TUPA 2023 (N.º 47).',
      'https://www.munihuancayo.gob.pe/tupa/declaratoria-fabrica',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Anuncios y Publicidad Exterior (TUPA 2023, N.º 52)
@@ -166,6 +191,8 @@ VALUES
      '(N.º 52).',
      'https://www.munihuancayo.gob.pe/tupa/anuncios-publicidad',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Comercio en Mercados y Ambulatorio (TUPA 2023, N.º 118)
@@ -177,6 +204,8 @@ VALUES
      'sanidad vigente. Plazo de atención: 5 días hábiles. Arancel según TUPA 2023 (N.º 118).',
      'https://www.munihuancayo.gob.pe/tupa/comercio-mercados',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Eventos Públicos (TUPA 2023, N.º 130)
@@ -189,6 +218,8 @@ VALUES
      '(N.º 130).',
      'https://www.munihuancayo.gob.pe/tupa/eventos-publicos',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Unión de Hecho (TUPA 2023, N.º 205)
@@ -201,6 +232,8 @@ VALUES
      '15 días hábiles. Arancel según TUPA 2023 (N.º 205).',
      'https://www.munihuancayo.gob.pe/tupa/union-de-hecho',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Empadronamiento Municipal (TUPA 2023, N.º 240)
@@ -213,6 +246,8 @@ VALUES
      'Sin costo adicional al arancel TUPA 2023 (N.º 240).',
      'https://www.munihuancayo.gob.pe/tupa/empadronamiento',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Ocupación de Vía Pública (TUPA 2023, N.º 57)
@@ -224,6 +259,8 @@ VALUES
      'cronograma. Plazo de atención: 5 días hábiles. Arancel según TUPA 2023 (N.º 57).',
      'https://www.munihuancayo.gob.pe/tupa/ocupacion-via-publica',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Matrimonio Civil (TUPA 2023, pág. 423)
@@ -237,6 +274,8 @@ VALUES
      'según TUPA 2023 (N.º 201).',
      'https://www.munihuancayo.gob.pe/tupa/matrimonio-civil',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL),
 
     -- Impuesto Predial (TUPA 2023, Tributos)
@@ -249,5 +288,7 @@ VALUES
      'y el DNI del propietario. Vigencia según TUPA 2023 y ordenanza anual de tributos.',
      'https://www.munihuancayo.gob.pe/tributos/impuesto-predial',
       'vigente',
+      '1.0', 
+      DATE '2023-08-01', 
       NULL)
 ON CONFLICT (id) DO NOTHING;

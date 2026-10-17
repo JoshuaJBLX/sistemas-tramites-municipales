@@ -38,6 +38,23 @@ class DocumentoAdminRequest(BaseModel):
         return v2
 
 
+class DocumentoEstadoRequest(BaseModel):
+    """Cambio de estado de un documento (HU-01: aprobación de calidad)."""
+
+    estado: str
+
+    @field_validator('estado')
+    @classmethod
+    def _estado_valido(cls, v: str) -> str:
+        v2 = normalizar_texto(v).lower()
+        permitido = {'vigente', 'obsoleto', 'en_revision', 'derogado'}
+        if v2 not in permitido:
+            raise ValueError(
+                f'Estado "{v2}" no válido. Valores permitidos: {", ".join(sorted(permitido))}.'
+            )
+        return v2
+
+
 class DocumentoAdminResponse(BaseModel):
     id: str
     tramite_id: str

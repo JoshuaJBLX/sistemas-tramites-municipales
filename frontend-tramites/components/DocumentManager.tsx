@@ -5,6 +5,7 @@ import {
   listarTramitesAdmin,
   subirDocumento,
   reprocesarDocumento,
+  cambiarEstadoDocumento,
   eliminarDocumentoLogico,
   eliminarDocumentoFisico,
   type DocumentoAdmin,
@@ -120,7 +121,22 @@ export default function DocumentManager() {
                 <td className="py-2">{d.fecha_publicacion || '-'}</td>
                 <td className="py-2">{d.indexado ? 'Sí' : 'No'}</td>
                 <td className="py-2">{d.fragmentado ? 'Sí' : 'No'}</td>
-                <td className="py-2 flex gap-1">
+                <td className="py-2 flex flex-wrap gap-1">
+                  {d.estado !== 'vigente' && (
+                    <button
+                      className="rounded-lg border border-emerald-400 bg-emerald-50 px-2 py-1 font-semibold text-emerald-700"
+                      title="Marcar el documento como vigente (aprobación de calidad)"
+                      onClick={async () => {
+                        try {
+                          await cambiarEstadoDocumento(d.id, 'vigente');
+                          setMsg(`«${d.titulo}» aprobado y marcado como vigente`);
+                          await cargar();
+                        } catch (e: any) { setMsg(e.message); }
+                      }}
+                    >
+                      Aprobar
+                    </button>
+                  )}
                   <button className="rounded-lg border px-2 py-1" onClick={async () => { try { await reprocesarDocumento(d.id); await cargar(); } catch (e:any) { setMsg(e.message); } }}>Reprocesar</button>
                   <button className="rounded-lg border px-2 py-1" onClick={async () => { if (confirm('¿Baja lógica?')) { await eliminarDocumentoLogico(d.id); await cargar(); } }}>Dar de baja</button>
                   <button className="rounded-lg border px-2 py-1 text-red-600" onClick={async () => { if (confirm('¿Eliminar FÍSICAMENTE? Esta acción no se deshace.')) { await eliminarDocumentoFisico(d.id); await cargar(); } }}>Eliminar</button>

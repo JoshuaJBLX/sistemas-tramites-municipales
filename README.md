@@ -8,20 +8,26 @@ asistente conversacional basado en **RAG** (PostgreSQL + búsqueda semántica) y
 La base de datos de conocimiento se alimenta del TUPA 2023 (252 procedimientos) y de
 la documentación oficial publicada en <https://www.gob.pe/munijunin>.
 
-## Estado del proyecto (16 de octubre de 2026, HEAD `ea06c9a`)
+## Estado del proyecto (17 de octubre de 2026, verificado en vivo)
 
 | Métrica | Valor |
 | --- | --- |
-| Avance global | **60/101 = 59 %** (PMV1 21/24 = **88 %** · PMV2 14/28 = **50 %** incl. HU-11 · PMV3 25/49 = **51 %** incl. HU-17) |
-| Inventario | 86 `.py` de backend · 25 `.ts`/`.tsx` · 9 `.sql` · 90 `.md` · 6 controllers (1 stub) · 10 puertos · 16 componentes front-end |
-| Endpoints | **22** declarados (16 públicos + 6 admin) — **0 servibles** hoy |
+| Avance global | **83/101 = 82 %** (PMV1 24/24 = **100 %** ✅ · PMV2 28/28 = **100 %** ✅ incl. HU-11 · PMV3 31/49 = **63 %** incl. HU-17) |
+| Inventario | 91 `.py` de backend · 25 `.ts`/`.tsx` · 11 `.sql` · 92 `.md` · 7 controllers · 11 puertos · 16 componentes front-end |
+| Endpoints | **31 rutas servibles** (la API arranca: `import main` → 31) |
+| Catálogo | **252 procedimientos TUPA** con costo y área reales (265 trámites en BD) |
+| Documentos | 20/20 con metadatos completos y **20/20 fragmentados** (RAG por fragmento activo) |
 | Pruebas | 0 suites (`pytest` ausente, G-18) |
 
-> ⚠️ **El backend PMV2 está escrito pero hoy no arranca**: `main.py` falla con `ImportError`
-> (`tramite_admin_controller` es un stub), la migración `004` no está aplicada y faltan
-> `pypdf`/`python-docx` en `requirements.txt`. Hasta cerrar los defectos **D-14..D-21** la
-> demostración de carga y fragmentación de documentos está bloqueada.
-> Detalle y plan de cierre en [`PMV2_DOCUMENTOS.md`](PMV2_DOCUMENTOS.md).
+> ✅ **PMV1 y PMV2 cerrados al 100 %** (17-oct-2026): la API arranca con 31 rutas, las migraciones
+> `004`/`005`/`006` están aplicadas, `requirements.txt` trae `pypdf`/`python-docx`/`rapidocr`,
+> el panel admin carga y la carga de un PDF real del TUPA responde **201** con texto extraído. Se
+> añadieron el umbral de rechazo "no inventar" (G-04), la trazabilidad completa con bloqueo de
+> afirmaciones y fuentes con metadatos (HU-10), el clasificador de dominio con derivación a la
+> entidad (HU-11) y el panel de auditoría real (HU-14).
+> Quedan pendientes de PMV3 la seguridad, auditoría por filtros, métricas y reportes, y la
+> validación SUS con 50 ciudadanos (P2-17, no fabricable). Estado detallado en
+> [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md).
 
 ## Estructura del proyecto
 
@@ -84,21 +90,23 @@ disponible; si no, la columna `documentos.embedding` se crea como `double precis
 `BusquedaVectorialAdapter` calcula la similitud de coseno en Python. El flujo RAG es idéntico
 en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomendado para producción).
 
-## API principal (22 endpoints: 16 públicos + 6 admin)
+## API principal (31 rutas servibles: 18 públicos + 9 admin + 4 de documentación)
 
-> ⚠️ **16-oct-2026:** el recuento publicado antes era de 13 rutas; hoy hay **22 endpoints
-> declarados** (ver `documentacion/00-documentos-rectores/06-estado-actual-implementado.md` §6.2), pero
-> **0 son servibles** hasta resolver **D-14** (la API no arranca) y **D-15** (migración `004`
-> sin aplicar). Ninguno valida autenticación ni rol (D-8).
+> ✅ **17-oct-2026 (verificación en vivo):** la API **arranca** y todos los endpoints son servibles
+> (los defectos D-14..D-23 están corregidos; ver
+> `documentacion/00-documentos-rectores/06-estado-actual-implementado.md` §13). Ninguno valida
+> autenticación ni rol (**D-8/G-01**, pendiente de PMV3).
 
-**Públicos (16):**
+**Públicos (18):**
 
 | Método | Ruta | Descripción |
 | ------ | ---- | ----------- |
 | POST | `/api/consultas` | Consulta en lenguaje natural (RAG + SLM) |
-| GET | `/api/consultas/{id}` | Trazabilidad de una consulta |
+| GET | `/api/consultas` | Listado de auditoría (`?limite=`) |
+| GET | `/api/consultas/{id}` | Trazabilidad completa (respuesta, fuentes, confianza, banderas) |
 | GET | `/api/tramites` | Catálogo de trámites |
 | GET | `/api/tramites/{id}` | Detalle del trámite y documentos vigentes |
+| GET | `/api/tramites/{id}/relacionados` | Trámites relacionados (HU-12) |
 | POST | `/api/documentos` | Registra e indexa un documento (embeddings) |
 | POST | `/api/documentos/upload` | Carga con validación de formato y extracción de texto (PMV2) |
 | GET | `/api/documentos` | Listado con filtros `tramite_id`/`estado`/`incluir_eliminados` (PMV2) |
@@ -112,7 +120,7 @@ en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomen
 | GET | `/api/usuarios/{id}/consultas` | Historial del usuario |
 | GET | `/health` | Estado del servicio |
 
-**Administración (6) — prefijo `/api/admin/documentos`:**
+**Administración (9):**
 
 | Método | Ruta | Descripción |
 | ------ | ---- | ----------- |
@@ -120,8 +128,11 @@ en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomen
 | POST | `/api/admin/documentos` | Crea por JSON y procesa en segundo plano |
 | POST | `/api/admin/documentos/upload` | Carga `multipart/form-data` con metadatos (PMV2) |
 | POST | `/api/admin/documentos/{id}/procesar` | Reprocesa un documento |
+| PUT | `/api/admin/documentos/{id}/estado` | Cambia estado con validación (P2-11) |
 | DELETE | `/api/admin/documentos/{id}` | Baja lógica |
 | DELETE | `/api/admin/documentos/{id}/fisico` | Baja física |
+| GET | `/api/tramites/admin` | Listado ampliado para el panel admin (265 filas) |
+| PUT | `/api/tramites/{id}/area` | Actualiza `area_responsable` (HU-07) |
 
 ## Flujo de una consulta (RAG)
 

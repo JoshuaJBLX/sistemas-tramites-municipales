@@ -12,6 +12,9 @@ export interface ChatMsg {
   confianza?: string;
   intencion?: string;
   pideAclaracion?: boolean;
+  afirmacionBloqueada?: boolean;
+  fueraDominio?: boolean;
+  entidadSugerida?: string;
   tramiteProbable?: TramiteProbable | null;
   fallo?: boolean;
 }
@@ -62,6 +65,16 @@ export default function ChatThread({ mensajes, cargando }: { mensajes: ChatMsg[]
             <MuniAvatar />
             <div className="min-w-0">
               <div className={`bubble-bot !rounded-2xl ${m.fallo ? 'border-amber-300' : ''}`}>
+                {m.fueraDominio && (
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-primary-500">
+                    Fuera del alcance municipal{m.entidadSugerida ? ` → ${m.entidadSugerida}` : ''}
+                  </p>
+                )}
+                {m.afirmacionBloqueada && (
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-amber-700">
+                    Afirmación bloqueada por falta de respaldo documental
+                  </p>
+                )}
                 {m.pideAclaracion && (
                   <p className="mb-1 text-xs font-bold uppercase tracking-wide text-amber-700">
                     Necesito que precises tu consulta

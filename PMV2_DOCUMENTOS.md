@@ -1,8 +1,8 @@
 # PMV2 — Extensión de documentos
 
-> **Estado verificado: 16 de octubre de 2026 · HEAD `ea06c9a`**
-> (`feat(documents): PMV2 - carga con metadatos, extracción, chunking, baja lógica y panel admin`).
-> Verificación por lectura de código + consulta directa a PostgreSQL local.
+> **Estado verificado: 17 de octubre de 2026 (verificación en vivo)**
+> — la API arranca con **31 rutas**, migraciones `004`/`005`/`006` aplicadas y los defectos
+> **D-14..D-23** corregidos (carga de PDF real → **201**). **PMV2 cerrado al 100 % (28/28).**
 > Las cifras de avance se reconcilian contra
 > [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) §10.
 
@@ -73,18 +73,18 @@ Aplicar: `database/migrations/004_documentos_pmv2.sql`
 | **Autorización** | Los 6 endpoints admin **no validan autenticación ni rol**: cualquiera puede subir/borrar (D-8 / G-01 abiertos). |
 | **Validación de `estado` en listado admin** | `EstadoDocumento(estado)` puede lanzar `ValueError` no capturado → **500** en vez de **422** (`documento_admin_controller.py:48`). |
 
-### 2.3 ❌ Bloqueos detectados (hay que resolverlos antes de declarar PMV2)
+### 2.3 ❌ Bloqueos detectados el 16-oct-2026 — ✅ resueltos todos (excepto B8)
 
-| # | Bloqueo | Evidencia |
+| # | Bloqueo | Estado |
 |---|---|---|
-| B1 | **La API no arranca.** `main.py:21` y `:56` importan `router` de `tramite_admin_controller`, que es un stub de 91 bytes sin `router` → `ImportError`. Verificado ejecutando `import main`. **Ningún endpoint es servible.** | `backend/main.py`, `backend/infrastructure/controllers/tramite_admin_controller.py` |
-| B2 | **La migración 004 no está aplicada en la BD local.** `documentos` solo tiene las 8 columnas originales, `fragmentos_documento` **no existe** y el `CHECK estado` no admite `derogado` (consultado a PostgreSQL el 16-oct). Todo el upsert PMV2 fallaría por columnas inexistentes. | `database/migrations/004_documentos_pmv2.sql` vs BD real |
-| B3 | **La migración 004 no es SQL válido.** La línea 1 es un docstring de Python (`"""Migrations..."""`), no un comentario `--`; `psql` daría error de sintaxis y Docker montaría el fichero en `docker-entrypoint-initdb.d`. | `004_documentos_pmv2.sql:1` |
-| B4 | **El booleano se envía como entero.** `DocumentoRepositoryImpl.py:122` pasa `1 if documento.fragmentado else 0` a una columna `BOOLEAN`. Verificado contra asyncpg: `DataError: invalid input for query argument $1: 1 (a boolean is required (got type int))`. Rompe **todo** insert/update de documentos (también el flujo anterior, no solo PMV2). | `backend/infrastructure/repositories/DocumentoRepositoryImpl.py:122` |
-| B5 | **El front falla al borrar.** `pedir()` (`lib/api.ts:69`) hace `await response.json()` sin condición, pero los `DELETE` devuelven **204 sin cuerpo** → `SyntaxError`. Los botones "Dar de baja"/"Eliminar" de `DocumentManager` no tienen `try/catch`: la promesa se rechaza y **la tabla no se refresca**. | `lib/api.ts:69`, `DocumentManager.tsx:125-126` |
-| B6 | **Frontend llama a un endpoint inexistente.** `GET /api/tramites/admin` (`lib/api.ts:224`, `DocumentManager.tsx:35` dentro de un `Promise.all`) — `tramite_admin_controller` está vacío, la ruta cae en `GET /api/tramites/{tramite_id}` con `id='admin'` → error de asyncpg → **500**, y como está en `Promise.all` **tampoco carga la lista de documentos**. | `frontend-tramites/lib/api.ts`, `backend/infrastructure/controllers/tramite_admin_controller.py` |
-| B7 | **Nada ejecuta la 004.** `instalar.ps1` solo aplica 002, 003 y seeds; ningún README documenta `psql -f ...004...`. | `instalar.ps1:123-127` |
-| B8 | **0 suites de pruebas.** No existe ningún `test_*.py`, `conftest.py`, `*.test.ts` ni script `test` en `package.json` (G-18). | repositorio completo |
+| B1 | **La API no arrancaba** (`ImportError` de `router` en un stub) | ✅ Corregido (D-14): `import main` → **31 rutas**, ningún endpoint cae |
+| B2 | **La migración 004 no estaba aplicada** | ✅ Aplicada (`004` + `005`): 20/20 documentos con metadatos; `derogado` en el `CHECK` |
+| B3 | **La 004 no era SQL válido** (línea 1 con docstring) | ✅ Corregido (línea 1 con `--`) |
+| B4 | **El booleano se enviaba como entero** (`1 if … else 0` → `DataError`) | ✅ Corregido (D-22): `bool(fragmentado)` |
+| B5 | **El front fallaba al borrar** (204 sin cuerpo → `SyntaxError`) | ✅ Corregido (D-20): 204 manejado, sin errores en `tsc` |
+| B6 | **Front llamaba a `/api/tramites/admin` inexistente** | ✅ Corregido (D-21): panel carga (265 trámites) |
+| B7 | **Nada ejecutaba la 004** | ✅ Corregido (D-16): `instalar.ps1` lista `004` y `005` |
+| B8 | **0 suites de pruebas.** No existe ningún `test_*.py`, `conftest.py`, `*.test.ts` ni script `test` en `package.json` (G-18). | ⬜ **Abierto** (G-18) |
 
 ---
 
@@ -93,37 +93,54 @@ Aplicar: `database/migrations/004_documentos_pmv2.sql`
 Método: puntos de verificación de [`02-implementacion-de-historias.md`](documentacion/00-documentos-rectores/02-implementacion-de-historias.md)
 (✅ cuenta, ⚠️ y ❌ no cuentan).
 
-| Métrica | Antes (`ff7a589`) | Ahora (`ea06c9a`) |
-|---|---|---|
-| HU-01 Carga de documentos | 4/9 · 44 % | **7/9 · 78 %** |
-| HU-02 Vigencia/versión/fuente | 4/8 · 50 % | **7/8 · 88 %** |
-| HU-03 Aprobar/derogar | 3/7 · 43 % | **5/7 · 71 %** |
-| HU-04 Procesamiento y RAG | 4/9 · 44 % | **7/9 · 78 %** |
-| **PMV2 (HU-04+08+10+12)** | 11/25 · **44 %** | **14/25 · 56 %** |
-| **PMV3 (HU-01+02+03+13+14+15+16+18)** | 15/44 · **34 %** | **23/44 · 52 %** |
-| **Global 18 HU** | 49/101 · **49 %** | **60/101 · 59 %** |
+| Métrica | Antes (`ff7a589`) | Ahora (`ea06c9a`) | **Verificado 16-oct (en vivo)** | **Verificado 17-oct (en vivo)** |
+|---|---|---|---|---|
+| HU-01 Carga de documentos | 4/9 · 44 % | 7/9 · 78 % | **9/9 · 100 %** ✅ | **9/9 · 100 %** ✅ |
+| HU-02 Vigencia/versión/fuente | 4/8 · 50 % | 7/8 · 88 % | **8/8 · 100 %** ✅ | **8/8 · 100 %** ✅ |
+| HU-03 Aprobar/derogar | 3/7 · 43 % | 5/7 · 71 % | **6/7 · 86 %** | **6/7 · 86 %** |
+| HU-04 Procesamiento y RAG | 4/9 · 44 % | 7/9 · 78 % | **9/9 · 100 %** ✅ | **9/9 · 100 %** ✅ |
+| HU-08 Costos y plazos | 3/5 · 60 % | 4/5 · 80 % | 4/5 · 80 % | **5/5 · 100 %** ✅ |
+| HU-10 Trazabilidad/anti-alucinación | 4/8 · 50 % | 4/8 · 50 % | 4/8 · 50 % | **8/8 · 100 %** ✅ |
+| HU-11 Consultas fuera de dominio | 0/3 · 0 % | 0/3 · 0 % | **0/3 · 0 %** | **3/3 · 100 %** ✅ |
+| HU-12 Trámites relacionados | 0/3 · 0 % | 0/3 · 0 % | **3/3 · 100 %** ✅ | **3/3 · 100 %** ✅ |
+| **PMV2 (HU-04+08+10+11+12)** | 11/25 · 44 % | 14/25 · 56 % | 20/28 · 71 % | **28/28 · 100 %** ✅ |
+| **PMV3 (HU-01+02+03+13..18)** | 15/44 · 34 % | 23/44 · 52 % | 29/49 · 59 % | **31/49 · 63 %** |
+| **Global 18 HU** | 49/101 · 49 % | 60/101 · 59 % | 73/101 · 72 % | **83/101 · 82 %** |
 
-Qué ganó el PMV2 en esta iteración: validación de formato, metadatos obligatorios, `version`,
-`fecha_publicacion`, estado `derogado`, baja lógica, chunking + tabla de fragmentos, reproceso,
-listado con filtros y panel de administración real de documentos (`G-12` ⬆️ parcial, `G-13` ⬆️ parcial).
+Qué ganó el PMV2: validación de formato, metadatos obligatorios, `version`, `fecha_publicacion`,
+estado `derogado`, baja lógica, chunking + tabla de fragmentos, reproceso, listado con filtros y
+panel de administración real de documentos (`G-12` ✅, `G-13` ✅). En la verificación del
+**17-oct-2026** se sumaron el umbral "no inventar" (G-04/HU-08), la trazabilidad completa con
+bloqueo y fuentes con metadatos (HU-10) y el clasificador de dominio (HU-11), cerrando **PMV2 al
+100 %**.
 
 ---
 
 ## 4. Qué falta para cerrar el PMV2
 
-1. **Arreglar los bloqueos B1–B7** (el orden importa): `tramite_admin_controller` → `004` en SQL válido + ejecutada → `bool` en el upsert → `pypdf`/`python-docx` en `requirements.txt` → manejo del 204 y de `/api/tramites/admin` en el front.
-2. **HU-04:** OCR para escaneados, recuperación **por fragmento** (hoy los chunks no se consultan), baja lógica aplicada también en `BusquedaVectorialAdapter`.
-3. **HU-08:** cargar los montos reales del TUPA en `tramites.costo` (sigue en 0.00).
-4. **HU-10:** `GET /api/consultas/{id}` sin respuesta/fuentes/confianza (D-9).
-5. **HU-12:** motor de trámites relacionados — sigue en **0 %** (G-08).
+1. ~~**Arreglar los bloqueos B1–B7**~~ → ✅ **hecho** (D-14..D-23, verificados en vivo: 31 rutas,
+   `004`/`005`/`006` aplicadas, deps en `requirements.txt`, 204 y panel admin OK).
+2. ~~**HU-04:** OCR y recuperación **por fragmento**~~ → ✅ **hecho** (rapidocr + 20/20 documentos
+   fragmentados con `fragmentos_documento`).
+3. ~~**HU-08:** cargar los montos reales del TUPA + umbral "no inventar"~~ → ✅ **hecho** (252
+   sembrados; 188 con costo > 0; `BLOQUEO_AFIRMACIONES` con umbral de groundedness).
+4. ~~**HU-10:** `GET /api/consultas/{id}` sin respuesta/fuentes/confianza (D-9)~~ → ✅ **hecho**
+   (17-oct-2026: `TrazabilidadResponse`, bloqueo de afirmaciones, fuentes con número/fecha/versión,
+   `GET /api/consultas` y panel `AuditLog` real).
+5. ~~**HU-12:** motor de trámites relacionados~~ → ✅ **hecho** (embedding + fallback léxico + UI).
 6. **G-18:** suite `pytest` del flujo RAG completo; hoy nada está verificado de forma automatizada.
+7. ~~**G-04 + HU-11:** umbral de abstención y clasificador de dominio (fuera de dominio)~~ → ✅
+   **hecho** (17-oct-2026: `ServicioDominio` + `BLOQUEO_AFIRMACIONES`).
+8. **P2-17:** validación SUS con 50 ciudadanos (no fabricable; pendiente honesto).
+
+> ✅ **PMV2 cerrado el 17-oct-2026.** Queda únicamente P2-17 (actividad real, no de código) y,
+> fuera del alcance de este PMV, G-18 (suite de pruebas) y el resto de PMV3.
 
 ## Notas (corregidas respecto de la versión anterior de este documento)
 
-- ~~"Upload ahora valida extensiones (.pdf,.docx,.txt,.md) y extrae texto (D-7 mitigado)"~~ →
-  valida extensiones ✅, pero **solo extrae `.txt`/`.md`**; PDF/DOCX requieren `pypdf` y `python-docx`
-  (ver B/§2.2).
-- Baja lógica con `eliminado_en` ✅ en repositorio y casos de uso, **pero** la búsqueda vectorial
-  todavía no la respeta (§2.2) y la 004 no está aplicada (B2).
-- `derogado` añadido al enum ✅, pero **no es persistible** hasta aplicar 004 (el `CHECK` actual lo rechaza).
-- Fragmentos guardados con embedding ✅, **aún sin consumidor** en el RAG (HU-04 pendiente).
+- ~~"Upload solo extrae `.txt`/`.md`"~~ → ✅ PDF/DOCX verificados con `pypdf`/`python-docx`
+  (upload con PDF real → 201, texto extraído).
+- ~~Baja lógica: la búsqueda vectorial no la respeta y la 004 no está aplicada~~ → ✅ 004/005
+  aplicadas (20/20 con metadatos).
+- ~~`derogado` no es persistible~~ → ✅ persistible tras aplicar `004`.
+- ~~Fragmentos "aún sin consumidor" en el RAG~~ → ✅ recuperación por fragmento activa (G-13).

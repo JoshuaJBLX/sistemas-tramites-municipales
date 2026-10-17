@@ -4,6 +4,7 @@ from uuid import UUID
 
 from domain.entities.Consulta import Consulta
 from domain.entities.Respuesta import Respuesta
+from domain.entities.Trazabilidad import Trazabilidad
 from domain.ports.AuditoriaPort import AuditoriaPort
 from domain.ports.ConsultaRepository import ConsultaRepository
 
@@ -26,3 +27,11 @@ class ServicioAuditoria:
 
     async def obtener_consulta(self, consulta_id: UUID) -> Consulta | None:
         return await self._consulta_repository.obtener_por_id(consulta_id)
+
+    async def obtener_trazabilidad(self, consulta_id: UUID) -> Trazabilidad | None:
+        """HU-10 (D-9): consulta con su respuesta auditada completa."""
+        return await self._auditoria.obtener_trazabilidad(consulta_id)
+
+    async def listar_trazabilidad(self, limite: int = 20) -> list[Trazabilidad]:
+        """HU-10/HU-14: últimas consultas con su respuesta auditada."""
+        return await self._auditoria.listar_trazabilidad(limite)

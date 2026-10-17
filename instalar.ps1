@@ -123,6 +123,8 @@ if ($LASTEXITCODE -ne 0) {
     $archivos = @(
         'database/migrations/002_create_tables.sql',
         'database/migrations/003_create_vectors.sql',
+        'database/migrations/004_documentos_pmv2.sql',
+        'database/migrations/005_area_responsable.sql',
         'database/seeds/municipios.sql',
         'database/seeds/tramites.sql',
         'database/seeds/documentos.sql'

@@ -19,6 +19,10 @@ class Respuesta:
     confianza_intencion: float = 0.0
     pide_aclaracion: bool = False
     tramite_probable: TramiteProbable | None = None
+    # --- Anti-alucinación (HU-10 / G-04) y alcance (HU-11) ---
+    afirmaciones_bloqueadas: bool = False
+    fuera_dominio: bool = False
+    entidad_sugerida: str = ''
 
     def es_confiable(self) -> bool:
         return self.confianza in (NivelConfianza.ALTA, NivelConfianza.MEDIA)

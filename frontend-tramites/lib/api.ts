@@ -8,6 +8,9 @@ export interface FuenteCitada {
   titulo: string;
   fragmento?: string;
   url?: string;
+  numero?: string;
+  fecha?: string;
+  version?: string;
 }
 
 export interface TramiteProbable {
@@ -26,6 +29,9 @@ export interface RespuestaConsulta {
   groundedness: number;
   confianza_intencion: number;
   pide_aclaracion: boolean;
+  afirmaciones_bloqueadas: boolean;
+  fuera_dominio: boolean;
+  entidad_sugerida: string;
   intencion: string;
   tramite_probable: TramiteProbable | null;
 }
@@ -39,6 +45,7 @@ export interface Tramite {
   plazo: string;
   requisitos: string[];
   municipalidad?: string;
+  area?: string | null;
 }
 
 export const SUGERENCIAS_RAPIDAS = [
@@ -66,7 +73,13 @@ async function pedir<T>(url: string, init: RequestInit, timeoutMs: number): Prom
       const detalle = await leerDetalle(response);
       throw new Error(detalle ?? `El servidor respondió ${response.status}.`);
     }
-    return (await response.json()) as T;
+    // 204 No Content (DELETE) y respuestas sin cuerpo: no hay JSON que leer (D-20).
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return undefined as T;
+    }
+    const texto = await response.text();
+    if (!texto.trim()) return undefined as T;
+    return JSON.parse(texto) as T;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('La consulta está tardando demasiado. Intenta de nuevo en unos segundos.');
@@ -95,9 +108,37 @@ export async function enviarConsulta(pregunta: string): Promise<RespuestaConsult
     groundedness: typeof data.groundedness === 'number' ? data.groundedness : 0,
     confianza_intencion: typeof data.confianza_intencion === 'number' ? data.confianza_intencion : 0,
     pide_aclaracion: Boolean(data.pide_aclaracion),
+    afirmaciones_bloqueadas: Boolean(data.afirmaciones_bloqueadas),
+    fuera_dominio: Boolean(data.fuera_dominio),
+    entidad_sugerida: data.entidad_sugerida ?? '',
     intencion: data.intencion ?? 'desconocida',
     tramite_probable: data.tramite_probable ?? null,
   };
+}
+
+// ---------- Auditoría (HU-10 / HU-14): trazabilidad real de las consultas ----------
+export interface RegistroAuditoria {
+  id: string;
+  pregunta: string;
+  intencion?: string | null;
+  creada_en: string;
+  respuesta?: string | null;
+  confianza?: string | null;
+  groundedness: number;
+  afirmaciones_bloqueadas: boolean;
+  fuera_dominio: boolean;
+  entidad_sugerida: string;
+  fuentes: FuenteCitada[];
+  registrado_en?: string | null;
+}
+
+export async function obtenerAuditoria(limite = 20): Promise<RegistroAuditoria[]> {
+  const data = await pedir<RegistroAuditoria[]>(
+    `/api/consultas?limite=${limite}`,
+    {},
+    TIMEOUT_CATALOGO_MS,
+  );
+  return Array.isArray(data) ? data : [];
 }
 
 interface TramiteCrudo {
@@ -109,6 +150,7 @@ interface TramiteCrudo {
   costo: number | string | null;
   duracion_estimada_dias: number | null;
   municipalidad?: string;
+  area_responsable?: string | null;
 }
 
 function formatearCosto(valor: number | string | null): string {
@@ -132,12 +174,31 @@ export function mapearTramite(fila: TramiteCrudo): Tramite {
     plazo: formatearPlazo(fila.duracion_estimada_dias),
     requisitos: fila.requisitos ?? [],
     municipalidad: fila.municipalidad,
+    area: fila.area_responsable ?? null,
   };
+}
+
+export interface TramiteRelacionado extends Tramite {
+  similitud: number;
 }
 
 export async function obtenerTramites(): Promise<Tramite[]> {
   const data = await pedir<TramiteCrudo[]>('/api/tramites', {}, TIMEOUT_CATALOGO_MS);
   return Array.isArray(data) ? data.map(mapearTramite) : [];
+}
+
+export async function obtenerTramitesRelacionados(
+  tramiteId: string,
+  limite = 4,
+): Promise<TramiteRelacionado[]> {
+  const data = await pedir<(TramiteCrudo & { similitud: number })[]>(
+    `/api/tramites/${tramiteId}/relacionados?limite=${limite}`,
+    {},
+    TIMEOUT_CATALOGO_MS,
+  );
+  return Array.isArray(data)
+    ? data.map((fila) => ({ ...mapearTramite(fila), similitud: fila.similitud ?? 0 }))
+    : [];
 }
 
 export interface EstadoServicios {
@@ -210,6 +271,23 @@ export async function subirDocumento(
 
 export async function reprocesarDocumento(id: string): Promise<DocumentoAdmin> {
   return pedir<DocumentoAdmin>(`/api/admin/documentos/${id}/procesar`, { method: 'POST' }, TIMEOUT_CATALOGO_MS);
+}
+
+export type EstadoDocumentoAdmin = 'vigente' | 'obsoleto' | 'en_revision' | 'derogado';
+
+export async function cambiarEstadoDocumento(
+  id: string,
+  estado: EstadoDocumentoAdmin,
+): Promise<DocumentoAdmin> {
+  return pedir<DocumentoAdmin>(
+    `/api/admin/documentos/${id}/estado`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estado }),
+    },
+    TIMEOUT_CATALOGO_MS,
+  );
 }
 
 export async function eliminarDocumentoLogico(id: string): Promise<void> {

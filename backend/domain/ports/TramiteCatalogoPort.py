@@ -18,3 +18,13 @@ class TramiteCatalogoPort(ABC):
         base de datos, en lugar de dejarlos al redactado del modelo (HU-05, HU-07).
         """
         ...
+
+    @abstractmethod
+    async def relacionados(
+        self, tramite_id: UUID, limite: int = 4
+    ) -> list[TramiteProbable]:
+        """Trámites más parecidos al indicado, por similitud de sus embeddings.
+
+        Base del motor de recomendación de trámites complementarios (HU-12).
+        """
+        ...

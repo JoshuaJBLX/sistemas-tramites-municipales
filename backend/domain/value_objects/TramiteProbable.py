@@ -20,6 +20,8 @@ class TramiteProbable:
     fuente_url: str | None = None
     documentos_coincidentes: int = 0
     puntaje_relevancia: float = 0.0
+    # Oficina o área municipal que tramita el procedimiento (HU-07).
+    area_responsable: str | None = None
 
     def resumen_requisitos(self, limite: int | None = None) -> list[str]:
         """Devuelve la lista de requisitos, opcionalmente recortada."""

@@ -19,11 +19,14 @@ class ConsultaRequest(BaseModel):
 
 
 class FuenteResponse(BaseModel):
-    """Fuente citada. Incluye el título para que el front pueda mostrarla."""
+    """Fuente citada. Incluye título y metadatos disponibles (HU-10 / P3-08)."""
 
     url: str
     fragmento: str
     titulo: str = ''
+    numero: str = ''
+    fecha: str = ''
+    version: str = ''
 
 
 class TramiteProbableResponse(BaseModel):
@@ -35,6 +38,9 @@ class TramiteProbableResponse(BaseModel):
     costo: float = 0.0
     duracion_estimada_dias: int = 0
     fuente_url: str | None = None
+    area: str | None = Field(
+        default=None, description='Área u oficina responsable del trámite (HU-07)'
+    )
 
 
 class RespuestaResponse(BaseModel):
@@ -45,6 +51,15 @@ class RespuestaResponse(BaseModel):
     groundedness: float = 0.0
     confianza_intencion: float = 0.0
     pide_aclaracion: bool = False
+    afirmaciones_bloqueadas: bool = Field(
+        default=False, description='HU-10/G-04: la afirmación fue bloqueada por bajo groundedness'
+    )
+    fuera_dominio: bool = Field(
+        default=False, description='HU-11: la consulta corresponde a otra entidad'
+    )
+    entidad_sugerida: str = Field(
+        default='', description='HU-11: entidad externa sugerida (SUNAT, RENIEC…)'
+    )
     tramite_probable: TramiteProbableResponse | None = None
     fuentes: list[FuenteResponse] = Field(default_factory=list)
 
@@ -57,6 +72,30 @@ class ConsultaResponse(BaseModel):
     creada_en: datetime
 
 
+class TrazabilidadResponse(ConsultaResponse):
+    """HU-10 (D-9): la consulta con su respuesta auditada completa."""
+
+    respuesta: str | None = None
+    confianza: str | None = None
+    groundedness: float = 0.0
+    afirmaciones_bloqueadas: bool = False
+    fuera_dominio: bool = False
+    entidad_sugerida: str = ''
+    fuentes: list[FuenteResponse] = Field(default_factory=list)
+    registrado_en: datetime | None = None
+
+
+def _datos_fuente(fuente) -> dict:
+    return {
+        'url': fuente.url,
+        'fragmento': fuente.fragmento,
+        'titulo': fuente.titulo,
+        'numero': fuente.numero,
+        'fecha': fuente.fecha,
+        'version': fuente.version,
+    }
+
+
 def _cuerpo_respuesta(respuesta) -> dict:
     """Serializa la respuesta en el formato que consume el front-end."""
     cuerpo = {
@@ -65,14 +104,10 @@ def _cuerpo_respuesta(respuesta) -> dict:
         'groundedness': respuesta.groundedness,
         'confianza_intencion': respuesta.confianza_intencion,
         'pide_aclaracion': respuesta.pide_aclaracion,
-        'fuentes': [
-            {
-                'url': fuente.url,
-                'fragmento': fuente.fragmento,
-                'titulo': fuente.titulo,
-            }
-            for fuente in respuesta.fuentes
-        ],
+        'afirmaciones_bloqueadas': respuesta.afirmaciones_bloqueadas,
+        'fuera_dominio': respuesta.fuera_dominio,
+        'entidad_sugerida': respuesta.entidad_sugerida,
+        'fuentes': [_datos_fuente(fuente) for fuente in respuesta.fuentes],
     }
 
     tramite = respuesta.tramite_probable
@@ -84,6 +119,7 @@ def _cuerpo_respuesta(respuesta) -> dict:
             'costo': tramite.costo,
             'duracion_estimada_dias': tramite.duracion_estimada_dias,
             'fuente_url': tramite.fuente_url,
+            'area': tramite.area_responsable,
         }
         if tramite is not None
         else None
@@ -193,6 +229,7 @@ def _respuesta_desde_cuerpo(cuerpo: dict, consulta_id: UUID):
             costo=tramite.get('costo', 0.0),
             duracion_estimada_dias=tramite.get('duracion_estimada_dias', 0),
             fuente_url=tramite.get('fuente_url'),
+            area_responsable=tramite.get('area'),
         )
         if tramite
         else None
@@ -218,23 +255,50 @@ def _respuesta_desde_cuerpo(cuerpo: dict, consulta_id: UUID):
         confianza_intencion=cuerpo.get('confianza_intencion', 0.0),
         pide_aclaracion=cuerpo.get('pide_aclaracion', False),
         tramite_probable=tramite_probable,
+        afirmaciones_bloqueadas=cuerpo.get('afirmaciones_bloqueadas', False),
+        fuera_dominio=cuerpo.get('fuera_dominio', False),
+        entidad_sugerida=cuerpo.get('entidad_sugerida', ''),
     )
 
 
-@router.get('/{consulta_id}', response_model=ConsultaResponse)
+def _cuerpo_trazabilidad(trazabilidad) -> TrazabilidadResponse:
+    """HU-10: serializa una trazabilidad completa para el front-end."""
+    return TrazabilidadResponse(
+        id=trazabilidad.consulta.id,
+        usuario_id=trazabilidad.consulta.usuario_id,
+        pregunta=trazabilidad.consulta.pregunta,
+        intencion=trazabilidad.consulta.intencion,
+        creada_en=trazabilidad.consulta.creada_en,
+        respuesta=trazabilidad.respuesta,
+        confianza=trazabilidad.confianza,
+        groundedness=trazabilidad.groundedness,
+        afirmaciones_bloqueadas=trazabilidad.afirmaciones_bloqueadas,
+        fuera_dominio=trazabilidad.fuera_dominio,
+        entidad_sugerida=trazabilidad.entidad_sugerida,
+        fuentes=[_datos_fuente(fuente) for fuente in trazabilidad.fuentes],
+        registrado_en=trazabilidad.registrado_en,
+    )
+
+
+@router.get('', response_model=list[TrazabilidadResponse])
+async def listar_consultas(
+    limite: int = 20,
+    container: Container = Depends(obtener_container),
+) -> list[TrazabilidadResponse]:
+    """HU-10/HU-14: últimas consultas con su respuesta auditada (panel de auditoría)."""
+    cantidad = max(1, min(limite, 100))
+    registros = await container.auditar_consulta.listar_trazabilidad(cantidad)
+    return [_cuerpo_trazabilidad(registro) for registro in registros]
+
+
+@router.get('/{consulta_id}', response_model=TrazabilidadResponse)
 async def obtener_consulta(
     consulta_id: UUID,
     container: Container = Depends(obtener_container),
-) -> ConsultaResponse:
-    """Recupera una consulta registrada por su identificador."""
-    consulta = await container.auditar_consulta.consultar_trazabilidad(consulta_id)
-    if consulta is None:
+) -> TrazabilidadResponse:
+    """HU-10 (D-9): consulta con su respuesta, fuentes y confianza auditadas."""
+    trazabilidad = await container.auditar_consulta.consultar_trazabilidad(consulta_id)
+    if trazabilidad is None:
         raise HTTPException(status_code=404, detail='Consulta no encontrada')
 
-    return ConsultaResponse(
-        id=consulta.id,
-        usuario_id=consulta.usuario_id,
-        pregunta=consulta.pregunta,
-        intencion=consulta.intencion,
-        creada_en=consulta.creada_en,
-    )
+    return _cuerpo_trazabilidad(trazabilidad)

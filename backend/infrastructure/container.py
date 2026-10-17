@@ -1,8 +1,9 @@
 """Contenedor de dependencias actualizado con módulos de documentos (HU-01..HU-04)."""
 
+import json
 import os
 from dataclasses import dataclass
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import Request
 
@@ -10,6 +11,7 @@ from application.services.EvaluadorGroundedness import EvaluadorGroundedness
 from application.services.ServicioAuditoria import ServicioAuditoria
 from application.services.ServicioCache import ServicioCache
 from application.services.ServicioChunking import ServicioChunking
+from application.services.ServicioDominio import ServicioDominio
 from application.services.ServicioNLP import ServicioNLP
 from application.services.ServicioOrientacion import ServicioOrientacion
 from application.services.ServicioRAG import ServicioRAG
@@ -23,9 +25,11 @@ from application.use_cases.GenerarOrientacion import GenerarOrientacion
 from application.use_cases.GestionarDocumentos import GestionarDocumentos
 from application.use_cases.IdentificarTramiteProbable import IdentificarTramiteProbable
 from application.use_cases.ProcesarDocumento import ProcesarDocumento
+from application.use_cases.RecomendarTramites import RecomendarTramites
 from application.use_cases.RegistrarConsulta import RegistrarConsulta
 from domain.entities.Consulta import Consulta
 from domain.entities.Respuesta import Respuesta
+from domain.entities.Trazabilidad import Trazabilidad
 from domain.ports.AuditoriaPort import AuditoriaPort
 from domain.ports.BusquedaSemanticaPort import BusquedaSemanticaPort
 from domain.ports.CachePort import CachePort
@@ -34,6 +38,8 @@ from domain.ports.DocumentoRepository import DocumentoRepository
 from domain.ports.FragmentoRepository import FragmentoRepository
 from domain.ports.GeneracionRespuestaPort import GeneracionRespuestaPort
 from domain.ports.TramiteCatalogoPort import TramiteCatalogoPort
+from domain.value_objects.FuenteOficial import FuenteOficial
+from domain.value_objects.IntencionConsulta import IntencionConsulta
 from infrastructure.adapters.cache.RedisAdapter import RedisAdapter
 from infrastructure.adapters.catalog.TramiteCatalogoAdapter import TramiteCatalogoAdapter
 from infrastructure.adapters.documents.DocumentStorageAdapter import (
@@ -53,9 +59,95 @@ from infrastructure.repositories.DocumentoRepositoryImpl import DocumentoReposit
 from infrastructure.repositories.FragmentoRepositoryImpl import FragmentoRepositoryImpl
 
 QUERY_AUDITORIA = """
-    INSERT INTO auditoria_consultas (id, consulta_id, respuesta, confianza, fuentes, registrado_en)
-    VALUES ($1, $2, $3, $4, $5, NOW())
+    INSERT INTO auditoria_consultas (
+        id, consulta_id, respuesta, confianza, fuentes, fuentes_detalle,
+        groundedness, fuera_dominio, afirmaciones_bloqueadas, entidad_sugerida,
+        registrado_en
+    )
+    VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10, NOW())
 """
+
+# HU-10 (D-9): la trazabilidad une la consulta con su última respuesta
+# auditada (texto, confianza, groundedness y fuentes con metadatos).
+_TRAZABILIDAD_COLUMNAS = """
+    SELECT c.id, c.usuario_id, c.pregunta, c.intencion, c.creada_en,
+           a.respuesta, a.confianza, a.groundedness, a.fuentes_detalle,
+           a.fuera_dominio, a.afirmaciones_bloqueadas, a.entidad_sugerida,
+           a.registrado_en
+    FROM consultas c
+    LEFT JOIN LATERAL (
+        SELECT respuesta, confianza, groundedness, fuentes_detalle,
+               fuera_dominio, afirmaciones_bloqueadas, entidad_sugerida,
+               registrado_en
+        FROM auditoria_consultas
+        WHERE consulta_id = c.id
+        ORDER BY registrado_en DESC
+        LIMIT 1
+    ) a ON TRUE
+"""
+
+QUERY_TRAZABILIDAD_POR_ID = _TRAZABILIDAD_COLUMNAS + 'WHERE c.id = $1'
+QUERY_TRAZABILIDAD_LISTA = (
+    _TRAZABILIDAD_COLUMNAS + 'ORDER BY c.creada_en DESC LIMIT $1'
+)
+
+
+def _serializar_fuente(fuente) -> dict:
+    """Metadatos de la fuente para el JSON de auditoría (HU-10)."""
+    return {
+        'url': fuente.url,
+        'fragmento': fuente.fragmento,
+        'titulo': fuente.titulo,
+        'numero': fuente.numero,
+        'fecha': fuente.fecha,
+        'version': fuente.version,
+        'documento_id': str(fuente.documento_id),
+    }
+
+
+def _mapear_trazabilidad(fila) -> Trazabilidad:
+    from domain.entities.Fuente import Fuente
+
+    detalle = fila['fuentes_detalle'] or []
+    if isinstance(detalle, str):
+        detalle = json.loads(detalle)
+    fuentes = [
+        Fuente(
+            id=uuid4(),
+            documento_id=UUID(str(item['documento_id']))
+            if item.get('documento_id')
+            else uuid4(),
+            tipo=FuenteOficial.PORTAL_MUNICIPAL,
+            url=item.get('url', ''),
+            fragmento=item.get('fragmento', ''),
+            titulo=item.get('titulo', ''),
+            numero=item.get('numero', ''),
+            fecha=item.get('fecha', ''),
+            version=item.get('version', ''),
+        )
+        for item in detalle
+        if isinstance(item, dict)
+    ]
+
+    consulta = Consulta(
+        id=fila['id'],
+        usuario_id=fila['usuario_id'],
+        pregunta=fila['pregunta'],
+        intencion=IntencionConsulta(fila['intencion']) if fila['intencion'] else None,
+        creada_en=fila['creada_en'],
+    )
+
+    return Trazabilidad(
+        consulta=consulta,
+        respuesta=fila['respuesta'],
+        confianza=fila['confianza'],
+        groundedness=float(fila['groundedness'] or 0.0),
+        fuentes=fuentes,
+        fuera_dominio=bool(fila['fuera_dominio']),
+        afirmaciones_bloqueadas=bool(fila['afirmaciones_bloqueadas']),
+        entidad_sugerida=fila['entidad_sugerida'] or '',
+        registrado_en=fila['registrado_en'],
+    )
 
 
 class _AuditoriaPostgreSQL(AuditoriaPort):
@@ -64,6 +156,9 @@ class _AuditoriaPostgreSQL(AuditoriaPort):
 
     async def registrar(self, consulta: Consulta, respuesta: Respuesta) -> None:
         fuentes = ','.join(fuente.url for fuente in respuesta.fuentes) or None
+        detalle = json.dumps(
+            [_serializar_fuente(fuente) for fuente in respuesta.fuentes]
+        )
         async with self._connection.pool.acquire() as conexion:
             await conexion.execute(
                 QUERY_AUDITORIA,
@@ -72,7 +167,22 @@ class _AuditoriaPostgreSQL(AuditoriaPort):
                 respuesta.texto,
                 respuesta.confianza.value,
                 fuentes,
+                detalle,
+                respuesta.groundedness,
+                respuesta.fuera_dominio,
+                respuesta.afirmaciones_bloqueadas,
+                respuesta.entidad_sugerida or None,
             )
+
+    async def obtener_trazabilidad(self, consulta_id: UUID) -> Trazabilidad | None:
+        async with self._connection.pool.acquire() as conexion:
+            fila = await conexion.fetchrow(QUERY_TRAZABILIDAD_POR_ID, consulta_id)
+        return _mapear_trazabilidad(fila) if fila else None
+
+    async def listar_trazabilidad(self, limite: int = 20) -> list[Trazabilidad]:
+        async with self._connection.pool.acquire() as conexion:
+            filas = await conexion.fetch(QUERY_TRAZABILIDAD_LISTA, limite)
+        return [_mapear_trazabilidad(fila) for fila in filas]
 
 
 @dataclass
@@ -91,6 +201,7 @@ class Container:
     servicio_chunking: ServicioChunking
     registrar_consulta: RegistrarConsulta
     consultar_tramite: ConsultarTramite
+    recomendar_tramites: RecomendarTramites
     clasificar_intencion: ClasificarIntencion
     identificar_tramite: IdentificarTramiteProbable
     buscar_documentos: BuscarDocumentos
@@ -127,8 +238,9 @@ def crear_container(dsn: str | None = None) -> Container:
     )
     evaluador_groundedness = EvaluadorGroundedness()
     identificar_tramite = IdentificarTramiteProbable(tramite_catalogo)
+    servicio_dominio = ServicioDominio()
     servicio_orientacion = ServicioOrientacion(
-        servicio_rag, evaluador_groundedness, identificar_tramite
+        servicio_rag, evaluador_groundedness, identificar_tramite, servicio_dominio
     )
     servicio_auditoria = ServicioAuditoria(auditoria, consulta_repository)
     servicio_cache = ServicioCache(
@@ -136,7 +248,9 @@ def crear_container(dsn: str | None = None) -> Container:
     )
     servicio_chunking = ServicioChunking()
 
-    gestionar_documentos = GestionarDocumentos(documento_repository, busqueda_semantica)
+    gestionar_documentos = GestionarDocumentos(
+        documento_repository, busqueda_semantica, almacenamiento
+    )
     procesar_documento = ProcesarDocumento(
         documento_repository, fragmento_repository, servicio_chunking, busqueda_semantica
     )
@@ -159,6 +273,7 @@ def crear_container(dsn: str | None = None) -> Container:
         servicio_chunking=servicio_chunking,
         registrar_consulta=RegistrarConsulta(consulta_repository),
         consultar_tramite=ConsultarTramite(documento_repository, cache),
+        recomendar_tramites=RecomendarTramites(tramite_catalogo),
         clasificar_intencion=ClasificarIntencion(servicio_nlp),
         identificar_tramite=identificar_tramite,
         buscar_documentos=BuscarDocumentos(busqueda_semantica),

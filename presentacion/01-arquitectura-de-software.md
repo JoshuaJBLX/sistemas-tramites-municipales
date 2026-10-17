@@ -1,6 +1,6 @@
 # 01 — Arquitectura de Software
 
-> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
 
 > Sistema de Orientación de Trámites Municipales · MPJ (TUPA 2023)
 
@@ -63,10 +63,9 @@ de 7 a 10**.
 - Los controllers piden el contenedor con `Depends(obtener_container)`.
 - `crear_container()` construye todo el grafo: adaptadores → repositorios → servicios → casos de
   uso (`backend/infrastructure/container.py:104-171`).
-- ⚠️ **Hoy la app no arranca (D-14):** `main.py:21` importa `router` de
-  `tramite_admin_controller`, un stub de 91 bytes que no define `router` → `ImportError` antes de
-  montar ningún endpoint (0 de 22 servibles). Corregido ese import, el resto del cableado es el
-  descrito arriba.
+- ✅ **La app arranca (17-oct-2026):** `import main` → **31 rutas** registradas (los defects
+  D-14..D-23 se corrigieron: `tramite_admin_controller` define `router`, migraciones `004`/`005`
+  aplicadas). El cableado es el descrito arriba.
 
 ## 4. Stack tecnológico
 

@@ -1,6 +1,6 @@
 # 03 — Backend
 
-> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
 
 > FastAPI 0.111 · Python 3.11+ · Arquitectura hexagonal · RAG + SLM
 
@@ -9,11 +9,10 @@
 - `load_dotenv()` lee `.env` de la raíz.
 - *lifespan* abre el **pool de PostgreSQL** y crea el contenedor de dependencias al arrancar;
   cierra el pool y la conexión Redis al apagar (`main.py:24-36`).
-- Aplica **CORS** (orígenes del frontend local), incluye **6 routers** (consulta, tramite,
-  documento, usuario, documento_admin y tramite_admin) y expone `GET /health`.
-- ⚠️ **Hoy la app no arranca (D-14):** `main.py:21` importa `router` de `tramite_admin_controller`,
-  un stub de 91 bytes sin `router` → `ImportError` (verificado con `import main`). Resultado:
-  **0 de los 22 endpoints declarados son servibles** hasta corregir ese import.
+- Aplica **CORS** (orígenes del frontend local), incluye **7 routers** (consulta, tramite,
+  documento, usuario, documento_admin, tramite_admin y administración) y expone `GET /health`.
+- ✅ **La app arranca (17-oct-2026):** verificado con `import main` → **31 rutas** servibles
+  (los defectos D-14..D-23 están corregidos).
 
 ## 2. Inyección de dependencias (`infrastructure/container.py`)
 
@@ -39,16 +38,15 @@ El cableado vive en `container.py:104-171`. Parámetros configurables vía entor
 
 ## 3. Endpoints de la API
 
-**22 endpoints declarados: 16 públicos + 6 de administración** (prefijo
-`/api/admin/documentos`), repartidos en 6 controllers. ⚠️ **Ninguno es servible hoy**: el
-`ImportError` de `main.py:21` (**D-14**) aborta el arranque antes de montar los routers.
+**31 rutas servibles: 18 públicas + 9 admin + 4 de documentación**, repartidos en 7 controllers. ✅ **Todos servibles hoy (17-oct-2026): `import main` → 31 rutas** (D-14..D-23 corregidos).
 
 ### 3.1 Consultas (`/api/consultas`)
 
 | Método | Ruta | Descripción | Respuesta |
 |---|---|---|---|
-| POST | `/api/consultas` | Clasifica intención, registra, cachea, genera orientación RAG y audita | `{consulta_id, intencion, texto, confianza, groundedness, confianza_intencion, pide_aclaracion, tramite_probable, fuentes[{titulo, url, fragmento}]}` |
-| GET | `/api/consultas/{id}` | Trazabilidad básica de la consulta | `{id, usuario_id, pregunta, intencion, creada_en}` |
+| POST | `/api/consultas` | Clasifica intención, registra, cachea, genera orientación RAG y audita | `{consulta_id, intencion, texto, confianza, groundedness, confianza_intencion, pide_aclaracion, tramite_probable, fuentes[{titulo, url, fragmento, numero, fecha, version}], afirmaciones_bloqueadas, fuera_dominio, entidad_sugerida}` |
+| GET | `/api/consultas` | **Listado de auditoría (HU-10/HU-14 ✅):** `?limite=` (1..100) | `[{id, usuario_id, pregunta, intencion, creada_en, respuesta, confianza, groundedness, fuentes, ...}]` |
+| GET | `/api/consultas/{id}` | **Trazabilidad completa (HU-10/D-9 ✅):** consulta + respuesta, confianza, groundedness, fuentes (número/fecha/versión), bloqueo y fuera de dominio | `{id, usuario_id, pregunta, intencion, creada_en, respuesta, confianza, groundedness, fuentes, afirmaciones_bloqueadas, fuera_dominio, entidad_sugerida, registrado_en}` |
 
 Entrada: `{pregunta: str (min 3), usuario_id?: UUID}` — validada con Pydantic (la UI envía solo
 `pregunta`).
@@ -175,8 +173,8 @@ puertos antes de `ea06c9a`).
 | `OllamaAdapter` | httpx → Ollama | `qwen2.5:3b`, system prompt propio, `temperature=0.2`, `num_predict=512`, `stream=False`, timeout 120 s |
 | `RedisAdapter` | redis.asyncio | JSON serializado, TTL, cierre de cliente; degradable (si Redis cae, sigue sin caché) |
 | `TramiteCatalogoAdapter` | PostgreSQL | Resuelve los trámites vinculados a los documentos recuperados (`JOIN documentos`), para `IdentificarTramiteProbable` |
-| `DocumentStorageAdapter` | filesystem | Guarda/lee/elimina/lista archivos en `storage/documentos` con nombre `uuid4.ext` — cumple `AlmacenamientoDocumentosPort` (PMV2). ⚠️ `eliminar()` no se invoca: la baja física deja el archivo en disco (**D-19**) |
-| `ExtraccionTextoAdapter` | pypdf / python-docx | **Nuevo (PMV2):** extrae texto de `.pdf`, `.docx`, `.txt` y `.md`; si falta la librería o el archivo es escaneado lanza `DocumentoIlegibleError`. ⚠️ `pypdf`/`python-docx` **no están en `requirements.txt`** → hoy solo txt/md (**D-17**) |
+| `DocumentStorageAdapter` | filesystem | Guarda/lee/elimina/lista archivos en `storage/documentos` con nombre `uuid4.ext` — cumple `AlmacenamientoDocumentosPort` (PMV2). ✅ `eliminar()` se invoca en la baja física (D-19 cerrado) |
+| `ExtraccionTextoAdapter` | pypdf / python-docx | **Nuevo (PMV2):** extrae texto de `.pdf`, `.docx`, `.txt` y `.md`; si falta la librería o el archivo es escaneado lanza `DocumentoIlegibleError`. ✅ `pypdf`/`python-docx` en `requirements.txt` (D-17 cerrado) |
 
 ## 7. Repositorios (`infrastructure/repositories/`)
 
@@ -186,8 +184,7 @@ puertos antes de `ea06c9a`).
   listado por trámite, `listar()` con filtros, `marcar_eliminado()` y `eliminar_fisico()` (PMV2).
 - `ConsultaRepositoryImpl` — insert/upsert con actualización de intención, consultas por id/usuario.
 - `FragmentoRepositoryImpl` — **nuevo (PMV2):** `guardar_lote`, `listar_por_documento` y
-  `eliminar_por_documento` sobre `fragmentos_documento` (⚠️ la tabla aún no existe en la BD:
-  **D-15**).
+  `eliminar_por_documento` sobre `fragmentos_documento` (✅ tabla creada y poblada con 004).
 
 ## 8. Seguridad implementada
 
@@ -196,16 +193,17 @@ puertos antes de `ea06c9a`).
 - ✅ CORS solo para localhost:3000.
 - ⚠️ Pendiente: autenticación/JWT/roles (G-01), guardrails anti prompt-injection (G-20),
   rate limiting (G-23), enmascaramiento PII (G-03).
-- ⚠️ **`Usuario.es_administrador()` existe pero nunca se invoca (D-8):** ningún endpoint —ni los 6
-  de `/api/admin/documentos`— comprueba autenticación ni rol; `container.py` expone el contenedor
+- ⚠️ **`Usuario.es_administrador()` existe pero nunca se invoca (D-8):** ningún endpoint —ni los 9
+  de administración— comprueba autenticación ni rol; `container.py` expone el contenedor
   completo a cualquier petición.
 
 ## 9. Cómo se relaciona con el frontend
 
-El frontend consume **3 endpoints públicos** (`POST /api/consultas`, `GET /api/tramites`,
-`GET /health`) y, desde el PMV2, **6 de administración** (`/api/admin/documentos*` más
-`GET /api/tramites/admin`) a través de `lib/api.ts` (225 líneas, 9 funciones). El resto de la API
+El frontend consume **4 endpoints públicos** (`POST /api/consultas`, `GET /api/consultas`,
+`GET /api/tramites`, `GET /health`) y, desde el PMV2, **funciones de administración**
+(`/api/admin/documentos*` más `GET /api/tramites/admin`) a través de `lib/api.ts`. El resto de la API
 (documentos públicos, usuarios) existe para gestión y trazabilidad.
 
-⚠️ **A día de hoy ninguna de esas llamadas puede funcionar:** la API no arranca (**D-14**), los
-`DELETE` rompen con `204` sin cuerpo (**D-20**) y `GET /api/tramites/admin` no existe (**D-21**).
+✅ **Todo funciona (17-oct-2026):** la API arranca (31 rutas), los `DELETE` devuelven `204` sin
+error en el front (D-20) y el panel admin opera con rutas existentes (D-21). Las llamadas del
+frontend al panel admin usan ahora `PUT /api/admin/documentos/{id}/estado` (nuevo, D-23).

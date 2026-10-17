@@ -3,10 +3,22 @@
 import type { Tramite } from '../lib/api';
 import { DocIcon, ClockIcon } from './icons';
 
-export default function TramiteCard({ tramite, index = 0 }: { tramite: Tramite; index?: number }) {
+export default function TramiteCard({
+  tramite,
+  index = 0,
+  seleccionado = false,
+  onSeleccionar,
+}: {
+  tramite: Tramite;
+  index?: number;
+  seleccionado?: boolean;
+  onSeleccionar?: (tramite: Tramite) => void;
+}) {
   return (
     <article
-      className="card-3d group relative overflow-hidden p-5 animate-rise-in"
+      className={`card-3d group relative overflow-hidden p-5 animate-rise-in ${
+        seleccionado ? 'ring-2 ring-primary-600' : ''
+      }`}
       style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
     >
       <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-soft/60 blur-2xl transition group-hover:scale-150" aria-hidden="true" />
@@ -24,6 +36,7 @@ export default function TramiteCard({ tramite, index = 0 }: { tramite: Tramite; 
         <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
           {tramite.costo && <span className="chip">💰 {tramite.costo}</span>}
           {tramite.plazo && <span className="chip"><ClockIcon className="h-3.5 w-3.5" /> {tramite.plazo}</span>}
+          {tramite.area && <span className="chip" title="Área municipal responsable (TUPA)">🏢 {tramite.area}</span>}
         </div>
         {tramite.requisitos && tramite.requisitos.length > 0 && (
           <ul className="mt-3 space-y-1 border-t border-mist-200 pt-3 text-xs text-primary-800">
@@ -34,6 +47,16 @@ export default function TramiteCard({ tramite, index = 0 }: { tramite: Tramite; 
               </li>
             ))}
           </ul>
+        )}
+        {onSeleccionar && (
+          <button
+            type="button"
+            onClick={() => onSeleccionar(tramite)}
+            className="mt-3 w-full rounded-xl border border-primary-200 bg-white/80 px-3 py-2 text-xs font-bold text-primary-700 transition hover:-translate-y-0.5 hover:bg-white"
+            aria-pressed={seleccionado}
+          >
+            {seleccionado ? 'Trámite seleccionado' : 'Ver trámites relacionados'}
+          </button>
         )}
       </div>
     </article>

@@ -23,6 +23,9 @@ export default function ChatBox({ compact = false }: { compact?: boolean }) {
         autor: 'asistente', texto: r.texto,
         fuentes: r.fuentes, groundedness: r.groundedness, confianza: r.confianza,
         intencion: r.intencion, pideAclaracion: r.pide_aclaracion,
+        afirmacionBloqueada: r.afirmaciones_bloqueadas,
+        fueraDominio: r.fuera_dominio,
+        entidadSugerida: r.entidad_sugerida,
         tramiteProbable: r.tramite_probable,
       }]);
     } catch (error) {

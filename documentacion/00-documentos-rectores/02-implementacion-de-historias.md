@@ -5,6 +5,15 @@ Análisis detallado de las 18 HU contra el código real del repositorio.
 schema/migraciones), `database/` y `frontend-tramites/`. Verificado el **16 de octubre de 2026**
 (HEAD `ea06c9a`; 101 puntos de verificación contra el código y la base de datos PostgreSQL local).
 
+> ⚠️ **Documento histórico (desactualizado en sus cifras).** Este análisis corresponde a la
+> verificación de las 10:00 del 16-oct-2026 (commit `ea06c9a`); **las cifras vigentes son
+> posteriores** y están en [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) §10:
+> **83/101 = 82 % global · PMV1 100 % ✅ · PMV2 100 % ✅ · PMV3 63 %** (11 HU al 100 %: HU-01, 02, 04–12).
+> Los defectos **D-14..D-23 están corregidos** (la API arranca con 31 rutas, `004`/`005`/`006` aplicadas,
+> carga de PDF real → 201). El detalle por punto de este documento se mantiene como
+> **auditoría de partida**; para el estado actual, usar el documento 06 y el
+> [`07-checklist-implementacion.md`](07-checklist-implementacion.md).
+
 **Leyenda:** ✅ Implementado · ⚠️ Parcial · ❌ No implementado
 
 ## Cómo se calcula el % de avance
@@ -55,13 +64,10 @@ verificables con `grep` sobre el repositorio.
 | HU más avanzada | **HU-05 y HU-06 · 100 %** |
 | Pruebas automatizadas | **0 suites** (ningún `test_*.py`, `*.test.ts` ni `conftest.py` en el repo; **G-18** sigue abierto) |
 
-> El 59 % mide el **alcance total contratado** de las 18 historias. El **núcleo RAG sí funciona de
-> extremo a extremo** (verificado: 22 trámites, 20 documentos indexados, consulta en 4–17 s con 5
-> fuentes y acierto de caché inmediato). El porcentaje subió del 37 % al 49 % con HU-05, HU-06 y
-> las correcciones D-1..D-5, y ahora al **59 %** con el PMV2 documental (HU-01, HU-02, HU-03 y
-> HU-04 ganaron 11 puntos en el commit `ea06c9a`). Sigue bajo porque 5 HU no se empezaron, porque
-> el arancel real del TUPA no está cargado en la base de datos y porque la API **no arranca en el
-> HEAD actual** (defecto bloqueante D-14).
+> ⚠️ **Cifra histórica (ver ver banner superior):** el 59 % era el estado al comienzo de la jornada
+> del 16-oct-2026. El estado al final de ese día fue **72 % (73/101)**; el **17-oct-2026** se cerró
+> PMV2 al **100 %** (HU-08, HU-10, HU-11 y puntos de HU-14) y el estado verificado es
+> **82 % (83/101)** — ver §10 de [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md).
 
 ---
 
@@ -347,12 +353,22 @@ verificables con `grep` sobre el repositorio.
 | D-20 | `lib/api.ts` `pedir()` hace `response.json()` incondicional, pero los DELETE devuelven **204 sin cuerpo** → `SyntaxError` | `lib/api.ts` | 🔴 Alto |
 | D-21 | El front llama a `GET /api/tramites/admin` (inexistente; cae en `GET /api/tramites/{id}` → 500) dentro de `Promise.all`, así que el panel de documentos no carga | `DocumentManager.tsx` / `lib/api.ts` | 🔴 Bloqueante |
 
-**Conclusión:** el backend tiene un núcleo RAG sólido y verificado (consulta, búsqueda vectorial,
-SLM, groundedness, caché, identificación de trámite probable y auditoría en BD). Con la corrección
-de D-1 a D-5, **HU-05 y HU-06 llegaron al 100 %**; con el PMV2 documental del commit `ea06c9a`
-(validación de formato, metadatos obligatorios, estado `derogado`, baja lógica, chunking,
-reprocesado, listados con filtros, 6 endpoints admin y el panel `DocumentManager`) el avance global
-sube del 49 % al **59 %** (60/101). Sin embargo, el HEAD actual **no arranca la API (D-14)**, la
-migración 004 no está aplicada (D-15/D-16) y el panel de documentos no carga (D-21): son los
-bloqueos inmediatos. El frente funcional que sigue abierto es HU-12 (trámites relacionados al 0 %),
-los montos del TUPA en `tramites.costo`, el OCR y la recuperación RAG por fragmento.
+> ✅ **Actualización (16-oct-2026, verificación en vivo):** **D-14..D-21 están corregidos**, más
+> **D-22** (upsert de `fragmentado` con `1/0` a columna BOOLEAN → `bool(...)`) y **D-23** (publicar
+> sin metadatos devolvía 500 → ahora 422). Estados actuales: API con **30 rutas**, migraciones
+> `004`/`005` aplicadas (20/20 documentos con metadatos), PDF real → 201 con texto extraído y
+> fragmentos creados. Quedan abiertos D-6 (parcial), D-7 (ya no aplica: extracción verificada),
+> D-8, D-9, D-11, D-12 (parcial), D-13 (menor). Ver `06-estado-actual-implementado.md` §13.
+
+**Conclusión (actualizada el 16-oct-2026):** el backend tiene un núcleo RAG sólido **y desplegable**:
+la API arranca, el ciclo documental E2E (carga → extracción → chunking → metadatos → aprobación →
+fragmentos) fue verificado con un PDF real del TUPA, y HU-01/HU-02/HU-04/HU-12 llegaron al 100 %.
+El avance global ese día fue **72 % (73/101)**.
+
+> ✅ **Actualización del 17-oct-2026:** se cerraron **HU-08** (umbral de rechazo "no inventar",
+> G-04), **HU-10** (trazabilidad completa, bloqueo de afirmaciones, fuentes con metadatos, panel
+> real — D-9) y **HU-11** (clasificador de dominio con derivación a la entidad correspondiente),
+> más 2 puntos de **HU-14** (respuesta completa en auditoría + panel real). **PMV2 llegó a
+> 100 % (28/28)** y el global a **82 % (83/101)**. Sigue abierto: HU-13 (auth/roles),
+> HU-14 (búsqueda por filtros), HU-15/HU-16/HU-18 (0 %), HU-17 (40 %) y la validación SUS
+> (P2-17). Detalle en §10 de `06-estado-actual-implementado.md`.

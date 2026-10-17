@@ -6,12 +6,17 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from domain.entities.Documento import Documento
-from domain.errors import DocumentoIlegibleError, FormatoNoSoportadoError
+from domain.errors import (
+    DocumentoIlegibleError,
+    DocumentoInvalidoError,
+    FormatoNoSoportadoError,
+)
 from domain.value_objects.EstadoDocumento import EstadoDocumento
 from infrastructure.container import Container, obtener_container
 from infrastructure.schemas.documento_admin import (
     DocumentoAdminRequest,
     DocumentoAdminResponse,
+    DocumentoEstadoRequest,
 )
 
 router = APIRouter(prefix='/api/admin/documentos', tags=['admin-documentos'])
@@ -45,7 +50,19 @@ async def listar(
     desde: int = Query(default=0, ge=0),
     container: Container = Depends(obtener_container),
 ):
-    estado_vo = EstadoDocumento(estado) if estado else None
+    estado_vo = None
+    if estado:
+        try:
+            estado_vo = EstadoDocumento(estado)
+        except ValueError as error:
+            # Estado desconocido: 422 con detalle en lugar de un 500 genérico (D-18).
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f'Estado "{estado}" no válido. Valores permitidos: '
+                    f'{", ".join(e.value for e in EstadoDocumento)}.'
+                ),
+            ) from error
     docs = await container.gestionar_documentos.listar(
         tramite_id=tramite_id,
         estado=estado_vo,
@@ -79,6 +96,9 @@ async def crear(
             pass
         final = await container.gestionar_documentos.obtener(guardado.id)
         return _map(final or guardado)
+    except ValueError as e:
+        # Estado/valor desconocido: 422 con detalle, no 400/500 genérico.
+        raise HTTPException(status_code=422, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
@@ -110,6 +130,11 @@ async def upload(
         return _map(final or guardado)
     except (FormatoNoSoportadoError, DocumentoIlegibleError) as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
+    except DocumentoInvalidoError as error:
+        # Reglas de negocio del módulo documental (p. ej. publicar sin metadatos).
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
     except Exception as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
 
@@ -124,6 +149,32 @@ async def procesar(
         raise HTTPException(status_code=404, detail='Documento no encontrado')
     final = await container.gestionar_documentos.obtener(doc.id)
     return _map(final or doc)
+
+
+@router.put('/{documento_id}/estado', response_model=DocumentoAdminResponse)
+async def cambiar_estado(
+    documento_id: UUID,
+    payload: DocumentoEstadoRequest,
+    container: Container = Depends(obtener_container),
+):
+    """Marca un documento como vigente/obsoleto/en revisión/derogado (HU-01)."""
+    try:
+        estado = EstadoDocumento(payload.estado)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+    try:
+        actualizado = await container.gestionar_documentos.actualizar_estado(
+            documento_id, estado
+        )
+    except DocumentoInvalidoError as error:
+        # Regla de negocio: no se puede publicar sin metadatos completos (HU-01).
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
+    if actualizado is None:
+        raise HTTPException(status_code=404, detail='Documento no encontrado')
+    final = await container.gestionar_documentos.obtener(actualizado.id)
+    return _map(final or actualizado)
 
 
 @router.delete('/{documento_id}', status_code=204)

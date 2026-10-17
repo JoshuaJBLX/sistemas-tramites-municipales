@@ -7,15 +7,15 @@
 
 > **Trazabilidad por PMV:** ver `05-trazabilidad-por-pmv.md` (qué se construyó en PMV1/PMV2/PMV3).
 
-> **Cifras canónicas verificadas el 16 de octubre de 2026** (HEAD `ea06c9a`, contra código +
-> PostgreSQL local; detalle en `06-estado-actual-implementado.md` §10 y §13):
+> **Cifras canónicas verificadas el 17 de octubre de 2026** (verificación en vivo contra API +
+> PostgreSQL local; detalle en `06-estado-actual-implementado.md` §0 y §10):
 >
 > | Dimensión | Valor |
 > |---|---|
-> | Avance global de las 18 HU | **60/101 = 59 %** |
-> | PMV1 | **21/24 = 88 %** |
-> | PMV2 | **14/28 = 50 %** (incluye HU-11) |
-> | PMV3 | **25/49 = 51 %** (incluye HU-17) |
+> | Avance global de las 18 HU | **83/101 = 82 %** |
+> | PMV1 | **24/24 = 100 %** ✅ |
+> | PMV2 | **28/28 = 100 %** ✅ (incluye HU-11) |
+> | PMV3 | **31/49 = 63 %** (incluye HU-17) |
 
 ## 0. Verificación local (octubre 2026)
 
@@ -41,21 +41,21 @@ Correcciones aplicadas durante esa verificación (ver commit `fix(backend)`):
 5. pgvector ahora es **opcional**: sin la extensión la columna es `double precision[]` y el
    coseno se calcula en Python (`Connection.es_pgvector()`).
 
-> **Advertencia (16-oct-2026, HEAD `ea06c9a`):** esa verificación corresponde a un estado previo.
-> En el HEAD actual la API **no arranca**: `main.py:21` importa `router` de
-> `tramite_admin_controller`, que es un stub de 91 bytes sin `router` → `ImportError` (**D-14**),
-> por lo que 0 de los 22 endpoints declarados son servibles hasta corregirlo.
+> **Nota (16-oct-2026, verificación en vivo):** esa verificación de arranque fue previa al cierre de
+> los defectos. **Hoy la API arranca con 31 rutas** (20 públicas + 7 admin + 4 de doc), las
+> migraciones `004`/`005`/`006` están aplicadas y todos los endpoints declarados son servibles
+> (D-14..D-23 corregidos; ver `06-estado-actual-implementado.md` §13.1).
 
 ## 1. Situación general
 
 El sistema es una **PoC funcional**: el flujo ciudadano completo (preguntar → RAG → SLM →
-groundedness → responder con fuentes) opera de extremo a extremo. Las funciones de **administración
-y gobierno** (login, métricas reales, carga documental conectada, reportes) son la parte pendiente
+groundedness → responder con fuentes) opera de extremo a extremo **y la API despliega**. Las
+funciones de **administración y gobierno** (login, métricas reales, reportes) son la parte pendiente
 principal.
 
 ```
 Flujo de consulta  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░  (✅ casi completo, falta G-16/G-04)
-Gestión documental ▓▓▓▓▓▓▓░░░░░░░░░░░░░  (⚠️ PMV2 en código; bloqueos D-14..D-21; G-12/G-13 parciales)
+Gestión documental ▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░  (✅ PMV2 E2E verificado; G-12/G-13 completos)
 Seguridad          ▓░░░░░░░░░░░░░░░░░░░  (❌ G-01, G-20, G-23)
 Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░  (❌ G-16, G-18, G-26)
 ```
@@ -74,16 +74,19 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
   `BGE_M3Adapter` (embeddings 1024 dims, CPU, async), `OllamaAdapter` (temperatura 0.2),
   `RedisAdapter`, `DocumentStorageAdapter`, `ExtraccionTextoAdapter`; repositorios `asyncpg` con
   pool 1-10, SQL parametrizado y `FragmentoRepositoryImpl` (fragmentos del PMV2).
-- **API**: 6 controllers (uno es stub) con rutas `/api/consultas`, `/api/consultas/{id}`, `/api/tramites`,
-  `/api/tramites/{id}`, `/api/documentos*`, `/api/usuarios*`, `/api/admin/documentos` (6 endpoints
-  admin) y `/health`: **22 endpoints declarados (16 públicos + 6 admin)**; DI central en `container.py`.
+- **API**: 7 controllers con rutas `/api/consultas*` (incl. `GET ''` y `/{id}` de trazabilidad),
+  `/api/tramites*` (incl. `relacionados` y `PUT /{id}/area`), `/api/documentos*`, `/api/usuarios*`,
+  `/api/admin/documentos*` (7 endpoints admin) y `/health`: **27 endpoints de API (20 públicos +
+  7 admin) + 4 de documentación = 31 rutas servibles**; DI central en `container.py`.
 
 ### 2.2 Base de datos (PostgreSQL 16 + pgvector)
-- Migraciones 001 (BD + extensión vector), 002 (6 tablas), 003 (índice **HNSW** `vector_cosine_ops`)
-  y 004 (`documentos_pmv2`: metadatos, `fragmentos_documento`, `derogado`) — **la 004 no está
-  aplicada** y su línea 1 es inválida (**D-15**); `instalar.ps1` tampoco la aplica (**D-16**).
-- Seeds reales TUPA 2023 **MPJ**: 1 municipio, 22 trámites, 20 documentos con fuente `gob.pe/munijunin`.
-- Búsqueda por similitud de coseno (`embedding <=> $1::vector`).
+- Migraciones 001 (BD + extensión vector), 002 (6 tablas), 003 (índice **HNSW** `vector_cosine_ops`),
+  004 (`documentos_pmv2`: metadatos, `fragmentos_documento`, `derogado`) y 005
+  (`area_responsable`) — **las 004 y 005 están aplicadas** (20/20 documentos con metadatos;
+  252 trámites con área).
+- Seeds reales TUPA 2023 **MPJ**: 1 municipio, **252 procedimientos**, 20 documentos con fuente
+  `gob.pe/munijunin`.
+- Búsqueda por similitud de coseno (`embedding <=> $1::vector`, con fallback Python sin pgvector).
 
 ### 2.3 Frontend (Next.js 14)
 - Rutas `/`, `/chat`, `/tramites`, `/admin`; **16 componentes** + set de 23 iconos SVG.
@@ -101,31 +104,32 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 - **Metadatos obligatorios**: `version`, `fecha_publicacion`, `hash_contenido`, `archivo_nombre`,
   `mime_type`, `fragmentado`, `eliminado_en`.
 - **Estado `derogado`** y **baja lógica**: `DELETE /api/documentos/{id}` marca `eliminado_en`
-  (**D-10 corregido**); existe además `DELETE /{id}/fisico` (no borra el archivo de disco, **D-19**).
+  (**D-10 corregido**); existe además `DELETE /{id}/fisico` que **sí borra el archivo** (D-19 ✅).
 - **Chunking** (`ServicioChunking` 800/120) + tabla `fragmentos_documento` + `FragmentoRepositoryImpl`.
 - **Reprocesado** (`POST /api/documentos/{id}/procesar`) y casos de uso `CargarDocumento` y
   `ProcesarDocumento`.
-- **Listados con filtros**: `GET /api/documentos` y `GET /api/admin/documentos`; **6 endpoints admin**.
-- **Panel real** `DocumentManager.tsx` en `/admin` (vacío **G-12** ⬆️ parcial; los KPIs/gráficos de
-  `/admin` siguen ficticios).
-- **Inventario del repo (16-oct-2026):** 86 `.py` de backend, 25 `.ts`/`.tsx` de fuente, 9 `.sql`,
-  90 `.md`, 6 controllers (1 stub), 22 endpoints declarados (16 públicos + 6 admin), 10 puertos de
-  dominio, 16 componentes front-end.
+- **Listados con filtros**: `GET /api/documentos` y `GET /api/admin/documentos`; **7 endpoints admin**.
+- **Panel real** `DocumentManager.tsx` en `/admin` (**G-12 ✅**: carga, sube, aprueba y borra;
+  los KPIs/gráficos de `/admin` siguen ficticios, D-6).
+- **Inventario del repo (17-oct-2026):** 91 `.py` de backend, 25 `.ts`/`.tsx` de fuente, 11 `.sql`,
+  92 `.md`, 7 controllers (ninguno stub), 27 endpoints de API + 4 de documentación = 31 rutas,
+  11 puertos de dominio, 16 componentes front-end.
 
-### 2.6 Defectos bloqueantes del PMV2 (16-oct-2026)
+### 2.6 Defectos bloqueantes del PMV2 — ✅ todos corregidos (16-oct-2026)
 
-| # | Defecto | Ubicación | Estado |
-|---|---------|-----------|--------|
-| D-14 | La API no arranca (`ImportError` de `router` en un stub); 0 de 22 endpoints servibles | `main.py:21`, `tramite_admin_controller.py` | 🔴 Bloqueante |
-| D-15 | Migración `004_documentos_pmv2.sql` sin aplicar y con línea 1 inválida (docstring Python en vez de `--`) | `database/migrations/004_documentos_pmv2.sql` | 🔴 Bloqueante |
-| D-16 | `instalar.ps1` no aplica la migración 004 | `instalar.ps1` | 🔴 Bloqueante |
-| D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` (extracción de PDF/DOCX inoperante) | `requirements.txt` | 🔴 Bloqueante |
-| D-18 | `estado` inválido → 500 en vez de 422 | `documento_admin_controller.py:48` | 🔴 Alto |
-| D-19 | La baja física no borra el archivo en `storage/documentos` | `DELETE /{id}/fisico` | 🟠 Medio |
-| D-20 | `pedir()` hace `response.json()` incondicional; DELETE 204 sin cuerpo → `SyntaxError` | `lib/api.ts` | 🔴 Alto |
-| D-21 | El front llama a `GET /api/tramites/admin` (inexistente → 500) dentro de `Promise.all`; el panel de documentos no carga | `DocumentManager.tsx` | 🔴 Bloqueante |
+| # | Defecto | Estado |
+|---|---------|--------|
+| D-14 | La API no arrancaba (`ImportError` de `router` en un stub) | ✅ **31 rutas servibles** |
+| D-15 | Migración `004` sin aplicar y con línea 1 inválida | ✅ `004`/`005` aplicadas |
+| D-16 | `instalar.ps1` no aplicaba la 004 | ✅ ambas listadas |
+| D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` | ✅ deps completas |
+| D-18 | `estado` inválido → 500 | ✅ 422 |
+| D-19 | La baja física no borraba el archivo | ✅ sin huérfanos |
+| D-20 | `response.json()` incondicional en DELETE 204 | ✅ 204 manejado |
+| D-21 | Front llamaba a `/api/tramites/admin` inexistente | ✅ panel carga |
+| D-22/D-23 | `fragmentado` BOOLEAN / publicar sin metadatos → 500 | ✅ corregidos |
 
-> El catálogo completo de defectos (D-1..D-21) está en la sección de defectos de
+> El catálogo completo de defectos (D-1..D-23) está en la sección de defectos de
 > `02-implementacion-de-historias.md` y en `06-estado-actual-implementado.md` §13.
 
 ## 3. Parcial (⚠️) y por implementar (❌)
@@ -137,15 +141,15 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 | G-18 | **Suite de pruebas automatizadas (pytest)** | 🔴 Alta |
 | G-16 / G-06 | **Métricas reales** del panel (hoy maqueta) | 🔴 Alta |
 | G-01 | **Autenticación, JWT, roles y control de acceso** | 🔴 Alta |
-| G-12 | **Carga de documentos conectada a `/api/documentos`** — ⬆️ **parcial**: `DocumentManager.tsx` ya consume la API real, pero los KPIs/gráficos de `/admin` siguen ficticios (D-6) | 🟠 Media |
-| G-04 | Abstención / rechazo por groundedness baja | 🟠 Media |
+| G-12 | **Carga de documentos conectada a `/api/documentos`** — ✅ **cerrado (16-oct-2026)**: `DocumentManager.tsx` sube, lista, aprueba y borra de verdad (los KPIs/gráficos de `/admin` siguen ficticios, D-6/G-06) | ✅ |
+| G-04 | Abstención / rechazo por groundedness baja — ✅ **cerrado (17-oct-2026)**: umbral de rechazo (`BLOQUEO_AFIRMACIONES`) en `ServicioOrientacion` + clasificador de dominio (`ServicioDominio`) que deriva a la entidad correspondiente | ✅ |
 | G-20 | Guardrails anti prompt-injection | 🟠 Media |
-| G-13 | Chunking documental — ⬆️ **parcial**: `ServicioChunking` (800/120) y tabla `fragmentos_documento` existen; aún faltan OCR y la recuperación RAG **por fragmento** (el RAG consulta el embedding del documento completo); `version`/`fecha_publicacion` ya están en metadatos (migración 004 sin aplicar, D-15) | 🟠 Media |
+| G-13 | Chunking documental — ✅ **cerrado (16-oct-2026)**: `ServicioChunking` (800/120), tabla `fragmentos_documento`, migración `004` aplicada, OCR (`rapidocr`) y recuperación RAG **por fragmento** verificadas (20/20 docs) | ✅ |
 | G-14 | Consistencia `tipo`/`duracion_estimada_dias` ↔ `categoria`/`plazo` | 🟠 Media |
 | G-07 | Reportes y exportación | 🟠 Media |
 | G-11 | Rutas `/login`, `/tramites/[id]`, `/404`, sub-rutas admin | 🟠 Media |
 | G-10 | UI de historial ciudadano `/mis-consultas` | 🟡 Baja |
-| G-08 | Recomendación de trámites relacionados | 🟡 Baja |
+| G-08 | Recomendación de trámites relacionados — ✅ **cerrado (16-oct-2026)**: motor de similitud (embedding + fallback léxico), endpoint y UI | ✅ |
 | G-09 | Derivación a atención municipal | 🟡 Baja |
 | G-02 | Clasificador ML (Random Forest/TF-IDF) con métricas F1 | 🟡 Baja |
 | G-03 | Enmascaramiento de PII | 🟡 Baja |
@@ -159,8 +163,9 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 | G-26 | Accesibilidad WCAG, pruebas de carga, SonarQube, ZAP | 🟡 Baja |
 
 ### 3.2 HU sin soporte en interfaz (❌)
-- **HU-11** Consultas fuera de dominio · **HU-12** Trámites relacionados · **HU-15**
-  Retroalimentación · **HU-18** Reportes y exportación.
+- **HU-15** Retroalimentación · **HU-18** Reportes y exportación. (HU-11 y HU-12 quedaron sin
+  interfaz dedicada, pero ambas tienen backend funcional y se benefician del chat; HU-11 cerró
+  el 17-oct-2026.)
 
 ### 3.3 Diferencias con `a.md` (documentadas)
 - `a.md` proponía: 7 contenedores, API `/api/v1/consulta`, clasificador Random Forest, 16 rutas,
@@ -169,11 +174,10 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 
 ## 4. Recomendación de cierre (siguiente iteración)
 
-0. **D-14..D-21** (bloqueantes del PMV2): hacer arrancar la API (`router` real en
-   `tramite_admin_controller`), corregir y aplicar la migración 004, añadir `pypdf`/`python-docx`
-   al `requirements.txt`, arreglar el panel de documentos (D-21) y el `response.json()` de DELETE (D-20).
+0. ~~**D-14..D-21** (bloqueantes del PMV2)~~ ✅ corregidos (16-oct-2026).
 1. **G-18** prueba todo el flujo RAG (pytest + `httpx`/`pytest-asyncio`).
 2. **G-01** login JWT + roles para proteger `/admin` y `/api/documentos`.
 3. **G-16** endpoint de métricas agregadas (consultas por día, groundedness promedio, latencia).
 4. **G-12** completar la gestión documental (KPIs reales de `/admin`).
-5. **G-04** rechazo/derivación cuando la groundedness es baja; **G-13** recuperación RAG por fragmento + OCR.
+5. ~~**G-04** rechazo/derivación cuando la groundedness es baja~~ ✅ cerrado (17-oct-2026);
+   ~~G-13~~ ✅ cerrado (16-oct-2026).

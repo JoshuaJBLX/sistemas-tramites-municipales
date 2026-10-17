@@ -25,3 +25,12 @@ python-dotenv==1.0.1
 # Embeddings (BGE-M3)
 sentence-transformers==3.0.1
 numpy>=2.0
+
+# Extracción de texto de documentos (HU-01 / D-17)
+pypdf==5.1.0
+PyMuPDF==1.24.14
+python-docx==1.1.2
+
+# OCR para documentos escaneados (HU-04 / P2-13)
+rapidocr==3.10.0
+onnxruntime==1.31.0

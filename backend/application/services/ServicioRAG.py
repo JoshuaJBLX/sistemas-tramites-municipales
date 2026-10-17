@@ -1,5 +1,6 @@
 """Servicio de aplicación: ServicioRAG (Retrieval-Augmented Generation)."""
 
+import re
 from uuid import uuid4
 
 from application.services.ServicioSLM import ServicioSLM
@@ -7,6 +8,9 @@ from domain.entities.Documento import Documento
 from domain.entities.Fuente import Fuente
 from domain.ports.BusquedaSemanticaPort import BusquedaSemanticaPort
 from domain.value_objects.FuenteOficial import FuenteOficial
+
+# Número de documento dentro del título (p. ej. "Resolución N° 045-2023").
+_NUMERO_DOCUMENTO = re.compile(r'n[°ºo]\.?\s*([0-9][0-9\-]*)', re.IGNORECASE)
 
 
 class ServicioRAG:
@@ -42,15 +46,34 @@ class ServicioRAG:
 
     @staticmethod
     def construir_fuentes(documentos: list[Documento]) -> list[Fuente]:
-        """Convierte los documentos recuperados en fuentes citables."""
+        """Convierte los documentos recuperados en fuentes citables.
+
+        Si la recuperación fue por fragmento (HU-04), la cita muestra el chunk
+        que de verdad sustenta la respuesta en lugar de las primeras líneas del
+        documento completo. Cada fuente lleva los metadatos disponibles del
+        documento: número, fecha de publicación y versión (HU-10 / P3-08).
+        """
         return [
             Fuente(
                 id=uuid4(),
                 documento_id=documento.id,
                 tipo=FuenteOficial.PORTAL_MUNICIPAL,
                 url=documento.url_origen,
-                fragmento=documento.contenido[:280],
+                fragmento=(documento.fragmento_destacado or documento.contenido)[:280],
                 titulo=documento.titulo,
+                numero=ServicioRAG._extraer_numero(documento.titulo),
+                fecha=(
+                    documento.fecha_publicacion.isoformat()
+                    if documento.fecha_publicacion
+                    else ''
+                ),
+                version=documento.version or '',
             )
             for documento in documentos
         ]
+
+    @staticmethod
+    def _extraer_numero(titulo: str) -> str:
+        """Extrae el número de resolución/ordenanza del título, si existe."""
+        coincidencia = _NUMERO_DOCUMENTO.search(titulo or '')
+        return coincidencia.group(1) if coincidencia else ''

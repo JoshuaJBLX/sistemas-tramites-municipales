@@ -12,6 +12,7 @@ from uuid import UUID
 
 from domain.entities.Documento import Documento
 from domain.errors import DocumentoInvalidoError
+from domain.ports.AlmacenamientoDocumentosPort import AlmacenamientoDocumentosPort
 from domain.ports.BusquedaSemanticaPort import BusquedaSemanticaPort
 from domain.ports.DocumentoRepository import DocumentoRepository
 from domain.value_objects.EstadoDocumento import EstadoDocumento
@@ -24,9 +25,11 @@ class GestionarDocumentos:
         self,
         documento_repository: DocumentoRepository,
         busqueda_semantica: BusquedaSemanticaPort,
+        almacenamiento: AlmacenamientoDocumentosPort | None = None,
     ) -> None:
         self._documento_repository = documento_repository
         self._busqueda_semantica = busqueda_semantica
+        self._almacenamiento = almacenamiento
 
     async def registrar(self, documento: Documento) -> Documento:
         """Publica (si es vigente) y genera el embedding antes de persistir."""
@@ -124,5 +127,21 @@ class GestionarDocumentos:
             )
 
     async def eliminar_fisico(self, documento_id: UUID) -> None:
-        """Eliminación definitiva (solo limpieza administrativa explícita)."""
+        """Eliminación definitiva: borra filas, fragmentos y archivo en disco.
+
+        Solo limpieza administrativa explícita. Primero se recupera el documento
+        para conocer el nombre del archivo almacenado y borrarlo también (D-19),
+        de modo que no queden huérfanos en `storage/documentos`.
+        """
+        documento = await self._documento_repository.obtener_por_id(documento_id)
+        if (
+            documento is not None
+            and self._almacenamiento is not None
+            and documento.archivo_nombre
+        ):
+            try:
+                self._almacenamiento.eliminar(documento.archivo_nombre)
+            except OSError:
+                # Un archivo ya ausente no debe impedir la baja del registro.
+                pass
         await self._documento_repository.eliminar_fisico(documento_id)

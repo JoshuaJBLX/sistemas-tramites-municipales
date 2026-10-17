@@ -119,7 +119,7 @@ class DocumentoRepositoryImpl(PostgreSQLRepository, DocumentoRepository):
             documento.archivo_nombre,
             documento.mime_type,
             documento.hash_contenido,
-            1 if documento.fragmentado else 0,
+            bool(documento.fragmentado),
             documento.eliminado_en,
             embedding,
         )

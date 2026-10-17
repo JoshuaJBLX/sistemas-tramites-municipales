@@ -1,6 +1,6 @@
 # 04 — Base de Datos
 
-> **Actualizado el 16 de octubre de 2026 (HEAD `ea06c9a`).** Cifras y estado verificados contra el código en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) y [PMV2_DOCUMENTOS.md](../PMV2_DOCUMENTOS.md): global **59 %**, PMV1 **88 %**, PMV2 **56 %**, PMV3 **52 %**; la API aún no arranca (D-14).
+> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
 
 > PostgreSQL 16 + pgvector · base `tramites_municipales`
 
@@ -11,16 +11,18 @@
 | `001_create_database.sql` | Crea la BD `tramites_municipales` (si no existe) y habilita `CREATE EXTENSION vector` |
 | `002_create_tables.sql` | Crea las 6 tablas del dominio + índices B-tree de apoyo |
 | `003_create_vectors.sql` | Índice **HNSW** por similitud de coseno sobre `documentos.embedding` |
-| `004_documentos_pmv2.sql` | **Nuevo (PMV2), 29 líneas — ⚠️ NO APLICADA (D-15):** añade 7 columnas a `documentos`, crea la tabla `fragmentos_documento` y amplía el `CHECK` de `estado` con `derogado` |
+| `004_documentos_pmv2.sql` | **(PMV2), 29 líneas — ✅ APLICADA (16-oct-2026):** añade 7 columnas a `documentos`, crea la tabla `fragmentos_documento` y amplía el `CHECK` de `estado` con `derogado` |
+| `005_area_responsable.sql` | ✅ **Aplicada (16-oct-2026):** añade `area_responsable` a `tramites` y la expone en las respuestas (HU-07) |
+| `006_auditoria_trazabilidad.sql` | **(PMV2) ✅ Aplicada (17-oct-2026):** añade `groundedness`, `fuentes_detalle` (JSONB), `fuera_dominio`, `afirmaciones_bloqueadas` y `entidad_sugerida` a `auditoria_consultas` (HU-10) |
 
 Las migraciones `001`-`003` se ejecutan **automáticamente al primer arranque** del contenedor
-postgres en `docker-compose.yml` (montadas en `/docker-entrypoint-initdb.d`).
+postgres en `docker-compose.yml` (montadas en `/docker-entrypoint-initdb.d`); `004`, `005` y `006` se
+aplican con `psql -f` (listadas en `instalar.ps1`).
 
-> ⚠️ **La `004` no está aplicada en ninguna BD y hoy ni siquiera es ejecutable:** su **línea 1 es
-> un docstring de Python (`"""…"""`)** en lugar de un comentario `--`, así que `psql` la rechaza
-> (**D-15**). `instalar.ps1` tampoco la incluye en su paso de migraciones (**D-16**). Verificado el
-> 16-oct-2026 contra la BD local: `documentos` sigue con **8 columnas**, `fragmentos_documento`
-> **no existe** y el `CHECK` de `estado` sigue en `(vigente, obsoleto, en_revision)`.
+> ✅ **La `004` quedó corregida y aplicada el 16-oct-2026** (su línea 1 era un docstring Python →
+> comentario `--`; D-15/D-16). Verificado contra la BD local: `documentos` tiene las 7 columnas
+> PMV2 (20/20 documentos con `version` y `fecha_publicacion`), `fragmentos_documento` existe con
+> **20 filas** y el `CHECK` de `estado` admite `derogado`.
 
 `database/schema.sql` es la **referencia consolidada** del esquema (mismo modelo; no se ejecuta).
 
@@ -28,12 +30,12 @@ postgres en `docker-compose.yml` (montadas en `/docker-entrypoint-initdb.d`).
 
 ```
 municipalidades (1) ────< (N) tramites (1) ────< (N) documentos (1) ────< (N) fragmentos_documento
-                              │                                              (PMV2, 004 sin aplicar)
+                              │                                              (PMV2, 004 ✅ aplicada)
 usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
                            (1)        (N-1)
 ```
 
-## 3. Tablas, columnas y relaciones (6 base + 1 del PMV2)
+## 3. Tablas, columnas y relaciones (6 base + 1 del PMV2 + 1 de auditoría)
 
 ### municipalidades
 | Columna | Tipo | Notas |
@@ -75,7 +77,7 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 | estado | VARCHAR(20) | CHECK IN ('vigente','obsoleto','en_revision') → **PMV2 añade `derogado`** |
 | **embedding** | **vector(1024)**¹ | Embedding BGE-M3; NULL si no indexado |
 | actualizado_en | TIMESTAMPTZ | default NOW() |
-| **PMV2 (+7)** ↓ | — | ⚠️ **solo en la migración 004, sin aplicar (D-15)** |
+| **PMV2 (+7)** ↓ | — | ✅ **aplicadas (004, 16-oct-2026)** |
 | version | VARCHAR(20) | Versión del documento |
 | fecha_publicacion | DATE | Fecha de publicación (opcional) |
 | archivo_nombre | VARCHAR(300) | Nombre original del archivo subido |
@@ -103,7 +105,10 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 | fuentes | TEXT | URLs separadas por comas |
 | registrado_en | TIMESTAMPTZ | — |
 
-### fragmentos_documento (PMV2 — ⚠️ tabla aún inexistente en la BD, D-15)
+### auditoria_consultas — PMV2 (006, 17-oct-2026): `groundedness`, `fuentes_detalle` (JSONB),
+`fuera_dominio`, `afirmaciones_bloqueadas`, `entidad_sugerida` ✅
+
+### fragmentos_documento (PMV2 — ✅ creada y poblada: 20/20 documentos, 16-oct-2026)
 | Columna | Tipo | Notas |
 |---|---|---|
 | id | UUID PK | — |
@@ -117,7 +122,7 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 
 **B-tree** (`002`): `idx_tramites_municipalidad`, `idx_documentos_tramite`, `idx_documentos_estado`,
 `idx_consultas_usuario`, `idx_consultas_creada_en`, `idx_tramites_tipo` (en `003`).
-`idx_fragmentos_documento` se crea en la migración `004` (**sin aplicar**).
+`idx_fragmentos_documento` se crea en la migración `004` (**✅ aplicada**).
 
 **Vectorial HNSW** (`003`):
 ```sql
@@ -171,7 +176,7 @@ según a.md) y citan el portal <https://www.gob.pe/munijunin>.
 
 - Datos persistentes en el volumen `pgdata` de Docker Compose.
 - `docker compose down -v` borra la BD (full reset); las migraciones y seeds se re-aplican desde cero.
-- ⚠️ **Para habilitar el PMV2** hay que corregir la línea 1 de `004_documentos_pmv2.sql` (docstring
-  Python → comentario `--`) y aplicarla con `psql -f`: ni el montaje de `/docker-entrypoint-initdb.d`
-  (solo corre en volumen nuevo) ni `instalar.ps1` la ejecutan hoy (**D-15/D-16**). Sin ella, las
-  consultas que filtran `eliminado_en IS NULL` fallan con `UndefinedColumn`.
+- ✅ **Migraciones `004`/`005`/`006` corregidas y aplicadas (17-oct-2026)** (D-15/D-16 cerrados):
+  `documentos` tiene las 7 columnas del PMV2, `fragmentos_documento` existe con 20 filas,
+  `area_responsable` está poblada y `auditoria_consultas` tiene las columnas de trazabilidad
+  (`groundedness`, `fuentes_detalle`, `fuera_dominio`, `afirmaciones_bloqueadas`, `entidad_sugerida`).
