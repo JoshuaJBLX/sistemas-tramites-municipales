@@ -9,7 +9,8 @@ from domain.ports.GeneracionRespuestaPort import GeneracionRespuestaPort
 
 PROMPT_SISTEMA = (
     'Eres un asistente experto en trámites municipales. Responde en español, '
-    'de forma clara y breve, usando exclusivamente el contexto entregado. '
+    'de forma muy breve y concreta (máximo 4 pasos numerados y luego apartados '
+    'cortos), usando exclusivamente el contexto entregado. '
     'Si el contexto no responde la pregunta, dilo explícitamente.'
 )
 
@@ -27,15 +28,23 @@ class OllamaAdapter(GeneracionRespuestaPort):
         self._modelo = modelo or os.getenv('OLLAMA_MODEL', 'qwen2.5:3b')
         self._timeout_segundos = timeout_segundos
 
-    async def generar(self, pregunta: str, contexto: list[Documento]) -> str:
+    async def generar(
+        self,
+        pregunta: str,
+        contexto: list[Documento],
+        instrucciones: str | None = None,
+    ) -> str:
         prompt = self.construir_prompt(pregunta, contexto)
+        sistema = (
+            f'{PROMPT_SISTEMA}\n\n{instrucciones}' if instrucciones else PROMPT_SISTEMA
+        )
 
         payload = {
             'model': self._modelo,
             'prompt': prompt,
-            'system': PROMPT_SISTEMA,
+            'system': sistema,
             'stream': False,
-            'options': {'temperature': 0.2, 'num_predict': 512},
+            'options': {'temperature': 0.2, 'num_predict': 320},
         }
 
         async with httpx.AsyncClient(timeout=self._timeout_segundos) as cliente:

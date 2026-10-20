@@ -79,6 +79,18 @@ _CONFIANZA_BASE = 0.55
 _CONFIANZA_POR_PATRON = 0.15
 _UMBRAL_EMPATE = 0.75
 
+# Palabras funcionales del español: si una consulta no contiene ninguna y
+# tampoco coincide con un patrón de intención, se considera sin sentido.
+_PALABRAS_COMUNES = frozenset({
+    'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del', 'en',
+    'que', 'para', 'con', 'por', 'y', 'o', 'a', 'al', 'mi', 'tu', 'su', 'me',
+    'te', 'se', 'nos', 'como', 'cuanto', 'cuanta', 'cuantos', 'cuantas',
+    'cuesta', 'cuestan', 'donde', 'cuando', 'quien', 'cual', 'cuales', 'este',
+    'esta', 'esto', 'ese', 'esa', 'eso', 'hay', 'tengo', 'necesito', 'necesita',
+    'quiero', 'puedo', 'debo', 'es', 'son', 'ser', 'estan', 'fue', 'sin',
+    'sobre', 'entre', 'tambien', 'solo', 'ya', 'no', 'si', 'hay', 'hay',
+})
+
 
 class ServicioNLP:
     """Clasificación de intención y normalización de texto de las consultas."""
@@ -97,6 +109,11 @@ class ServicioNLP:
         """
         texto = self._normalizar(pregunta)
 
+        # Pregunta sin sentido: texto vacío, demasiado corto, sin vocales o
+        # sin ninguna palabra reconocible (evita consultar el RAG con ruido).
+        if self._sin_sentido(texto):
+            return ClasificacionIntencion.con_sin_sentido()
+
         # (intención, patrones coincidentes, peso de especificidad)
         candidatos = [
             (intencion, [p for p in patrones if p in texto])
@@ -105,6 +122,10 @@ class ServicioNLP:
         candidatos = [c for c in candidatos if c[1]]
 
         if not candidatos:
+            # Sin intención clara: si tampoco contiene palabras comunes del
+            # español, se considera que la consulta no tiene sentido.
+            if self._sin_palabras_reconocibles(texto):
+                return ClasificacionIntencion.con_sin_sentido()
             return ClasificacionIntencion.sin_patron()
 
         mejor = max(candidatos, key=lambda c: (len(c[1]), sum(map(len, c[1]))))
@@ -129,3 +150,29 @@ class ServicioNLP:
             if unicodedata.category(caracter) != 'Mn'
         )
         return re.sub(r'[^\w\s]', ' ', sin_tildes).strip()
+
+    @staticmethod
+    def _sin_sentido(texto: str) -> bool:
+        """Detecta una consulta sin sentido (vacía, muy corta o sin palabras).
+
+        Criterios: menos de 2 caracteres; menos de 2 letras; ninguna vocal;
+        o una sola palabra repetida (p. ej. ``aaaa``). No marca como sin
+        sentido una consulta corta pero válida como ``hola`` o ``que cuesta``.
+        """
+        limpio = texto.strip()
+        if len(limpio) < 2:
+            return True
+        letras = [c for c in limpio if c.isalpha()]
+        if len(letras) < 2:
+            return True
+        if not any(c in 'aeiou' for c in limpio):
+            return True
+        palabras = limpio.split()
+        if len(palabras) == 1 and len(set(palabras[0])) == 1:
+            return True
+        return False
+
+    @staticmethod
+    def _sin_palabras_reconocibles(texto: str) -> bool:
+        """Indica si la consulta no contiene ninguna palabra común del español."""
+        return not any(palabra in _PALABRAS_COMUNES for palabra in texto.split())

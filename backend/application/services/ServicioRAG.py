@@ -32,16 +32,25 @@ class ServicioRAG:
         return [documento for documento in documentos if documento.esta_vigente()]
 
     async def responder(
-        self, pregunta: str, contexto: list[Documento] | None = None
+        self,
+        pregunta: str,
+        contexto: list[Documento] | None = None,
+        estructura: bool = True,
     ) -> tuple[str, list[Fuente]]:
-        """Genera la respuesta y las fuentes citadas que la sustentan."""
+        """Genera la respuesta y las fuentes citadas que la sustentan.
+
+        `estructura=False` desactiva el armazón REQUISITOS/COSTO/PLAZO (HU-09)
+        para consultas generales que no preguntan por un trámite concreto.
+        """
         documentos = contexto if contexto is not None else await self.recuperar(pregunta)
 
         if not documentos:
-            texto = await self._servicio_slm.generar(pregunta, [])
+            texto = await self._servicio_slm.generar(pregunta, [], estructura=estructura)
             return texto, []
 
-        texto = await self._servicio_slm.generar(pregunta, documentos)
+        texto = await self._servicio_slm.generar(
+            pregunta, documentos, estructura=estructura
+        )
         return texto, self.construir_fuentes(documentos)
 
     @staticmethod

@@ -39,12 +39,14 @@ class Respuesta:
 
         partes = [self.texto.rstrip()]
 
-        requisitos = self.tramite_probable.resumen_requisitos()
+        requisitos = self.tramite_probable.resumen_requisitos(limite=5)
         if requisitos:
             lista = '\n'.join(f'  {indice}. {valor}' for indice, valor in enumerate(requisitos, 1))
+            restantes = len(self.tramite_probable.requisitos) - len(requisitos)
+            extra = f'\n  … y {restantes} más en la ficha oficial.' if restantes > 0 else ''
             partes.append(
                 'Requisitos registrados en el catálogo oficial de la municipalidad:\n'
-                f'{lista}'
+                f'{lista}{extra}'
             )
 
         detalles = []

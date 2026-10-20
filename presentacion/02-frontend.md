@@ -437,6 +437,6 @@ de puntos de verificación está en [05-implementaciones.md](05-implementaciones
    groundedness** + fuentes TUPA + trámite probable.
 4. `/tramites` → buscar "impuesto predial", filtrar por categoría.
 5. ✅ **El paso 1 funciona (17-oct-2026):** la API arranca (31 rutas) y el frontend consume
-   datos reales de la BD (catálogo de 265 trámites).
+   datos reales de la BD (catálogo de 272 trámites).
 6. `/admin` → el dashboard muestra los KPIs **ficticios** (252 / 1,236 / 98 %, D-6) y
    `DocumentManager`, que **sí carga la tabla** (D-20/D-21 corregidos).

@@ -82,10 +82,12 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 ### 2.2 Base de datos (PostgreSQL 16 + pgvector)
 - Migraciones 001 (BD + extensión vector), 002 (6 tablas), 003 (índice **HNSW** `vector_cosine_ops`),
   004 (`documentos_pmv2`: metadatos, `fragmentos_documento`, `derogado`) y 005
-  (`area_responsable`) — **las 004 y 005 están aplicadas** (20/20 documentos con metadatos;
-  252 trámites con área).
+  (`area_responsable`) — **las 004 y 005 están aplicadas** (45/45 documentos con metadatos;
+  259 trámites con área).
 - Seeds reales TUPA 2023 **MPJ**: 1 municipio, **252 procedimientos**, 20 documentos con fuente
-  `gob.pe/munijunin`.
+  `gob.pe/munijunin`. **Seeds MPH (19-oct-2026):** `documentos_mph.sql` (19 documentos),
+  `tramites_servicios.sql` (6 servicios) y `documentos_institucionales.sql` (6 documentos + 1
+  servicio); base documental total **45 documentos** y catálogo **272 trámites**.
 - Búsqueda por similitud de coseno (`embedding <=> $1::vector`, con fallback Python sin pgvector).
 
 ### 2.3 Frontend (Next.js 14)

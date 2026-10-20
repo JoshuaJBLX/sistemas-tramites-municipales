@@ -54,8 +54,8 @@
 **Infraestructura:**
 
 - ✅ Docker Compose de 3 servicios (PostgreSQL+pgvector, Redis, Ollama) con healthchecks y volúmenes.
-- ✅ Migraciones `001`-`006` y seeds TUPA 2023 (**252 procedimientos** / 20 documentos /
-  1 municipalidad). `004`/`005`/`006` aplicadas.
+- ✅ Migraciones `001`-`006` y seeds TUPA 2023 (**252 procedimientos** / 45 documentos
+  (20 TUPA + 25 MPH) / 1 municipalidad). `004`/`005`/`006` aplicadas.
 - ❌ **0 suites de pruebas automatizadas** (G-18).
 
 ## 2. Estado por Historia de Usuario (las 18)
@@ -126,7 +126,7 @@ Resumen: **11 HU al 100 %** (HU-01, HU-02, HU-04–HU-12) · **4 parciales** (HU
 ### 3.1 Defectos D-14..D-21 — ✅ corregidos (16 de octubre de 2026, verificados en vivo)
 
 Verificación: `python -c "import main"` → **31 rutas**; carga de PDF real → **201**; panel admin
-carga la lista (265 trámites); `PUT .../estado` → 200/422 según corresponda.
+carga la lista (272 trámites); `PUT .../estado` → 200/422 según corresponda.
 
 | # | Defecto | Estado |
 |---|---|---|
@@ -137,7 +137,7 @@ carga la lista (265 trámites); `PUT .../estado` → 200/422 según corresponda.
 | D-18 | `estado` inválido → 500 | ✅ 422 (también en `PUT /{id}/estado`) |
 | D-19 | La baja física no borraba el archivo | ✅ 204 sin huérfanos en `storage/documentos` |
 | D-20 | `pedir()` hacía `response.json()` en 204 | ✅ Manejo del 204; `tsc` sin errores |
-| D-21 | Panel admin llamaba a `/api/tramites/admin` inexistente | ✅ Panel carga (265 trámites) |
+| D-21 | Panel admin llamaba a `/api/tramites/admin` inexistente | ✅ Panel carga (272 trámites) |
 | D-22 | `fragmentado` con `1/0` a columna BOOLEAN | ✅ `bool(fragmentado)` en `DocumentoRepositoryImpl` |
 | D-23 | Publicar sin metadatos → 500 | ✅ 422 capturando `DocumentoInvalidoError` |
 

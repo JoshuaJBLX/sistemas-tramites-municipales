@@ -38,12 +38,12 @@
 | HU iniciadas (⚠️ o ✅) | **15 / 18** | §10.3 |
 | HU sin empezar (❌) | **3 / 18** — HU-15, HU-16, HU-18 | §10.3 |
 | Pruebas automatizadas | **0 suites** | §13.2 |
-| Catálogo de trámites | **252 TUPA** (265 en BD = 252 + 13 prototipos sin equivalente exacto) | §7 |
-| Documentos indexados | **20** (20/20 con embedding y **20/20 fragmentados**: `fragmentos_documento` = 20 filas) | §7 |
+| Catálogo de trámites | **252 TUPA** (272 en BD = 252 + 13 prototipos + 6 servicios MPH + 1 institucional) | §7 |
+| Documentos indexados | **45** (20 TUPA + 19 MPH + 6 institucionales; 45/45 con embedding y **45/45 fragmentados**: `fragmentos_documento` = 56 filas) | §7 |
 | Endpoints REST | **31 rutas servibles** (27 de API + 4 de documentación) | §6.2 |
 | Archivos Python (backend) | **91** | §5 |
 | Archivos `.ts`/`.tsx` de fuente | **25** (5 rutas + 16 componentes + 2 lib + 2 config) | §5 |
-| Archivos SQL | **11** (6 migraciones, 3 seeds, 1 script, 1 schema) | §7 |
+| Archivos SQL | **14** (6 migraciones, 6 seeds, 1 script, 1 schema) | §7 |
 | Documentos Markdown | **92** | §11 |
 
 **Lo que funciona de extremo a extremo (código):** el flujo ciudadano completo
@@ -55,7 +55,7 @@ listado con filtros, baja lógica/física y panel de administración de document
 
 > ✅ **Resuelto el 16 de octubre (verificación en vivo):** los bloqueos D-14..D-21 están corregidos
 > (`import main` → 30 rutas, migración 004 **y** 005 aplicadas, `instalar.ps1` lista ambas, deps en
-> `requirements.txt`). La API sirve en `localhost:8000`, el panel admin carga los 265 trámites y la
+> `requirements.txt`). La API sirve en `localhost:8000`, el panel admin carga los 272 trámites y la
 > carga de un PDF real del TUPA devuelve **201** con texto extraído. Se corrigió además un bug no
 > documentado: `DocumentoRepositoryImpl.guardar` enviaba `int` a la columna BOOLEAN `fragmentado`
 > (rompía todo upsert de documentos). Detalle en §13.1.
@@ -146,8 +146,10 @@ sistemas-tramites-municipales/            raíz del proyecto
 ├── database/
 │   ├── schema.sql                          referencia consolidada del esquema
 │   ├── migrations/                         001 base+extensión · 002 tablas+índices · 003 HNSW
-│   │                                       · 004 PMV2 (metadatos + fragmentos)  ⚠️ no aplicada
+│   │                                       · 004 PMV2 · 005 área responsable · 006 auditoría
 │   ├── seeds/                              municipios (1) · tramites (22) · documentos (20)
+│   │                                       · tramites_servicios (6) · documentos_mph (19)
+│   │                                       · documentos_institucionales (6 + 1 servicio)
 │   └── scripts/actualizar_huancayo.sql    corrección de entidad Junín → Huancayo
 ├── documentacion/
 │   ├── 00-documentos-rectores/             7 documentos (este es el 06)
@@ -343,7 +345,7 @@ archivo original y persistir los fragmentos.
 |---|---|---|
 | `ServicioNLP.py` | 131 | **Clasificador léxico de intención.** Diccionario `_PATRONES_INTENCION` (líneas 12-75) con **raíces**, no palabras completas, para tolerar conjugaciones (`requisit` cubre requisito/requisitos/requiere/necesito). Lógica: normaliza (minúsculas, sin tildes, sin puntuación, línea 124-131), puntúa cada intención por nº de patrones coincidentes, desempata por especificidad (suma de longitudes, línea 110), y calcula `confianza = 0.55 + 0.15 × (patrones−1)` con tope 1.0 (líneas 78-79, 117); si hay empate técnico baja la confianza a 0.70 (línea 118-119). Sin patrones → `OTRO` con confianza 0. |
 | `ServicioRAG.py` | 56 | Orquesta recuperación + generación. `recuperar()` (líneas 25-28) llama al `BusquedaSemanticaPort` y **filtra solo documentos vigentes**. `responder()` (30-41): sin documentos devuelve el texto de abstención del SLM con lista de fuentes vacía. `construir_fuentes()` estático (43-56): convierte cada documento en `Fuente` con `fragmento = contenido[:280]` y su `titulo`. |
-| `ServicioSLM.py` | 45 | Construye el prompt y delega. `PLANTILLA_SISTEMA` (líneas 6-10): *"Responde únicamente con la información del contexto... si no la contiene, indícalo explícitamente"*. `INSTRUCCION_ESTRUCTURA` (13-18): exige apartados REQUISITOS / PASOS / COSTO / PLAZO / OBSERVACIONES y la frase *"No especificado en la base documental"* cuando falte respaldo. `generar()` (27-35): si no hay contexto devuelve la abstención *"No encontré información oficial... Te recomiendo acudir a la oficina de trámites"* (líneas 29-33). |
+| `ServicioSLM.py` | ~250 | Construye el formato de salida y delega. `INSTRUCCION_ESTRUCTURA` pide pasos numerados (máximo 4, título en negrita) + apartados REQUISITOS / PASOS / COSTO / PLAZO / OBSERVACIONES compactos (19-oct-2026); `INSTRUCCION_BREVE` para consultas generales. `generar(..., estructura)`: sin contexto devuelve la abstención *"No encontré información oficial…"*; con estructura aplica `garantizar_estructura` (fallback desde BD, HU-09) y `condensar` (pasos arriba, cada apartado ≤ 200 caracteres y total ≤ 1100 con "…"). `generar` delege al puerto con `instrucciones=…`. |
 | `ServicioOrientacion.py` | 94 | **Orquestador del flujo de orientación.** `orientar()` (líneas 34-72): (1) si la clasificación requiere aclaración devuelve `ACLARACION_AMBIGUA` sin generar ni citar (41-42); (2) recupera documentos; (3) genera respuesta y fuentes; (4) calcula `groundedness` y confianza; (5) si confianza BAJA y hay fuentes, **agrega nota de advertencia visible** al texto (49-54); (6) llama a `IdentificarTramiteProbable` (56-58); (7) anexa los datos estructurados del catálogo (71-72). `ACLARACION_AMBIGUA` (líneas 14-18) es el texto que pide专业课 precisar requisitos/costo/lugar/estado. |
 | `EvaluadorGroundedness.py` | 49 | **Control de alucinaciones por cobertura léxica.** Tokeniza la respuesta (palabras de >3 caracteres, línea 48-49), construye el vocabulario del contexto (contenido + título de cada documento) y calcula `coincidencias / términos_respuesta` (líneas 27-42). Umbrales: `ALTA ≥ 0.75`, `MEDIA ≥ 0.40`, si no `BAJA` (líneas 6-7, 18-25). `esta_grounded()` (44-45). |
 | `ServicioCache.py` | 35 | Abstrae la caché de respuestas. `construir_clave()` (17-20): `consulta:` + SHA-256 de la pregunta normalizada (minúsculas, sin espacios extremos) — así `"¿Cuánto cuesta?"` y `"cuánto cuesta"` comparten entrada. `obtener_respuesta`, `guardar_respuesta` (TTL configurable), `invalidar`. |
@@ -357,7 +359,7 @@ archivo original y persistir los fragmentos.
 | `ClasificarIntencion.py` | 26 | `ejecutar()` devuelve solo la intención; `ejecutar_detallado()` devuelve la `ClasificacionIntencion` completa (intención + confianza + empate). Ambos validan que la pregunta no esté vacía. |
 | `RegistrarConsulta.py` | 34 | Construye la entidad `Consulta` con `uuid4()` y `datetime.now(timezone.utc)` y la persiste vía `ConsultaRepository`. |
 | `GenerarOrientacion.py` | 29 | Valida la pregunta y delega en `ServicioOrientacion.orientar()`, reenviando la `ClasificacionIntencion`. |
-| `IdentificarTramiteProbable.py` | 72 | **Deducción del trámite del catálogo.** `ejecutar(documentos)` (líneas 26-54): pide al `TramiteCatalogoPort` los trámites vinculados a los documentos recuperados; puntúa cada trámite **sumando la similitud semántica** de sus documentos (`_puntuar`, 56-72); descarta si el ganador no supera `PUNTAJE_MINIMO = 0.45` (línea 10, 45-46) o si no supera al segundo por `MARGEN_MINIMO = 1.15` (línea 8, 49-51). Si nada domina, **no propone ningún trámite** — decisión deliberada: es preferible callar antes que señalar el trámite equivocado. |
+| `IdentificarTramiteProbable.py` | ~110 | **Deducción del trámite del catálogo.** `ejecutar(documentos)`: pide al `TramiteCatalogoPort` los trámites vinculados a los documentos recuperados; puntúa cada trámite **sumando la similitud semántica** de sus documentos (`_puntuar`), considerando solo los que superan `VOTO_MINIMO_DOC = 0.45` (evita que documentos genéricos como catálogo/TUPA acumulen puntos flojos). Descarta si el ganador no supera `PUNTAJE_MINIMO = 0.45` o si no supera al segundo por `MARGEN_MINIMO = 1.15` — **las variantes del mismo trámite** (p. ej. "Licencia de Funcionamiento" vs "Licencia de Funcionamiento Temporal", solapamiento de tokens ≥ 0.5) **no cuentan como rivales** para el margen (19-oct-2026). Si nada domina, **no propone ningún trámite** — decisión deliberada: es preferible callar antes que señalar el trámite equivocado. |
 | `AuditarConsulta.py` | 20 | `ejecutar()` registra la trazabilidad; `consultar_trazabilidad()` recupera la consulta por id. |
 | `GestionarDocumentos.py` | 128 | **Ampliado en PMV2:** `registrar()` genera el embedding, valida metadatos (`requiere_metadatos()`) y calcula `hash_contenido`; **`listar()`** con filtros `tramite_id`/`estado`/`incluir_eliminados` + paginación; `actualizar_estado()`; **`eliminar()` = baja lógica** (marca `eliminado_en`); **`eliminar_fisico()`** (borra filas). |
 | `CargarDocumento.py` | 91 | **Nuevo (PMV2).** Orquesta la carga de un archivo: valida la extensión (`FormatoDocumento`) → extrae el texto (`ExtraccionTextoPort`) → almacena el original (`AlmacenamientoDocumentosPort`) → registra el documento con metadatos → indexa el embedding → fragmenta. Si el *chunking* falla, degrada sin romper la carga (solo deja `fragmentado=false`). |
@@ -371,7 +373,7 @@ archivo original y persistir los fragmentos.
 |---|---|---|
 | `rag/BusquedaVectorialAdapter.py` | 117 | **Búsqueda semántica con doble modo.** Detecta pgvector con `Connection.es_pgvector()` (línea 84) y elige: **modo pgvector** — `1 - (embedding <=> $1::vector)` con índice HNSW (`QUERY_BUSQUEDA_VECTORIAL_PGVECTOR`, líneas 17-25); **modo sin pgvector** — trae todos los embeddings y calcula el coseno con numpy en Python (`_coseno`, líneas 40-52; `QUERY_BUSQUEDA_IN_MEMORIA`, 27-33). Ambos filtran `estado = 'vigente'` y `embedding IS NOT NULL`, y aplican `umbral_similitud = 0.3` (línea 75, constructor). `generar_embedding()` delega en BGE-M3. |
 | `embeddings/BGE_M3Adapter.py` | 41 | Genera vectores de 1024 dimensiones con `BAAI/bge-m3` en CPU. Carga perezosa y en hilo (`asyncio.to_thread`, línea 36) para no bloquear el event loop. `normalize_embeddings=True` (línea 40). |
-| `slm/OllamaAdapter.py` | 57 | Cliente HTTP de Ollama (`OLLAMA_URL`, por defecto `localhost:11434`; modelo `qwen2.5:3b`). Payload: `temperature 0.2`, `num_predict 512`, `stream false` (líneas 33-39). `construir_prompt()` (48-56) arma `Contexto:` con `Fuente: título (url)` + contenido, o avisa *"No se recuperó contexto documental"* si está vacío. Timeout 120 s. |
+| `slm/OllamaAdapter.py` | ~65 | Cliente HTTP de Ollama (`OLLAMA_URL`, por defecto `localhost:11434`; modelo `qwen2.5:3b`). Payload: `temperature 0.2`, `num_predict 320`, `stream false`; acepta `instrucciones` del servicio y las concatena al prompt de sistema. `construir_prompt()` arma `Contexto:` con `Fuente: título (url)` + contenido, o avisa *"No se recuperó contexto documental"* si está vacío. Timeout 120 s. |
 | `cache/RedisAdapter.py` | 89 | Caché tolerante a fallos: captura `RedisConnectionError`/`TimeoutError`, avisa **una sola vez** (`_advertir_una_vez`, 42-45) y sigue sin caché. El sistema no cae si Redis está apagado. `cerrar()` (86-89) para el apagado. |
 | `catalog/TramiteCatalogoAdapter.py` | 48 | Resuelve trámites desde documentos con `JOIN documentos d ON d.tramite_id = t.id WHERE d.id = ANY($1::uuid[])` (líneas 9-18), devolviendo nombre, requisitos, costo, plazo, URL y nº de documentos coincidentes. |
 | `documents/DocumentStorageAdapter.py` | 41 | **Ampliado en PMV2:** guarda, lee, elimina y lista archivos bajo `DOCUMENTS_PATH` (por defecto `./storage/documentos`), con nombre seguro `uuid4 + extensión`. Cumple `AlmacenamientoDocumentosPort`. ⚠️ `eliminar()` **nunca se invoca**: la baja física borra filas pero deja el archivo en disco (D-19). |
@@ -598,7 +600,7 @@ ejecuta **también** en el acierto de caché: se reconstruye una `Respuesta` mí
 | 23 | PUT | `/api/admin/documentos/{id}/estado` | `documento_admin_controller` | Cambia estado con validación (422 si inválido o sin metadatos) — **P2-11 ✅** |
 | 24 | DELETE | `/api/admin/documentos/{id}` | `documento_admin_controller.py:129` | Baja lógica; 204 |
 | 25 | DELETE | `/api/admin/documentos/{id}/fisico` | `documento_admin_controller.py:137` | Baja física; 204 |
-| 26 | GET | `/api/tramites/admin` | `tramite_admin_controller.py:40` | Listado ampliado para el panel admin (265 filas) |
+| 26 | GET | `/api/tramites/admin` | `tramite_admin_controller.py:40` | Listado ampliado para el panel admin (272 filas) |
 | 27 | PUT | `/api/tramites/{id}/area` | `tramite_admin_controller.py:49` | Actualiza `area_responsable` (migración 005; HU-07 ✅) |
 
 Los 9 admin **repiten** la funcionalidad pública bajo otro prefijo (7 bajo `/api/admin/documentos` y
@@ -623,7 +625,7 @@ Documentación interactiva: <http://localhost:8000/docs> (Swagger, automático p
 | `database/migrations/002_create_tables.sql` | Crea las 6 tablas, los 5 índices de apoyo (líneas 76-80) y decide el tipo de columna del embedding (líneas 84-94): `vector(1024)` si la extensión existe, si no `double precision[]`. |
 | `database/migrations/003_create_vectors.sql` | Índice **HNSW** `idx_documentos_embedding_hnsw ON documentos USING hnsw (embedding vector_cosine_ops)` solo si hay pgvector; deja comentada la alternativa IVFFlat; añade `idx_tramites_tipo`. |
 | `database/migrations/004_documentos_pmv2.sql` | **(PMV2), 29 líneas — ✅ CORREGIDA Y APLICADA (16-oct-2026).** Añade a `documentos` las columnas `version`, `fecha_publicacion`, `archivo_nombre`, `mime_type`, `hash_contenido`, `fragmentado`, `eliminado_en`; crea la tabla `fragmentos_documento` con su índice; y reescribe el `CHECK` de `estado` para admitir `derogado`. Su línea 1 era un docstring Python → corregida a `--` (D-15); verificado: 20/20 documentos con metadatos. |
-| `database/migrations/005_area_responsable.sql` | **Nuevo, ✅ APLICADO (16-oct-2026):** añade `area_responsable` a `tramites` y la expone en las respuestas (HU-07 ✅); 252/265 trámites con área. |
+| `database/migrations/005_area_responsable.sql` | **Nuevo, ✅ APLICADO (16-oct-2026):** añade `area_responsable` a `tramites` y la expone en las respuestas (HU-07 ✅); 259/272 trámites con área. |
 | `database/migrations/006_auditoria_trazabilidad.sql` | **Nuevo, ✅ APLICADO (17-oct-2026):** HU-10 — añade a `auditoria_consultas` las columnas `groundedness`, `fuentes_detalle JSONB`, `fuera_dominio`, `afirmaciones_bloqueadas` y `entidad_sugerida`, más índices por `consulta_id` y `registrado_en`. |
 | `database/schema.sql` | Referencia consolidada del esquema (documentación, no se ejecuta). |
 
@@ -657,6 +659,9 @@ Los 8 metadatos y `fragmentos_documento` **existen solo en el archivo 004**, no 
 | `seeds/municipios.sql` | **1** Municipalidad | ⚠️ Sigue insertando *"Municipalidad Provincial de Junín"* (líneas 3, 10-11). `scripts/actualizar_huancayo.sql` lo corrige a Huancayo. |
 | `seeds/tramites.sql` | **22** trámites | 5 registros civiles, 4 certificados/tributos, 4 licencias, 4 urbanismo, 2 comercio/eventos, 3 otros. Todos con `costo 0.00` (§13.4) y plazos de 1 a 30 días. |
 | `seeds/documentos.sql` | **20** documentos | Textos de Procedimientos Administrativos por trámite, con `url_origen` del portal oficial, pensados para indexarse. |
+| `seeds/documentos_mph.sql` | **19** documentos | Trámites y servicios MPH con requisitos, costo, pasos y vigencia (fuente: clippings gob.pe). |
+| `seeds/tramites_servicios.sql` | **6** trámites | Servicios MPH fuera del TUPA (mesa de partes, carnet de sanidad, carnet/TUC de conductor, videos de seguridad). |
+| `seeds/documentos_institucionales.sql` | **6** documentos (+1 servicio) | Contenido institucional MPH: catálogo oficial de gob.pe, contacto/sedes/horarios, emergencias, canales en línea, Portal de Transparencia y TUPA. Crea el servicio "Información institucional y contacto" porque `documentos.tramite_id` es NOT NULL. |
 
 **Correspondencia catálogo ↔ documentos:** cada documento tiene `tramite_id`, que es el puente que permite a `IdentificarTramiteProbable` resolver el trámite y traer sus datos estructurados.
 
@@ -783,7 +788,7 @@ powershell -ExecutionPolicy Bypass -File .\instalar.ps1
 |---|---|---|---|
 | 1/7 | Verificar herramientas | Comprueba `python`, `psql`, `node`, `npm`, `ollama`; `redis-server` es **opcional**. Si falta algo crítico, termina con código 1. | 62-82 |
 | 2/7 | Archivo de configuración | Copia `.env.example` → `.env` si no existe. | 85-91 |
-| 3/7 | Base de datos | Crea el rol `tramites`, la base `tramites_municipales`, y aplica en orden: `002_create_tables.sql`, `003_create_vectors.sql`, `seeds/municipios.sql`, `seeds/tramites.sql`, `seeds/documentos.sql` con `ON_ERROR_STOP=1`. **No aplica `004_documentos_pmv2.sql`** (líneas 94-137) → una instalación limpia queda sin los metadatos ni `fragmentos_documento` (**D-16**). | 94-137 |
+| 3/7 | Base de datos | Crea el rol `tramites`, la base `tramites_municipales`, y aplica en orden: `002_create_tables.sql`, `003_create_vectors.sql`, `seeds/municipios.sql`, `seeds/tramites.sql`, `seeds/documentos.sql` con `ON_ERROR_STOP=1`. **No aplica `004_documentos_pmv2.sql`** (líneas 94-137) **ni los seeds MPH/institucionales** → una instalación limpia queda sin los metadatos, sin `fragmentos_documento` y sin los 25 documentos ni los 7 servicios nuevos (**D-16**). | 94-137 |
 | 4/7 | Dependencias Python | Crea `.venv` y ejecuta `pip install -r requirements.txt`. | 140-149 |
 | 5/7 | Dependencias front-end | `npm install` en `frontend-tramites`. | 152-160 |
 | 6/7 | Redis y Ollama | Comprueba puertos 6379/11434; arranca lo que falte; descarga el modelo `qwen2.5:3b`. | 163-190 |
@@ -932,7 +937,7 @@ trámites básicos?* Objetivo: prototipo funcional con chat + SLM + 5 trámites.
 | Chat conversacional | ✅ | `app/chat/page.tsx`, `components/ChatBox.tsx`, `components/ChatThread.tsx` |
 | SLM local que orienta trámites | ✅ | `adapters/slm/OllamaAdapter.py` (`qwen2.5:3b`), `services/ServicioSLM.py`, servicio Ollama en `docker-compose.yml` |
 | Clasificación de intención | ✅ heurística | `services/ServicioNLP.py` (9 intenciones, confianza, desempate) |
-| ≥5 trámites mínimos | ✅ superado | `seeds/tramites.sql`: **252 trámites TUPA 2023** (265 en BD) |
+| ≥5 trámites mínimos | ✅ superado | `seeds/tramites.sql`: **252 trámites TUPA 2023** (272 en BD) |
 
 #### Desglose de las 4 HU del PMV1
 
@@ -970,12 +975,13 @@ trámites básicos?* Objetivo: prototipo funcional con chat + SLM + 5 trámites.
 | Componente | Estado | Evidencia |
 |---|---|---|
 | RAG con búsqueda vectorial | ✅ | `BusquedaVectorialAdapter` (pgvector HNSW / coseno numpy, umbral 0.3) |
-| 20+ trámites en base documental | ✅ superado | `seeds/documentos.sql`: **20** documentos vigentes, **20/20 fragmentados** (`fragmentos_documento` = 20 filas) |
+| 20+ trámites en base documental | ✅ superado | **45** documentos indexados (20 TUPA + 19 MPH + 6 institucionales; todos fragmentados: `fragmentos_documento` = 56) |
 | Arquitectura hexagonal | ✅ | `domain/` + `application/` + `infrastructure/` + `container.py` |
 | Citas / fuentes visibles | ✅ corregido (D-3) + enriquecido (HU-10/P3-08) | `Fuente` viaja con `titulo`, `numero`, `fecha` y `version`; `GroundednessBadge` las muestra en expandible con URL y fragmento |
 | Carga con validación, metadatos y extracción | ✅ **verificado en vivo** | `POST /api/admin/documentos/upload` con PDF real del TUPA → **201**, texto extraído, `indexado=true`; `requirements.txt` con `pypdf`, `PyMuPDF`, `python-docx`, `rapidocr` |
-| *Chunking* + tabla de fragmentos | ✅ **verificado en vivo** | `POST /api/admin/documentos/{id}/procesar` sobre los 20 documentos → 20 OK; el adapter consulta `fragmentos_documento` y hace fallback a documento completo |
+| *Chunking* + tabla de fragmentos | ✅ **verificado en vivo** | `POST /api/admin/documentos/{id}/procesar` sobre los **45** documentos → 45 OK (19-oct-2026), `fragmentos_documento` = 56 filas; el adapter consulta fragmentos y hace fallback a documento completo |
 | **Abstención / fuera de dominio** | ✅ completa (17-oct-2026) | Umbral de rechazo por groundedness en `ServicioOrientacion` (`BLOQUEO_AFIRMACIONES`, G-04) + `ServicioDominio` (HU-11) que deriva a SUNAT/RENIEC/pensiones/… antes de invocar al SLM |
+| **Preguntas ambiguas / sin sentido** | ✅ completa (19-oct-2026) | `ServicioNLP`: saludo → bienvenida; texto sin palabras reconocibles → "no entendí" (`_sin_sentido` + `_sin_palabras_reconocibles`); sin patrón de intención → la consulta **primero intenta el RAG** (piso de similitud 0.45, `UMBRAL_CONSULTA_GENERAL`) y solo pide aclaración si no hay documento afín o el respaldo es insuficiente. La estructura HU-09 (REQUISITOS/COSTO/…) se aplica solo cuando hay intención de trámite; en consultas generales (horarios, teléfonos, catálogo) el modelo responde directo desde el contexto. Verificado en vivo: horarios, teléfono del serenazgo, catálogo de trámites y números de emergencia responden con fuentes; consultas sin contenido piden precisar. |
 | Validación con 50 ciudadanos | ❌ | Sin prueba SUS (P2-17, no fabricable) |
 | Dataset de la PoC | ✅ versionado | `documentacion/06-prueba-de-concepto/dataset-poc.csv`: **200 consultas** (50 por intención), regenerable con `backend/scripts/generar_dataset_poc.py` (G-21) |
 
@@ -1253,7 +1259,7 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 | D-18 | `EstadoDocumento(estado)` sin capturar → 500 | `documento_admin_controller.py` | ✅ **Corregido** — 422 con detalle |
 | D-19 | La baja física no borraba el archivo en disco | `GestionarDocumentos.eliminar_fisico` | ✅ **Corregido** — invoca `AlmacenamientoDocumentosPort.eliminar`; verificado con baja física 204 |
 | D-20 | `pedir()` rompía con 204 sin cuerpo | `lib/api.ts` | ✅ **Corregido** — `npx tsc --noEmit` y `npx next build` OK |
-| D-21 | Panel admin llamaba `GET /api/tramites/admin` inexistente | `lib/api.ts` · `DocumentManager.tsx` | ✅ **Corregido** — panel carga los 265 trámites |
+| D-21 | Panel admin llamaba `GET /api/tramites/admin` inexistente | `lib/api.ts` · `DocumentManager.tsx` | ✅ **Corregido** — panel carga los 272 trámites |
 
 **Defecto nuevo detectado y corregido el 16 de octubre de 2026 (no documentado antes):**
 

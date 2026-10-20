@@ -12,6 +12,7 @@ from application.use_cases.IdentificarTramiteProbable import IdentificarTramiteP
 from domain.entities.Documento import Documento
 from domain.entities.Respuesta import Respuesta
 from domain.value_objects.ClasificacionIntencion import ClasificacionIntencion
+from domain.value_objects.IntencionConsulta import IntencionConsulta
 from domain.value_objects.NivelConfianza import NivelConfianza
 
 # Mensaje de aclaración cuando la pregunta no permite identificar la intención.
@@ -19,6 +20,22 @@ ACLARACION_AMBIGUA = (
     'Para orientarte mejor necesito que precises tu consulta. Puedes indicarme, '
     'por ejemplo: qué requisitos necesitas, cuánto cuesta, en qué lugar se '
     'tramita o cómo se sigue el estado de tu expediente.'
+)
+
+# Respuesta a un saludo (HU-05): bienvenida sin consultar el RAG.
+RESPUESTA_SALUDO = (
+    '¡Hola! Soy el asistente virtual de la Municipalidad Provincial de Huancayo. '
+    'Puedo orientarte sobre requisitos, costos, plazos y pasos de trámites como '
+    'licencias de funcionamiento, certificados de habitabilidad, partidas de '
+    'nacimiento, matrimonio o defunción, carnet de sanidad, ITSE y más. '
+    '¿Sobre qué trámite necesitas orientación?'
+)
+
+# Respuesta cuando la consulta no tiene sentido (HU-05): no se entendió.
+RESPUESTA_SIN_SENTIDO = (
+    'No entendí tu consulta. Escríbela con palabras claras y completas, por '
+    'ejemplo: "¿Qué necesito para el carnet de sanidad?" o "¿Cuánto cuesta la '
+    'licencia de funcionamiento?".'
 )
 
 # Derivación al área responsable del trámite cuando la confianza es baja (HU-07).
@@ -45,6 +62,14 @@ BLOQUEO_AFIRMACIONES = (
     'presentaré como un dato oficial. Verifícalo directamente con la '
     'municipalidad antes de continuar.'
 )
+
+
+# Piso de similitud para las consultas sin intención de trámite (horarios,
+# teléfonos, catálogo…): el umbral general de 0.30 recupera documentos con
+# similitud floja que ensucian la respuesta, así que una consulta general solo
+# se responde si existe un documento claramente afín (≥ 0.45); si no, se pide
+# aclaración.
+UMBRAL_CONSULTA_GENERAL = 0.45
 
 
 class ServicioOrientacion:
@@ -77,12 +102,34 @@ class ServicioOrientacion:
                     consulta_id, clasificacion, evaluacion
                 )
 
-        # Si la pregunta es ambigua se pide aclaración en vez de inventar.
-        if clasificacion is not None and clasificacion.requiere_aclaracion:
+        # Saludo: se responde con una bienvenida, sin consultar el RAG (HU-05).
+        if clasificacion is not None and clasificacion.intencion == IntencionConsulta.SALUDO:
+            return self._respuesta_saludo(consulta_id, clasificacion)
+
+        # Consulta sin sentido: no se entendió, se pide reformular (HU-05).
+        if clasificacion is not None and clasificacion.sin_sentido:
+            return self._respuesta_sin_sentido(consulta_id, clasificacion)
+
+        # Si la pregunta es ambigua se pide aclaración en vez de inventar, pero
+        # primero se consulta la base documental: si hay información que responde
+        # la consulta (p. ej. horarios, teléfonos o catálogo de trámites) se
+        # responde con el RAG y sus fuentes; si no hay nada, se pide precisar.
+        documentos: list[Documento] = await self._servicio_rag.recuperar(pregunta)
+        consulta_general = (
+            clasificacion is not None and clasificacion.requiere_aclaracion
+        )
+        if consulta_general:
+            documentos = [
+                documento
+                for documento in documentos
+                if documento.puntuacion_similitud >= UMBRAL_CONSULTA_GENERAL
+            ]
+        if consulta_general and not documentos:
             return self._respuesta_de_aclaracion(consulta_id, clasificacion)
 
-        documentos: list[Documento] = await self._servicio_rag.recuperar(pregunta)
-        texto, fuentes = await self._servicio_rag.responder(pregunta, documentos)
+        texto, fuentes = await self._servicio_rag.responder(
+            pregunta, documentos, estructura=not consulta_general
+        )
         puntuacion = self._evaluador_groundedness.calcular_puntuacion(texto, documentos)
         confianza = self._evaluador_groundedness.evaluar(texto, documentos)
 
@@ -91,6 +138,10 @@ class ServicioOrientacion:
         # se pide verificar el dato con la municipalidad (no inventar).
         bloqueada = puntuacion < UMBRAL_CONFIANZA_MEDIA
         if bloqueada:
+            # En una consulta general sin respaldo se prefiere pedir aclaración
+            # antes que entregar un bloqueo críptico.
+            if consulta_general:
+                return self._respuesta_de_aclaracion(consulta_id, clasificacion)
             texto = BLOQUEO_AFIRMACIONES
 
         tramite_probable = None
@@ -144,6 +195,38 @@ class ServicioOrientacion:
             id=uuid4(),
             consulta_id=consulta_id,
             texto=ACLARACION_AMBIGUA,
+            confianza=NivelConfianza.MEDIA,
+            fuentes=[],
+            groundedness=0.0,
+            confianza_intencion=clasificacion.confianza,
+            pide_aclaracion=True,
+            tramite_probable=None,
+        )
+
+    @staticmethod
+    def _respuesta_saludo(
+        consulta_id: UUID, clasificacion: ClasificacionIntencion
+    ) -> Respuesta:
+        return Respuesta(
+            id=uuid4(),
+            consulta_id=consulta_id,
+            texto=RESPUESTA_SALUDO,
+            confianza=NivelConfianza.ALTA,
+            fuentes=[],
+            groundedness=0.0,
+            confianza_intencion=clasificacion.confianza,
+            pide_aclaracion=False,
+            tramite_probable=None,
+        )
+
+    @staticmethod
+    def _respuesta_sin_sentido(
+        consulta_id: UUID, clasificacion: ClasificacionIntencion
+    ) -> Respuesta:
+        return Respuesta(
+            id=uuid4(),
+            consulta_id=consulta_id,
+            texto=RESPUESTA_SIN_SENTIDO,
             confianza=NivelConfianza.MEDIA,
             fuentes=[],
             groundedness=0.0,

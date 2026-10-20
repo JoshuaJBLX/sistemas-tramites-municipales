@@ -18,7 +18,7 @@ VALUES
      'establecimiento de salud, DNI de la madre y DNI del padre (si está disponible). '
      'El trámite es inmediato y la partida se entrega el mismo día. Arancel según TUPA '
      'vigente (ver TUPA 2023, N.º 188).',
-     'https://www.munihuancayo.gob.pe/tupa/inscripcion-nacimiento',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
      'vigente',
      '1.0', 
      DATE '2023-08-01', 
@@ -32,7 +32,7 @@ VALUES
      'DNI, recibo de servicios básicos (luz, agua o teléfono) y solicitud en formato '
      'establecido. Plazo de atención: 1 a 3 días hábiles. Arancel según TUPA 2023 '
      '(N.º 232).',
-     'https://www.munihuancayo.gob.pe/tupa/certificado-residencia',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
      'vigente',
      '1.0', 
      DATE '2023-08-01', 
@@ -48,7 +48,7 @@ VALUES
      'Plazo de 5 a 15 días hábiles según el tipo de actividad. Incluye la '
      'Inspección Técnica de Seguridad en Edificaciones (ITSE) según el nivel de '
      'riesgo del giro. Arancel según TUPA 2023.',
-     'https://www.munihuancayo.gob.pe/tupa/licencia-funcionamiento',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
      'vigente',
      '1.0', 
      DATE '2023-08-01', 
@@ -63,7 +63,7 @@ VALUES
      'las modalidades A (aprobación automática), B, C o D (comisión técnica) según '
      'las características de la obra. Plazo de 10 a 20 días hábiles. Arancel según '
      'TUPA 2023 (N.º 30).',
-     'https://www.munihuancayo.gob.pe/tupa/licencia-edificacion',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
      'vigente',
      '1.0', 
      DATE '2023-08-01', 
@@ -77,7 +77,7 @@ VALUES
      'municipalidad. Se presenta DNI y solicitud escrita; la Gerencia de '
      'Administración Tributaria verifica en el sistema de tributos. Plazo de 1 a 2 '
      'días hábiles. Arancel según TUPA 2023 (N.º 109).',
-     'https://www.munihuancayo.gob.pe/tupa/certificado-no-adeudo',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
      'vigente',
      '1.0', 
      DATE '2023-08-01', 
@@ -91,7 +91,7 @@ VALUES
      'del establecimiento de salud, el DNI del fallecido y el DNI del declarante. '
      'El trámite es inmediato y se realiza en el mismo día en la Oficina de Registro '
      'Civil. Arancel según TUPA 2023 (N.º 220).',
-'https://www.munihuancayo.gob.pe/tupa/inscripcion-defuncion',
+'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -105,7 +105,7 @@ VALUES
      'predio. Se presenta solicitud, DNI y croquis de ubicación; el personal técnico '
      'realiza la verificación en campo y emite su conformidad. Plazo de atención: 7 días '
      'hábiles. Arancel según TUPA 2023 (N.º 42).',
-     'https://www.munihuancayo.gob.pe/tupa/numeracion-municipal',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -119,7 +119,7 @@ VALUES
      'Se presenta solicitud, DNI y croquis; el área técnica verifica en campo la posesión '
      'continua y pacífica. Plazo de atención: 5 días hábiles. Arancel según TUPA 2023 '
      '(N.º 233).',
-     'https://www.munihuancayo.gob.pe/tupa/certificado-posesion',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -133,7 +133,7 @@ VALUES
      'solicitada con el uso de suelo permitido. Se presenta solicitud, DNI, plano de '
      'ubicación y descripción de la actividad. Plazo de atención: 5 días hábiles. Arancel '
      'según TUPA 2023 (N.º 34).',
-     'https://www.munihuancayo.gob.pe/tupa/zonificacion-compatibilidad',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -147,7 +147,7 @@ VALUES
      'edificación y porcentaje de área libre. Se presenta solicitud, DNI, título de '
      'propiedad y plano de ubicación. Plazo de atención: 8 días hábiles. Arancel según TUPA '
      '2023 (N.º 36).',
-     'https://www.munihuancayo.gob.pe/tupa/parametros-urbanisticos',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -161,7 +161,7 @@ VALUES
      'habilitación, evaluados en modalidades A (previos) o B-C (con aportes) según el tipo '
      'de habilitación (residencial, comercial o industrial). Plazo de 30 a 45 días hábiles '
      'según modalidad. Arancel según TUPA 2023 (N.º 27).',
-     'https://www.munihuancayo.gob.pe/tupa/habilitacion-urbana',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -175,7 +175,7 @@ VALUES
      'construidas ante SUNARP. Se presenta solicitud, título de propiedad, planos y memoria '
      'descriptiva firmados por el profesional responsable. Plazo de atención: 15 días '
      'hábiles. Arancel según TUPA 2023 (N.º 47).',
-     'https://www.munihuancayo.gob.pe/tupa/declaratoria-fabrica',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -189,7 +189,7 @@ VALUES
      'fachadas o vía pública. Se presenta solicitud, DNI, croquis de ubicación y diseño del '
      'anuncio con dimensiones. Plazo de atención: 7 días hábiles. Arancel según TUPA 2023 '
      '(N.º 52).',
-     'https://www.munihuancayo.gob.pe/tupa/anuncios-publicidad',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -202,7 +202,7 @@ VALUES
      'Autoriza el comercio en puestos de mercados municipales o en zonas establecidas para '
      'comercio ambulatorio. Se presenta solicitud, DNI, croquis de ubicación y carné de '
      'sanidad vigente. Plazo de atención: 5 días hábiles. Arancel según TUPA 2023 (N.º 118).',
-     'https://www.munihuancayo.gob.pe/tupa/comercio-mercados',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -216,7 +216,7 @@ VALUES
      'organizador, plan de seguridad (personal, equipos, rutas de evacuación) y seguro '
      'contra accidentes. Plazo de atención: 10 días hábiles. Arancel según TUPA 2023 '
      '(N.º 130).',
-     'https://www.munihuancayo.gob.pe/tupa/eventos-publicos',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -230,7 +230,7 @@ VALUES
      'de Registro Civil. Se presenta DNI de ambos convivientes, acta notarial de '
      'reconocimiento, partidas de nacimiento y certificado de domicilio. Plazo de atención: '
      '15 días hábiles. Arancel según TUPA 2023 (N.º 205).',
-     'https://www.munihuancayo.gob.pe/tupa/union-de-hecho',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -244,7 +244,7 @@ VALUES
      'municipales (impuesto predial y arbitrios). Se presenta solicitud, DNI, título de '
      'propiedad o contrato y última declaración jurada. Plazo de atención: 10 días hábiles. '
      'Sin costo adicional al arancel TUPA 2023 (N.º 240).',
-     'https://www.munihuancayo.gob.pe/tupa/empadronamiento',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -257,7 +257,7 @@ VALUES
      'Permiso temporal para ocupar vía pública con materiales, andamios, canaletas u otras '
      'instalaciones durante una obra. Se presenta solicitud, DNI, plano del área a ocupar y '
      'cronograma. Plazo de atención: 5 días hábiles. Arancel según TUPA 2023 (N.º 57).',
-     'https://www.munihuancayo.gob.pe/tupa/ocupacion-via-publica',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -272,7 +272,7 @@ VALUES
      'nacimiento, certificado de soltería o disponibilidad, certificado de domicilio y dos '
      'testigos con DNI. Plazo de atención: 15 días hábiles desde la programación. Arancel '
      'según TUPA 2023 (N.º 201).',
-     'https://www.munihuancayo.gob.pe/tupa/matrimonio-civil',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 
@@ -286,7 +286,7 @@ VALUES
      'en bancos autorizados, al contado (hasta febrero, con descuento) o en cuatro cuotas '
      'trimestrales. Se requiere el código de contribuyente, la declaración jurada del predio '
      'y el DNI del propietario. Vigencia según TUPA 2023 y ordenanza anual de tributos.',
-     'https://www.munihuancayo.gob.pe/tributos/impuesto-predial',
+     'https://www.gob.pe/institucion/munihuancayo/informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-tupa-y-modificaciones',
       'vigente',
       '1.0', 
       DATE '2023-08-01', 

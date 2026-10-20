@@ -13,10 +13,10 @@ la documentación oficial publicada en <https://www.gob.pe/munijunin>.
 | Métrica | Valor |
 | --- | --- |
 | Avance global | **83/101 = 82 %** (PMV1 24/24 = **100 %** ✅ · PMV2 28/28 = **100 %** ✅ incl. HU-11 · PMV3 31/49 = **63 %** incl. HU-17) |
-| Inventario | 91 `.py` de backend · 25 `.ts`/`.tsx` · 11 `.sql` · 92 `.md` · 7 controllers · 11 puertos · 16 componentes front-end |
+| Inventario | 91 `.py` de backend · 25 `.ts`/`.tsx` · 14 `.sql` · 92 `.md` · 7 controllers · 11 puertos · 16 componentes front-end |
 | Endpoints | **31 rutas servibles** (la API arranca: `import main` → 31) |
-| Catálogo | **252 procedimientos TUPA** con costo y área reales (265 trámites en BD) |
-| Documentos | 20/20 con metadatos completos y **20/20 fragmentados** (RAG por fragmento activo) |
+| Catálogo | **252 procedimientos TUPA** con costo y área reales (272 trámites en BD) |
+| Documentos | **45/45** con metadatos completos y **45/45 fragmentados** (56 fragmentos; RAG por fragmento activo) |
 | Pruebas | 0 suites (`pytest` ausente, G-18) |
 
 > ✅ **PMV1 y PMV2 cerrados al 100 %** (17-oct-2026): la API arranca con 31 rutas, las migraciones
@@ -131,7 +131,7 @@ en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomen
 | PUT | `/api/admin/documentos/{id}/estado` | Cambia estado con validación (P2-11) |
 | DELETE | `/api/admin/documentos/{id}` | Baja lógica |
 | DELETE | `/api/admin/documentos/{id}/fisico` | Baja física |
-| GET | `/api/tramites/admin` | Listado ampliado para el panel admin (265 filas) |
+| GET | `/api/tramites/admin` | Listado ampliado para el panel admin (272 filas) |
 | PUT | `/api/tramites/{id}/area` | Actualiza `area_responsable` (HU-07) |
 
 ## Flujo de una consulta (RAG)

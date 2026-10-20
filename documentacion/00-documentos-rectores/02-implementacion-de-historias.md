@@ -142,7 +142,7 @@ verificables con `grep` sobre el repositorio.
 - [x] `POST /api/consultas` clasifica intención → registra → consulta caché → genera orientación RAG → audita (`consulta_controller.py`).
 - [x] Devuelve `texto`, `confianza` (alta/media/baja), `groundedness` real, `confianza_intencion`, `pide_aclaracion` y `fuentes` con `titulo` + `fragmento` + `url`.
 - [x] Persistencia de la consulta en `consultas` (`RegistrarConsulta.py`).
-- [x] **Trámite probable implementado:** `IdentificarTramiteProbable` vincula los documentos recuperados con `tramites` mediante `documentos.tramite_id`, pondera los votos por la similitud semántica del RAG y exige que el ganador supere al segundo por un margen (1.15) con puntaje mínimo 0.45. Si ningún trámite domina, **no se propone ninguno** (`IdentificarTramiteProbable.py`).
+- [x] **Trámite probable implementado:** `IdentificarTramiteProbable` vincula los documentos recuperados con `tramites` mediante `documentos.tramite_id`, pondera los votos por la similitud semántica del RAG (solo documentos con similitud ≥ 0.45) y exige que el ganador supere al segundo por un margen (1.15) con puntaje mínimo 0.45; las variantes del mismo trámite (solapamiento de nombres ≥ 0.5) no cuentan como rivales (19-oct-2026). Si ningún trámite domina, **no se propone ninguno** (`IdentificarTramiteProbable.py`).
 - [x] **Consulta ambigua gestionada:** sin patrón reconocido, con empate entre intenciones o con confianza < 0.5, `ServicioOrientacion` responde con `ACLARACION_AMBIGUA` y `pide_aclaracion: true`, sin generar respuesta ni citar fuentes (`ServicioOrientacion.py`).
 
 **Frontend**

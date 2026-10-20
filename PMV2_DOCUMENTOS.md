@@ -78,11 +78,11 @@ Aplicar: `database/migrations/004_documentos_pmv2.sql`
 | # | Bloqueo | Estado |
 |---|---|---|
 | B1 | **La API no arrancaba** (`ImportError` de `router` en un stub) | ✅ Corregido (D-14): `import main` → **31 rutas**, ningún endpoint cae |
-| B2 | **La migración 004 no estaba aplicada** | ✅ Aplicada (`004` + `005`): 20/20 documentos con metadatos; `derogado` en el `CHECK` |
+| B2 | **La migración 004 no estaba aplicada** | ✅ Aplicada (`004` + `005`): 45/45 documentos con metadatos; `derogado` en el `CHECK` |
 | B3 | **La 004 no era SQL válido** (línea 1 con docstring) | ✅ Corregido (línea 1 con `--`) |
 | B4 | **El booleano se enviaba como entero** (`1 if … else 0` → `DataError`) | ✅ Corregido (D-22): `bool(fragmentado)` |
 | B5 | **El front fallaba al borrar** (204 sin cuerpo → `SyntaxError`) | ✅ Corregido (D-20): 204 manejado, sin errores en `tsc` |
-| B6 | **Front llamaba a `/api/tramites/admin` inexistente** | ✅ Corregido (D-21): panel carga (265 trámites) |
+| B6 | **Front llamaba a `/api/tramites/admin` inexistente** | ✅ Corregido (D-21): panel carga (272 trámites) |
 | B7 | **Nada ejecutaba la 004** | ✅ Corregido (D-16): `instalar.ps1` lista `004` y `005` |
 | B8 | **0 suites de pruebas.** No existe ningún `test_*.py`, `conftest.py`, `*.test.ts` ni script `test` en `package.json` (G-18). | ⬜ **Abierto** (G-18) |
 
@@ -120,7 +120,7 @@ bloqueo y fuentes con metadatos (HU-10) y el clasificador de dominio (HU-11), ce
 
 1. ~~**Arreglar los bloqueos B1–B7**~~ → ✅ **hecho** (D-14..D-23, verificados en vivo: 31 rutas,
    `004`/`005`/`006` aplicadas, deps en `requirements.txt`, 204 y panel admin OK).
-2. ~~**HU-04:** OCR y recuperación **por fragmento**~~ → ✅ **hecho** (rapidocr + 20/20 documentos
+2. ~~**HU-04:** OCR y recuperación **por fragmento**~~ → ✅ **hecho** (rapidocr + 45/45 documentos
    fragmentados con `fragmentos_documento`).
 3. ~~**HU-08:** cargar los montos reales del TUPA + umbral "no inventar"~~ → ✅ **hecho** (252
    sembrados; 188 con costo > 0; `BLOQUEO_AFIRMACIONES` con umbral de groundedness).
@@ -141,6 +141,6 @@ bloqueo y fuentes con metadatos (HU-10) y el clasificador de dominio (HU-11), ce
 - ~~"Upload solo extrae `.txt`/`.md`"~~ → ✅ PDF/DOCX verificados con `pypdf`/`python-docx`
   (upload con PDF real → 201, texto extraído).
 - ~~Baja lógica: la búsqueda vectorial no la respeta y la 004 no está aplicada~~ → ✅ 004/005
-  aplicadas (20/20 con metadatos).
+  aplicadas (45/45 con metadatos).
 - ~~`derogado` no es persistible~~ → ✅ persistible tras aplicar `004`.
 - ~~Fragmentos "aún sin consumidor" en el RAG~~ → ✅ recuperación por fragmento activa (G-13).

@@ -18,6 +18,7 @@ class ClasificacionIntencion:
     intencion: IntencionConsulta
     confianza: float
     empata: bool = False
+    sin_sentido: bool = False
 
     @property
     def requiere_aclaracion(self) -> bool:
@@ -31,3 +32,9 @@ class ClasificacionIntencion:
     @classmethod
     def sin_patron(cls, empata: bool = False) -> 'ClasificacionIntencion':
         return cls(intencion=IntencionConsulta.OTRO, confianza=0.0, empata=empata)
+
+    @classmethod
+    def con_sin_sentido(cls) -> 'ClasificacionIntencion':
+        return cls(
+            intencion=IntencionConsulta.OTRO, confianza=0.0, empata=False, sin_sentido=True
+        )

@@ -106,7 +106,7 @@ corregir y ya no se mantiene en el repositorio.
 | # | Defecto | Estado |
 |---|---|---|
 | D-14 | La API no arrancaba: `ImportError` de `router` en un stub | ✅ 31 rutas servibles |
-| D-15 | Migración `004` sin aplicar y con línea 1 inválida | ✅ `004`/`005` aplicadas (20/20 con metadatos) |
+| D-15 | Migración `004` sin aplicar y con línea 1 inválida | ✅ `004`/`005` aplicadas (45/45 con metadatos) |
 | D-16 | `instalar.ps1` no aplicaba la `004` | ✅ ambas migraciones listadas |
 | D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` | ✅ deps completas (incl. OCR) |
 | D-18 | `estado` inválido respondía **500** | ✅ **422** |
@@ -150,7 +150,7 @@ corregir y ya no se mantiene en el repositorio.
 | Entidad: MPH (Huancayo) | ⚠️ Corregido: MPJ – Junín, TUPA 2023 (252 procedimientos) |
 | API `POST /api/v1/consulta` | ✅ Real: `POST /api/consultas` con `{pregunta}` |
 | Respuesta con `abstencion`/`groundedness`/`latencia_ms`/`pii_filtrado` | ⚠️ Solo `confianza` (alta/media/baja) |
-| Tablas `fragmentos_documentales`, `respuestas`, `evaluaciones_calidad` | ✅ `fragmentos_documento` existe y está poblada (20/20, `004` aplicada); `evaluaciones_calidad` sigue sin existir |
+| Tablas `fragmentos_documentales`, `respuestas`, `evaluaciones_calidad` | ✅ `fragmentos_documento` existe y está poblada (45/45, `004` aplicada); `evaluaciones_calidad` sigue sin existir |
 | 7 contenedores + monitoreo | ⚠️ 3 servicios (postgres, redis, ollama) |
 | Clasificador Random Forest + TF-IDF | ❌ Regex (`ServicioNLP.py`) |
 | 16 rutas frontend | ⚠️ 4 rutas (`/`, `/chat`, `/tramites`, `/admin`) |

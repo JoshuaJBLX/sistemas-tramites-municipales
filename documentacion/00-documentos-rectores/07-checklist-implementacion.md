@@ -13,13 +13,13 @@
 
 | # | HU | Punto pendiente | Acción | Archivo a tocar | Estado | Verificación |
 |---|---|---|---|---|---|---|
-| 1 | HU-07 | Derivación al área responsable | Añadir columna `area_responsable` a `tramites` | `database/migrations/005_area_responsable.sql` | ✅ | `grep -c area_responsable database/migrations/005_area_responsable.sql` → 4; API: 252/265 trámites con área |
+| 1 | HU-07 | Derivación al área responsable | Añadir columna `area_responsable` a `tramites` | `database/migrations/005_area_responsable.sql` | ✅ | `grep -c area_responsable database/migrations/005_area_responsable.sql` → 4; API: 259/272 trámites con área |
 | 2 | HU-07 | Exponer área en respuesta | Añadir `area` a `TramiteProbableResponse` y `consulta_controller.py` | `backend/infrastructure/controllers/consulta_controller.py` | ✅ | `GET /api/consultas` → `tramite_probable.area` poblada |
 | 3 | HU-07 | Derivar al área con confianza baja | Si confianza BAJA + trám probable → añadir texto derivación al área | `backend/application/services/ServicioOrientacion.py` | ✅ | `grep -n derivar backend/application/services/ServicioOrientacion.py` |
 | 4 | HU-09 | Estructura de apartados garantizada | Si el SLM no devuelve los apartados, componerlos desde BD | `backend/application/services/ServicioSLM.py` | ✅ | `grep -n estructura backend/application/services/ServicioSLM.py` |
 | 5 | HU-09 | Derivación al funcionario en la respuesta | Añadir texto de derivación al funcionario cuando no hay respuesta | `backend/application/services/ServicioOrientacion.py` | ✅ | `grep -n funcionario backend/application/services/ServicioOrientacion.py` |
 | 6 | HU-08 | Montos reales del TUPA 2023 | Cargar `costo` real en `tramites` | `database/seeds/tramites.sql` | ✅ | `grep -c "^('" database/seeds/tramites.sql` → 252 filas; API: **188 con costo > 0** (93 marcadas 0.00 = gratuito/tarifa variable/proporcional, según TUPA) |
-| 7 | HU-08 | Confirmar 252 procedimientos del TUPA | Ampliar seeds de trámites | `database/seeds/tramites.sql` | ✅ | `grep -c "^('" database/seeds/tramites.sql` → **252**; `POST /api/tramites` → 265 (252 TUPA + 13 prototipos) |
+| 7 | HU-08 | Confirmar 252 procedimientos del TUPA | Ampliar seeds de trámites | `database/seeds/tramites.sql` | ✅ | `grep -c "^('" database/seeds/tramites.sql` → **252**; `POST /api/tramites` → **272** (252 TUPA + 13 prototipos + 6 servicios MPH + 1 institucional) |
 
 ---
 
@@ -31,13 +31,13 @@
 |---|---|---|---|---|---|
 | P2-01 | D-14 | Añadir `router` vacío o eliminar import de `tramite_admin_router` | `backend/infrastructure/controllers/tramite_admin_controller.py` | ✅ | `python -c "import main"` → 30 rutas, exit 0 |
 | P2-02 | D-15 | Corregir línea 1 de migración 004 (docstring → comentario SQL) | `database/migrations/004_documentos_pmv2.sql` | ✅ | `head -1` → `--` |
-| P2-03 | D-15 | Aplicar migración 004 en BD local | `psql -f database/migrations/004_documentos_pmv2.sql` | ✅ | `SELECT version, fecha_publicacion FROM documentos` → 20/20 con datos |
+| P2-03 | D-15 | Aplicar migración 004 en BD local | `psql -f database/migrations/004_documentos_pmv2.sql` | ✅ | `SELECT version, fecha_publicacion FROM documentos` → 45/45 con datos |
 | P2-04 | D-16 | Añadir `004_documentos_pmv2.sql` al paso 3/7 de `instalar.ps1` | `instalar.ps1` | ✅ | `grep -n "004\|005" instalar.ps1` → ambas migraciones listadas |
 | P2-05 | D-17 | Añadir `pypdf` y `python-docx` a `requirements.txt` | `requirements.txt` | ✅ | `grep -E "pypdf\|python-docx\|PyMuPDF\|rapidocr" requirements.txt` → pypdf 5.1.0, PyMuPDF 1.24.14, python-docx 1.1.2, rapidocr 3.10.0 |
 | P2-06 | D-18 | Capturar `ValueError` de `EstadoDocumento()` → HTTP 422 | `backend/infrastructure/controllers/documento_admin_controller.py` | ✅ | `GET /api/tramites/admin?estado=no_valido` → 422; `PUT .../estado` con estado inválido → 422 |
 | P2-07 | D-19 | Invocar `AlmacenamientoDocumentosPort.eliminar` en baja física | `backend/application/use_cases/GestionarDocumentos.py` | ✅ | Baja física de prueba → 204 y sin huérfanos en `storage/documentos` |
 | P2-08 | D-20 | Corregir `pedir()` para no llamar `response.json()` en 204 | `frontend-tramites/lib/api.ts` | ✅ | DELETE desde UI sin error; `npx tsc --noEmit` → 0 errores |
-| P2-09 | D-21 | Eliminar llamada a `GET /api/tramites/admin` (ruta inexistente) | `frontend-tramites/lib/api.ts` + `DocumentManager.tsx` | ✅ | Panel admin carga la lista (265 trámites) |
+| P2-09 | D-21 | Eliminar llamada a `GET /api/tramites/admin` (ruta inexistente) | `frontend-tramites/lib/api.ts` + `DocumentManager.tsx` | ✅ | Panel admin carga la lista (272 trámites) |
 
 ### Funcionalidad pendiente
 
@@ -45,9 +45,9 @@
 |---|---|---|---|---|---|---|
 | P2-10 | HU-01 | Extracción de PDF/DOCX | Instalar deps y probar carga de `.pdf` / `.docx` | `requirements.txt` + `ExtraccionTextoAdapter.py` | ✅ | `POST /api/admin/documentos/upload` con PDF real del TUPA → **201**, `indexado=true`, `fragmentado=true`, texto extraído |
 | P2-11 | HU-01 | Confirmación/firma de calidad | UI para marcar documentos como revisados | `DocumentManager.tsx` + `PUT /api/admin/documentos/{id}/estado` | ✅ | Botón "Aprobar" visible; `PUT .../estado` → 200 (`en_revision`→`vigente`); 422 si faltan metadatos |
-| P2-12 | HU-02 | Columnas metadatos en BD | Verificar migración aplicada y funcional | `DocumentoRepositoryImpl.py` | ✅ | `SELECT COUNT(*) FROM documentos WHERE version IS NOT NULL AND fecha_publicacion IS NOT NULL` → 20 |
+| P2-12 | HU-02 | Columnas metadatos en BD | Verificar migración aplicada y funcional | `DocumentoRepositoryImpl.py` | ✅ | `SELECT COUNT(*) FROM documentos WHERE version IS NOT NULL AND fecha_publicacion IS NOT NULL` → **45** |
 | P2-13 | HU-04 | OCR para escaneados | Integrar OCR (`rapidocr`) | `ExtraccionTextoAdapter.py` | ✅ | `grep -n rapidocr backend/infrastructure/adapters/extraction/ExtraccionTextoAdapter.py`; prueba con PDF escaneado → texto |
-| P2-14 | HU-04 | Recuperación RAG por fragmento | Cambiar `BusquedaVectorialAdapter` para consultar `fragmentos_documento` | `backend/infrastructure/adapters/rag/BusquedaVectorialAdapter.py` | ✅ | `SELECT COUNT(*) FROM fragmentos_documento` → **20** (los 20 documentos reprocesados con `POST /procesar`); búsqueda por fragmentos activa |
+| P2-14 | HU-04 | Recuperación RAG por fragmento | Cambiar `BusquedaVectorialAdapter` para consultar `fragmentos_documento` | `backend/infrastructure/adapters/rag/BusquedaVectorialAdapter.py` | ✅ | `SELECT COUNT(*) FROM fragmentos_documento` → **56** (los 45 documentos reprocesados con `POST /procesar`, 19-oct-2026); búsqueda por fragmentos activa |
 | P2-15 | HU-12 | Motor de trámites relacionados | Implementar recomendación por similitud de embedding | nuevo `backend/application/use_cases/RecomendarTramites.py` + `TramiteCatalogoAdapter.relacionados` | ✅ | `GET /api/tramites/{id}/relacionados` → 200 con `similitud` **en orden decreciente**; embedding para trámites con documentos y **fallback léxico (Jaccard)** para los 252 TUPA |
 | P2-16 | HU-12 | UI de trámites relacionados | Componente de recomendación en `/tramites` | `frontend-tramites/app/tramites/page.tsx` + `TramiteCard.tsx` + `lib/api.ts` | ✅ | `npx next build` → OK; panel "Trámites relacionados con «…»" con % de afinidad |
 | P2-17 | — | Validación con 50 ciudadanos | Prueba SUS y reproducibilidad | nuevo `documentacion/06-prueba-de-concepto/validacion-sus.md` | ⬜ | Requiere prueba real con ciudadanos; no fabricable |
@@ -106,6 +106,20 @@
 | P3-28 | — | Enmascaramiento de PII | Detectar y anonimizar datos personales | `backend/application/use_cases/RegistrarConsulta.py` | ⬜ | `grep -n pii` |
 | P3-29 | — | Contenerización front/back | Dockerfile para cada servicio | `frontend-tramites/Dockerfile` + `backend/Dockerfile` | ⬜ | `docker compose up` |
 | P3-30 | — | Balanceador HTTPS + monitoreo | nginx + Prometheus + Grafana | nuevo `nginx.conf` + `docker-compose.monitoring.yml` | ⬜ | Stack completo |
+
+---
+
+## Contenidos y orientación (19-oct-2026, verificado)
+
+| # | Área | Punto | Acción | Archivo | Estado | Verificación |
+|---|---|---|---|---|---|---|
+| C-01 | Contenido RAG | Trámites MPH fuera del TUPA | Semilla de 19 documentos (requisitos/costo/pasos/vigencia) + 6 servicios del portal gob.pe | `database/seeds/documentos_mph.sql` · `database/seeds/tramites_servicios.sql` | ✅ | `INSERT 0 19` / `INSERT 0 6`; consultas tipo "carnet de sanidad" responden con 5 fuentes y groundedness ≥ 0.75 |
+| C-02 | Contenido RAG | Contenido institucional MPH | Semilla de 6 documentos (catálogo oficial de 19 trámites, contacto/sedes/horarios, emergencias, canales en línea, Portal de Transparencia, TUPA) + 1 servicio | `database/seeds/documentos_institucionales.sql` | ✅ | `INSERT 0 1` / `INSERT 0 6`; respuestas verificadas: horario 8:00-17:45, serenazgo 064-202050, bomberos 064-211020/064-221324 |
+| C-03 | Contenido RAG | Indexación y fragmentación | Reindexar y fragmentar los 25 documentos nuevos | `python -m backend.scripts.indexar_documentos` + `POST /api/admin/documentos/{id}/procesar` | ✅ | 45/45 documentos con embedding y fragmentados; `fragmentos_documento` = 56 |
+| C-04 | Orientación | Consultas sin sentido | Detectar texto sin palabras reconocibles y responder "no entendí"; saludo → bienvenida (bug: el campo y el classmethod `sin_sentido` colisionaban) | `ServicioNLP.py` · `ClasificacionIntencion.py` · `ServicioOrientacion.py` | ✅ | `asdfghjkl qwerty` y `zzz xxx yyy` → "No entendí tu consulta…"; `hola` → bienvenida |
+| C-05 | Orientación | Consultas generales sin intención | Sin patrón de intención → intentar el RAG con piso de similitud 0.45; solo pedir aclaración si no hay documento afín; estructura HU-09 solo con intención de trámite | `ServicioOrientacion.py` (`UMBRAL_CONSULTA_GENERAL`) · `ServicioSLM.py` · `ServicioRAG.py` | ✅ | Horarios/serenazgo/catálogo/emergencias → respuesta con fuentes; "¿Cuándo es el Día del Padre?" → pide aclaración; consultas de trámite conservan REQUISITOS/COSTO/… |
+| C-06 | Orientación | Formato de respuesta del chat | Pasos numerados (máx. 4, título en negrita) + apartados HU-09 compactos; cada apartado ≤ 200 caracteres y total ≤ 1100 con "…"; requisitos del catálogo limitados a 5; instrucción enviada al SLM vía `instrucciones` del puerto | `ServicioSLM.py` (`INSTRUCCION_ESTRUCTURA`, `condensar`) · `GeneracionRespuestaPort.py` · `OllamaAdapter.py` (`num_predict 320`) · `Respuesta.py` · `ChatThread.tsx` (pasos con badge, "Ver más" al colapsar, "Fuente oficial") | ✅ | "¿Qué necesito para la licencia de funcionamiento?" → 4 pasos + 5 apartados + ficha oficial (~1400 caracteres vs 4156 antes); `tsc --noEmit` OK |
+| C-07 | Contenido | Enlaces de fuente rotos (404) | Los 20 documentos con `www.munihuancayo.gob.pe/tupa/…` devolvían 404; repuntados a la página oficial del TUPA en gob.pe (`informes-publicaciones/1050892-texto-unico-de-procedimientos-administrativos-…`) | `database/seeds/documentos.sql` · BD `documentos.url_origen` | ✅ | `UPDATE 20`; click en "Fuente oficial" y "Ver fuentes" → **200** (20-oct-2026) |
 
 ---
 

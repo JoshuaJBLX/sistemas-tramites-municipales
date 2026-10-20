@@ -21,8 +21,8 @@ aplican con `psql -f` (listadas en `instalar.ps1`).
 
 > ✅ **La `004` quedó corregida y aplicada el 16-oct-2026** (su línea 1 era un docstring Python →
 > comentario `--`; D-15/D-16). Verificado contra la BD local: `documentos` tiene las 7 columnas
-> PMV2 (20/20 documentos con `version` y `fecha_publicacion`), `fragmentos_documento` existe con
-> **20 filas** y el `CHECK` de `estado` admite `derogado`.
+> PMV2 (45/45 documentos con `version` y `fecha_publicacion`), `fragmentos_documento` existe con
+> **56 filas** y el `CHECK` de `estado` admite `derogado`.
 
 `database/schema.sql` es la **referencia consolidada** del esquema (mismo modelo; no se ejecuta).
 
@@ -108,7 +108,7 @@ usuarios (1) ────< (N) consultas ────< (1) auditoria_consultas
 ### auditoria_consultas — PMV2 (006, 17-oct-2026): `groundedness`, `fuentes_detalle` (JSONB),
 `fuera_dominio`, `afirmaciones_bloqueadas`, `entidad_sugerida` ✅
 
-### fragmentos_documento (PMV2 — ✅ creada y poblada: 20/20 documentos, 16-oct-2026)
+### fragmentos_documento (PMV2 — ✅ creada y poblada: 45/45 documentos, 19-oct-2026)
 | Columna | Tipo | Notas |
 |---|---|---|
 | id | UUID PK | — |
@@ -161,6 +161,9 @@ LIMIT $2
 | `municipios.sql` | 1 municipalidad | Junín (MPJ) |
 | `tramites.sql` | **22 trámites** TUPA 2023 | Registro civil (nacimiento, matrimonio, defunción, separación, unión de hecho, partida) · certificados (residencia, posesión, no adeudo) · licencias (funcionamiento, edificación, anuncios, comercio) · urbanismo (zonificación, parámetros, habilitación, fábrica, numeración) · tributos (predial, empadronamiento) · otros (eventos, vía pública) |
 | `documentos.sql` | **20 documentos** vigentes | Nacimiento (N.º 188), residencia (N.º 232), licencia funcionamiento (N.º 9), licencia edificación (N.º 30), no adeudo (N.º 109), defunción (N.º 220) + matrimonio (N.º 201), predial, numeración (N.º 42), posesión (N.º 233), zonificación (N.º 34), parámetros (N.º 36), habilitación (N.º 27), fábrica (N.º 47), anuncios (N.º 52), comercio (N.º 118), eventos (N.º 130), unión de hecho (N.º 205), empadronamiento (N.º 240), vía pública (N.º 57) — con `url_origen` de `munijunin.gob.pe`, `embedding NULL` (se indexa al registrar) |
+| `tramites_servicios.sql` | **6 servicios MPH** | Mesa de Partes Virtual · Carnet de Sanidad · Carnet y duplicado de Habilitación de Conductor · TUC · Copia de videos de cámaras (fuente: gob.pe/munihuancayo, 19-oct-2026) |
+| `documentos_mph.sql` | **19 documentos MPH** | Requisitos, costo, pasos y vigencia de los 19 trámites/servicios del portal gob.pe de Huancayo (19-oct-2026) |
+| `documentos_institucionales.sql` | **6 documentos + 1 servicio MPH** | Catálogo oficial, contacto/sedes/horarios, emergencias, canales en línea, Portal de Transparencia y TUPA de la MPH (19-oct-2026) |
 
 Los seeds referencian la base de conocimiento oficial de la MPJ (TUPA 2023, 252 procedimientos
 según a.md) y citan el portal <https://www.gob.pe/munijunin>.

@@ -46,7 +46,7 @@
 | Chat conversacional | ✅ | `frontend-tramites/app/chat` + `ChatBox`/`ChatThread` |
 | SLM local que orienta trámites | ✅ | `Dockerfile` de Ollama (`docker-compose.yml`), `OllamaAdapter` (qwen2.5:3b) |
 | Clasificación de intención | ✅ (heurística) | `ServicioNLP` (regex, 6 intenciones) |
-| 5 trámites mínimos | ✅ superado | Seeds: **252 procedimientos TUPA** (265 trámites en BD) |
+| 5 trámites mínimos | ✅ superado | Seeds: **252 procedimientos TUPA** (272 trámites en BD) |
 | **PMV1 · Cierre** | ✅ **100 %** (24/24) | HU-05, HU-06, HU-07, HU-09 cerradas (migración 005 + área responsable + SLM) |
 
 ### PMV2 — Modelo RAG optimizado (✅ 100 %)
