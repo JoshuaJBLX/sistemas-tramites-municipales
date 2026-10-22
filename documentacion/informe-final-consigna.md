@@ -1,4 +1,5 @@
 # Informe Final — Borrador según Consigna de Evaluación
+> **Documento relacionado:** [06 · Estado actual implementado](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > **Propósito:** este documento sigue la estructura de la consigna de la evaluación final
 > (semanas 14–15). Lo que ya existe en el proyecto está **rellenado con datos verificados
