@@ -1,4 +1,5 @@
 # 00 — Documentos Rectores (referencia raíz)
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > **Actualizado el 17 de octubre de 2026**. Cifras verificadas contra
 > `06-estado-actual-implementado.md` (§10 y §13) y contra `PMV2_DOCUMENTOS.md`.

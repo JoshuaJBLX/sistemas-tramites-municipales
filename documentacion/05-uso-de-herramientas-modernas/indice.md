@@ -1,4 +1,5 @@
 # 05 — Uso de Herramientas Modernas
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **Resumen:** selección, aplicación y limitaciones de las herramientas de ingeniería y TI
 (atributo ICACIT AG-I11; equiv. "5.Uso de herramientas modernas.docx" de a.md). Contrastado

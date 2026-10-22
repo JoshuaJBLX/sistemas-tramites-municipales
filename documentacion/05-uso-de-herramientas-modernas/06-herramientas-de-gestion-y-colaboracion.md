@@ -1,4 +1,5 @@
 # 05.6 — Herramientas de Gestión y Colaboración
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **05 — Uso de herramientas modernas** (AG-I11). Leyenda: ✅ · ⚠️ · ❌ (G-XX).
 

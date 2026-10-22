@@ -1,4 +1,5 @@
-﻿# Trazabilidad por PMV — Estado del desarrollo del proyecto
+# Trazabilidad por PMV — Estado del desarrollo del proyecto
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Mapa de qué se construyó en qué **PMV** (Producto Mínimo Viable), qué queda por cerrar en cada
 > uno y cómo avanza el proyecto hacia los 3 PMV definidos en **04.4**. Leyenda: ✅ · ⚠️ · ❌ (G-XX).

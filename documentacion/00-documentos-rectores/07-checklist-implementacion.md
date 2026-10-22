@@ -1,4 +1,5 @@
 # 07 · Checklist de Implementación — PMV1, PMV2, PMV3
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > **Documento de verificación** para completar los 3 PMV. Cada punto tiene archivo de referencia,
 > estado (⬜ pendiente / 🔄 en curso / ✅ verificado) y método de comprobación con `grep`.

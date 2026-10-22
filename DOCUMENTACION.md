@@ -1,4 +1,5 @@
-﻿# DOCUMENTACIÓN DEL SISTEMA — Orientación de Trámites Municipales
+# DOCUMENTACIÓN DEL SISTEMA — Orientación de Trámites Municipales
+> **Documento relacionado:** [06 · Estado actual implementado](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 Documentación derivada de `a.md`, corregida y contrastada contra el código real, organizada en
 **1 carpeta de documentos rectores** (00) y **6 carpetas temáticas** (una por documento académico

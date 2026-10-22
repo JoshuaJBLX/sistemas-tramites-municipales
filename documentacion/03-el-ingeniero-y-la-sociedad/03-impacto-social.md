@@ -1,4 +1,5 @@
 # 03.3 — Impacto Social
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **03 — El Ingeniero y la Sociedad** (AG-101/AG-102). Leyenda: ✅ · ⚠️ · ❌ (G-XX).
 

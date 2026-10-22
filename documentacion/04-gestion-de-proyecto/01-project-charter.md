@@ -1,4 +1,5 @@
 # 04.1 — Project Charter
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **04 — Gestión de Proyecto** (a.md "4.Gestiòn de Proyecto.docx", PMI/Scrum).
 > Leyenda: ✅ · ⚠️ · ❌ (G-XX).

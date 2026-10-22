@@ -1,4 +1,5 @@
 # 04 — Gestión de Proyecto
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **Resumen:** gestión del proyecto bajo el marco PMI/Scrum y entregas por PMV (equiv. "4.Gestiòn
 de Proyecto.docx" de a.md). Contrastado con lo implementado, con leyenda: ✅ · ⚠️ · ❌ (G-XX).

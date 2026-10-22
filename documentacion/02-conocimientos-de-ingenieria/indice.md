@@ -1,4 +1,5 @@
 # 02 — Conocimientos de Ingeniería
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **Resumen:** aplicación de conocimientos de matemáticas, ciencias, computación e ingeniería
 (atributo ICACIT AG-107; equiv. "2.Conocimientos de Ingenieria.docx" de a.md). Contrastado con

@@ -1,4 +1,5 @@
 # Historias de Usuario — Sistema de Trámites Municipales
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 ---
 

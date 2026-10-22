@@ -1,4 +1,5 @@
 # PMV2 — Extensión de documentos
+> **Documento relacionado:** [06 · Estado actual implementado](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > **Estado verificado: 17 de octubre de 2026 (verificación en vivo)**
 > — la API arranca con **31 rutas**, migraciones `004`/`005`/`006` aplicadas y los defectos

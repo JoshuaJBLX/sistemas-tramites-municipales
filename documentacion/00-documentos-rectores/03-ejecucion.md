@@ -1,4 +1,5 @@
 # EJECUCIÓN LOCAL
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Verificado en Windows 11 (octubre 2026) con servicios nativos, sin Docker.
 

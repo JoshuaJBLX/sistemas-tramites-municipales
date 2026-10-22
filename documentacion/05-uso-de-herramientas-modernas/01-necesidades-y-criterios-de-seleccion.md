@@ -1,4 +1,5 @@
 # 05.1 — Necesidades y Criterios de Selección de Herramientas
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **05 — Uso de herramientas modernas** (a.md "5.Uso de herramientas modernas.docx",
 > AG-I11). Leyenda: ✅ · ⚠️ · ❌ (G-XX).

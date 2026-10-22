@@ -11,14 +11,19 @@
 > y `05-trazabilidad-por-pmv.md` en cuanto a cifras. Esos tres `.md` se conservan como respaldo
 > histórico y se remiten desde aquí.
 >
-> **Fecha de verificación: 16 de octubre de 2026** · HEAD `619a11d`
-> (`docs: actualización documentación PMV2 y presentación`), que no modificó código — el último
-> commit de código es `ea06c9a` (`feat(documents): PMV2 - carga con metadatos, extracción, chunking,
-> baja lógica y panel admin`).
-> Método: lectura íntegra de los 89 `.py`, 25 `.ts`/`.tsx` de fuente, 10 `.sql`, `instalar.ps1`,
+> **Fecha de verificación: 20 de octubre de 2026** · HEAD `0d86eaf`
+> (`feat(chat): formato de respuesta con pasos+HU-09 compacta, contenidos RAG y corrección de
+> enlaces 404`).
+> Método: lectura íntegra de los 91 `.py`, 25 `.ts`/`.tsx` de fuente, 14 `.sql`, `instalar.ps1`,
 > `docker-compose.yml` y de los 92 `.md`; **más consulta directa a PostgreSQL local** (esquema real,
-> conteos de `tramites`/`documentos`) y ejecución de `import main`. Cada afirmación de este
-> documento es verificable con `grep` sobre el archivo que se cita.
+> conteos de `tramites`/`documentos`/`fragmentos_documento`) y ejecución de `import main`. Cada
+> afirmación de este documento es verificable con `grep` sobre el archivo que se cita.
+>
+> **Actualización del 20 de octubre:** se sincronizan las cifras vigentes (272 trámites, 45
+> documentos 45/45 fragmentados, 56 fragmentos, 31 rutas, 91 `.py`, 14 `.sql`, 92 `.md`), se añaden
+> los contenidos RAG (seeds MPH e institucionales), el formato de respuesta del chat y la corrección
+> de los 20 enlaces 404 (`C-01..C-07` en `07-checklist-implementacion.md`). Todos los `.md` enlazan
+> a este documento como fuente única de verdad.
 >
 > **Actualización del 16 de octubre:** incorpora el avance del PMV2 (commit `ea06c9a`) y corrige
 > una inconsistencia heredada: la suma de puntos por HU hacía del PMV1 un **88 %**, no un 100 %
@@ -30,7 +35,7 @@
 
 | Dimensión | Resultado actual | Referencia |
 |---|---|---|
-| **Avance global de las 18 HU** | **82 %** (83/101 puntos de verificación) — verificado 17-oct-2026 | §10.1 |
+| **Avance global de las 18 HU** | **82 %** (83/101 puntos de verificación) — verificado 20-oct-2026 | §10.1 |
 | **PMV1 · Prototipo funcional** | **100 %** (24/24) — 4 HU ✅ | §10.4 |
 | **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) — 5 HU al 100 % (HU-04, HU-08, HU-10, HU-11, HU-12) | §10.5 |
 | **PMV3 · Sistema integrado** | **63 %** (31/49) — 9 HU (HU-01 y HU-02 al 100 %) | §10.6 |
@@ -170,7 +175,7 @@ sistemas-tramites-municipales/            raíz del proyecto
 └── PRESENTACION-PMV1.md                    guion de demostración del PMV1  ⚠️ reescrito localmente (§12.2)
 ```
 
-**Totales:** 86 archivos Python · 25 archivos `.ts`/`.tsx` de fuente · 9 archivos SQL · 90 archivos
+**Totales:** 91 archivos Python · 25 archivos `.ts`/`.tsx` de fuente · 14 archivos SQL · 92 archivos
 Markdown · 1 script PowerShell · 1 archivo YAML.
 
 ---

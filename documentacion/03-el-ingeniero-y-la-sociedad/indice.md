@@ -1,4 +1,5 @@
 # 03 — El Ingeniero y la Sociedad
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **Resumen:** impacto social, económico, ambiental, legal y ético del sistema (atributos ICACIT
 AG-101 y AG-102; equiv. "3.El Ingeniero y la Sociedad.docx" de a.md). Contrastado con el código

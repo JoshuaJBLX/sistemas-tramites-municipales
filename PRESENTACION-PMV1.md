@@ -1,4 +1,5 @@
-﻿# PMV1 – Demostración
+# PMV1 – Demostración
+> **Documento relacionado:** [06 · Estado actual implementado](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **MUN AI · Sistema basado en SLM para la orientación de trámites municipales · Municipalidad Provincial de Huancayo**
 

@@ -1,4 +1,5 @@
 # Estado de Implementación por Historia de Usuario
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 Análisis detallado de las 18 HU contra el código real del repositorio.
 **Método:** revisión de `backend/` (controllers, use cases, services, adapters, repositorios,

@@ -1,4 +1,5 @@
-﻿# Sistema de Trámites Municipales
+# Sistema de Trámites Municipales
+> **Documento relacionado:** [06 · Estado actual implementado](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 Plataforma de orientación de trámites de la **Municipalidad Provincial de Junín** (MPJ),
 que permite a los ciudadanos consultar procedimientos municipales mediante un

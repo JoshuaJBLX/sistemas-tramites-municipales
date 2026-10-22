@@ -1,4 +1,5 @@
 # 02.1 — Definición del Problema de Ingeniería
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **02 — Conocimientos de Ingeniería** (equiv. a.md "2.Conocimientos de Ingenieria.docx",
 > AG-107). Leyenda: ✅ · ⚠️ · ❌ (G-XX).

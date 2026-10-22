@@ -1,4 +1,5 @@
 # 08 · Tablero Scrum — Documento Maestro
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > **Tablero Scrum oficial del proyecto MUN AI** — *Sistema de Trámites Municipales* de la
 > Municipalidad Provincial de Huancayo (MPH). Reúne el Product Backlog completo (18 HU

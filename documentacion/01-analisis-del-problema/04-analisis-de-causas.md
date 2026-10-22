@@ -1,4 +1,5 @@
 # 01.4 — Análisis de Causas
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **01 — Análisis del Problema**. Leyenda: ✅ · ⚠️ · ❌ (G-XX).
 

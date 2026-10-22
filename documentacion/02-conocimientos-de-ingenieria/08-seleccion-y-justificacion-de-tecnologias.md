@@ -1,4 +1,5 @@
 # 02.8 — Selección y Justificación de Tecnologías
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **02 — Conocimientos de Ingeniería** (AG-107; comparativas detalladas en el documento
 > 05). Leyenda: ✅ · ⚠️ · ❌ (G-XX).

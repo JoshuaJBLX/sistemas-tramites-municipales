@@ -1,4 +1,5 @@
 # 04.9 — Medición del Desempeño del Proyecto
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Parte de **04 — Gestión de Proyecto** (PMI/Scrum). Leyenda: ✅ · ⚠️ · ❌ (G-XX).
 

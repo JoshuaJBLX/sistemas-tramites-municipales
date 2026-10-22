@@ -1,4 +1,5 @@
 # 01 — Análisis del Problema
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **Resumen:** diagnóstico del problema que motiva el sistema de orientación de trámites municipales
 (equiv. "1. Análisis del problema.docx" de a.md). Contrastado con el código real, con leyenda:

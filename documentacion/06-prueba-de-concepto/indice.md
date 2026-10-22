@@ -1,4 +1,5 @@
 # 06 — Prueba de Concepto (PoC)
+> **Documento relacionado:** [06 · Estado actual implementado](../00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 **Resumen:** validez técnica de la solución SLM + RAG + ML antes del desarrollo (equiv. "6.Prueba
 de Concepto.docx" de a.md). Contrastado con el pipeline real y señalando qué artefactos de PoC no

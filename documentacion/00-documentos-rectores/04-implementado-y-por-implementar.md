@@ -1,4 +1,5 @@
 # Implementado y por Implementar — Estado real del sistema
+> **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > Inventario honesto de qué está construido (con código real) y qué queda pendiente,
 > contrastado contra `a.md`, las 18 HU y los vacíos `G-XX`.
