@@ -19,7 +19,7 @@ redis==5.0.4
 httpx==0.27.0
 
 # Validación y configuración
-pydantic[email]==2.10.4
+pydantic[email]==2.9.2
 python-dotenv==1.0.1
 
 # Embeddings (BGE-M3)
