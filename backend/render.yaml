@@ -8,13 +8,14 @@ services:
     plan: free  # Cambiar a starter/standard si necesitas más recursos
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    
+
+    # Especificar versión de Python compatible con pydantic
+    pythonVersion: 3.11.9
+
     # Variables de entorno requeridas (se configuran en el dashboard de Render)
     envVars:
       - key: PORT
         value: 8000
-      - key: PYTHON_VERSION
-        value: 3.11
 
     # Health check para verificar que el servicio está funcionando
     healthCheckPath: /health
