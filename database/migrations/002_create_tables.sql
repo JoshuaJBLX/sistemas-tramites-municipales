@@ -5,14 +5,8 @@
 -- Ejecutar conectado a la BD: psql -d tramites_municipales -f database/migrations/002_create_tables.sql
 -- =============================================================
 
--- Habilita pgvector si el binario de la extensión está disponible en el
--- servidor (Docker: imagen pgvector/pgvector; local: puede faltar).
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM pg_available_extensions WHERE name = 'vector') THEN
-        CREATE EXTENSION vector;
-    END IF;
-END $$;
+-- NOTA: La extensión vector ya se crea en 001_supabase_setup.sql (o 001_create_database.sql)
+-- No es necesario crearla aquí. El bloque original se eliminó para evitar errores en Supabase.
 
 CREATE TABLE IF NOT EXISTS municipalidades (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),

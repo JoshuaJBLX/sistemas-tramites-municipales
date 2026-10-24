@@ -36,7 +36,10 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_fragmentos_documento ON fragmentos_documento (documento_id);
 
 -- Permitir estado 'derogado' (HU-03) si la restricción lo impide en algunas BD
+-- Primero eliminamos la restricción si existe (idempotente)
 ALTER TABLE documentos DROP CONSTRAINT IF EXISTS documentos_estado_check;
+
+-- Luego la recreamos con el valor correcto
 ALTER TABLE documentos
     ADD CONSTRAINT documentos_estado_check
     CHECK (estado IN ('vigente', 'obsoleto', 'en_revision', 'derogado'));

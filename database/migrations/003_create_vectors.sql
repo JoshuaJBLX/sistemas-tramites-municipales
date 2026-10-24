@@ -10,14 +10,24 @@
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector') THEN
-        EXECUTE 'CREATE INDEX IF NOT EXISTS idx_documentos_embedding_hnsw ' ||
+        -- Primero eliminamos el índice si existe (para poder recrearlo con diferentes parámetros si es necesario)
+        EXECUTE 'DROP INDEX IF EXISTS idx_documentos_embedding_hnsw';
+
+        -- Luego lo creamos
+        EXECUTE 'CREATE INDEX idx_documentos_embedding_hnsw ' ||
                 'ON documentos USING hnsw (embedding vector_cosine_ops)';
     END IF;
 END $$;
 
 -- Alternativa (pgvector < 0.5.0): índice IVFFlat.
--- CREATE INDEX IF NOT EXISTS idx_documentos_embedding_ivfflat
---     ON documentos USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+-- DO $$
+-- BEGIN
+--     IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'vector') THEN
+--         EXECUTE 'DROP INDEX IF EXISTS idx_documentos_embedding_ivfflat';
+--         EXECUTE 'CREATE INDEX idx_documentos_embedding_ivfflat ' ||
+--                 'ON documentos USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)';
+--     END IF;
+-- END $$;
 
 -- Índice GIN para filtrar por tipo de trámite si se usan etiquetas.
 CREATE INDEX IF NOT EXISTS idx_tramites_tipo ON tramites (tipo);

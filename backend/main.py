@@ -4,6 +4,7 @@ Ejecución (desde la carpeta backend/):
     uvicorn main:app --reload --port 8000
 """
 
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -41,9 +42,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Configuración de CORS - permite localhost y dominio de Vercel
+allowed_origins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+# Agregar dominio de Vercel si está configurado
+vercel_url = os.getenv('VERCEL_FRONTEND_URL')
+if vercel_url:
+    allowed_origins.append(vercel_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://127.0.0.1:3000'],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],

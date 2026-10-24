@@ -45,6 +45,9 @@ from infrastructure.adapters.catalog.TramiteCatalogoAdapter import TramiteCatalo
 from infrastructure.adapters.documents.DocumentStorageAdapter import (
     DocumentStorageAdapter,
 )
+from infrastructure.adapters.documents.DocumentStorageAdapterSupabase import (
+    DocumentStorageAdapterSupabase,
+)
 from infrastructure.adapters.embeddings.BGE_M3Adapter import BGE_M3Adapter
 from infrastructure.adapters.extraction.ExtraccionTextoAdapter import (
     ExtraccionTextoAdapter,
@@ -53,6 +56,7 @@ from infrastructure.adapters.rag.BusquedaVectorialAdapter import (
     BusquedaVectorialAdapter,
 )
 from infrastructure.adapters.slm.OllamaAdapter import OllamaAdapter
+from infrastructure.adapters.slm.OpenRouterAdapter import OpenRouterAdapter
 from infrastructure.repositories.Connection import Connection
 from infrastructure.repositories.ConsultaRepositoryImpl import ConsultaRepositoryImpl
 from infrastructure.repositories.DocumentoRepositoryImpl import DocumentoRepositoryImpl
@@ -217,9 +221,21 @@ def crear_container(dsn: str | None = None) -> Container:
 
     generador_embeddings = BGE_M3Adapter()
     busqueda_semantica = BusquedaVectorialAdapter(connection, generador_embeddings)
-    generacion_respuesta = OllamaAdapter()
+
+    # Usar OpenRouter si hay API key, sino Ollama local
+    if os.getenv('OPENROUTER_API_KEY'):
+        generacion_respuesta = OpenRouterAdapter()
+    else:
+        generacion_respuesta = OllamaAdapter()
+
     cache = RedisAdapter()
-    almacenamiento = DocumentStorageAdapter()
+
+    # Usar Supabase Storage si está configurado, sino almacenamiento local
+    if os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_SERVICE_ROLE_KEY'):
+        almacenamiento = DocumentStorageAdapterSupabase()
+    else:
+        almacenamiento = DocumentStorageAdapter()
+
     extraccion_texto = ExtraccionTextoAdapter()
     auditoria = _AuditoriaPostgreSQL(connection)
 

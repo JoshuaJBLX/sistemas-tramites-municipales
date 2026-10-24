@@ -3,7 +3,7 @@
 
 ---
 
-## HU-01 — Gestión documental
+## HU-01 — Carga de documentos oficiales
 
 **Historia de Usuario:**
 
@@ -23,7 +23,7 @@ Como administrador municipal necesito cargar documentos oficiales, como TUPA, or
 
 ---
 
-## HU-02 — Gestión documental
+## HU-02 — Metadatos de vigencia
 
 **Historia de Usuario:**
 
@@ -43,7 +43,7 @@ Como administrador municipal necesito registrar la vigencia, versión y fuente d
 
 ---
 
-## HU-03 — Gestión documental
+## HU-03 — Aprobación y derogación de documentos
 
 **Historia de Usuario:**
 
@@ -63,7 +63,7 @@ Como revisor municipal necesito aprobar, modificar, derogar o desactivar documen
 
 ---
 
-## HU-04 — Procesamiento documental y RAG
+## HU-04 — Procesamiento automático y RAG por fragmento
 
 **Historia de Usuario:**
 
@@ -83,7 +83,7 @@ Como administrador necesito que el sistema extraiga y procese automáticamente e
 
 ---
 
-## HU-05 — Consulta ciudadana
+## HU-05 — Consulta en lenguaje natural
 
 **Historia de Usuario:**
 
@@ -367,20 +367,20 @@ Como funcionario necesito generar reportes sobre las consultas y el desempeño d
 
 | ID | Épica | Historia de Usuario |
 | -- | ----- | ------------------- |
-| HU-01 | Gestión documental | Como administrador municipal necesito cargar documentos oficiales, como TUPA, ordenanzas, reglamentos y procedimientos, para construir la base de conocimiento del sistema. |
-| HU-02 | Gestión documental | Como administrador municipal necesito registrar la vigencia, versión y fuente de cada documento para evitar que el sistema utilice información desactualizada. |
-| HU-03 | Gestión documental | Como revisor municipal necesito aprobar, modificar, derogar o desactivar documentos para mantener actualizada la base de conocimiento. |
-| HU-04 | Procesamiento documental y RAG | Como administrador necesito que el sistema extraiga y procese automáticamente el contenido de los documentos para permitir la búsqueda semántica. |
-| HU-05 | Consulta ciudadana | Como ciudadano necesito realizar preguntas en lenguaje natural para conocer qué trámite municipal necesito. |
+| HU-01 | Carga de documentos oficiales | Como administrador municipal necesito cargar documentos oficiales, como TUPA, ordenanzas, reglamentos y procedimientos, para construir la base de conocimiento del sistema. |
+| HU-02 | Metadatos de vigencia | Como administrador municipal necesito registrar la vigencia, versión y fuente de cada documento para evitar que el sistema utilice información desactualizada. |
+| HU-03 | Aprobación y derogación de documentos | Como revisor municipal necesito aprobar, modificar, derogar o desactivar documentos para mantener actualizada la base de conocimiento. |
+| HU-04 | Procesamiento automático y RAG por fragmento | Como administrador necesito que el sistema extraiga y procese automáticamente el contenido de los documentos para permitir la búsqueda semántica. |
+| HU-05 | Consulta en lenguaje natural | Como ciudadano necesito realizar preguntas en lenguaje natural para conocer qué trámite municipal necesito. |
 | HU-06 | Clasificación de intención | Como ciudadano necesito que el sistema identifique si mi consulta corresponde a requisitos, costos, plazos, pasos o área responsable. |
 | HU-07 | Orientación de requisitos | Como ciudadano necesito conocer los documentos que debo presentar para realizar un trámite municipal. |
 | HU-08 | Orientación de costos y plazos | Como ciudadano necesito conocer el costo y el plazo de atención de un trámite para planificar mi solicitud. |
 | HU-09 | Generación de respuestas con SLM | Como ciudadano necesito recibir una explicación clara y ordenada del procedimiento que debo seguir. |
 | HU-10 | Trazabilidad y control de alucinaciones | Como ciudadano necesito saber cuándo una consulta no corresponde a trámites municipales para recibir orientación adecuada. |
 | HU-11 | Consultas fuera de dominio | Como ciudadano necesito saber cuándo una consulta no corresponde a trámites municipales para recibir orientación adecuada. |
-| HU-12 | Recomendación de trámites relacionados | Como ciudadano necesito conocer trámites complementarios que podrían estar relacionados con mi solicitud. |
+| HU-12 | Trámites relacionados | Como ciudadano necesito conocer trámites complementarios que podrían estar relacionados con mi solicitud. |
 | HU-13 | Gestión de usuarios y seguridad | Como administrador necesito gestionar usuarios y roles para controlar el acceso a documentos, configuraciones y métricas. |
-| HU-14 | Auditoría | Como funcionario necesito consultar el historial de interacciones para revisar la calidad y trazabilidad de las respuestas. |
+| HU-14 | Auditoría de interacciones | Como funcionario necesito consultar el historial de interacciones para revisar la calidad y trazabilidad de las respuestas. |
 | HU-15 | Retroalimentación ciudadana | Como ciudadano necesito calificar la utilidad de la respuesta para contribuir a mejorar el sistema. |
 | HU-16 | Métricas y monitoreo | Como funcionario necesito visualizar indicadores del sistema para conocer su desempeño y calidad. |
 | HU-17 | Derivación a atención municipal | Como ciudadano necesito ser derivado a un área responsable cuando el sistema no pueda responder de forma confiable. |
