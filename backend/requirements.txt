@@ -23,11 +23,9 @@ pydantic[email]==2.9.2
 python-dotenv==1.0.1
 
 # Embeddings (BGE-M3)
-# Deshabilitado temporalmente para Render (causa timeout por torch CUDA 2GB+)
-# Necesitas migrar a API de embeddings (OpenAI) o usar plan paid de Render
-# sentence-transformers==3.0.1
-# numpy>=2.0
-# openai>=1.0.0
+# Instalar sentence-transformers con torch CPU-only (variables de entorno en Render)
+sentence-transformers==3.0.1
+numpy>=2.0
 
 # Extracción de texto de documentos (HU-01 / D-17)
 pypdf==5.1.0

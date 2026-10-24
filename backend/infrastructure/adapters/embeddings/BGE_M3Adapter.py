@@ -3,7 +3,11 @@
 import asyncio
 import os
 
-from sentence_transformers import SentenceTransformer
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
 
 
 class BGE_M3Adapter:
@@ -14,6 +18,12 @@ class BGE_M3Adapter:
         nombre_modelo: str | None = None,
         dispositivo: str | None = None,
     ) -> None:
+        if not SENTENCE_TRANSFORMERS_AVAILABLE:
+            raise ImportError(
+                'sentence-transformers no está instalado. '
+                'Instálalo con: pip install sentence-transformers'
+            )
+
         self._nombre_modelo = nombre_modelo or os.getenv(
             'EMBEDDING_MODEL', 'BAAI/bge-m3'
         )
