@@ -1,0 +1,11 @@
+__pycache__
+*.pyc
+.venv
+storage/
+dump.rdb
+.env
+.env.local
+.render.env
+runtime.txt
+*.md
+node_modules
