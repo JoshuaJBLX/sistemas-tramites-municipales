@@ -1,5 +1,7 @@
 """Adaptador de embeddings basado en el modelo BGE-M3."""
 
+from __future__ import annotations  # anotaciones perezosas: la clase puede importarse sin sentence-transformers
+
 import asyncio
 import os
 
