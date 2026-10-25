@@ -32,7 +32,9 @@ class OpenRouterAdapter(GeneracionRespuestaPort):
 
         self._modelo = modelo or os.getenv(
             'OPENROUTER_MODEL',
-            'meta-llama/llama-3-8b-instruct'
+            # Verificado empíricamente contra OpenRouter (2026-10-25): el
+            # modelo anterior 'meta-llama/llama-3-8b-instruct' ya no existe (404).
+            'meta-llama/llama-3.3-70b-instruct'
         )
         self._timeout_segundos = timeout_segundos
         self._url_base = 'https://openrouter.ai/api/v1'
@@ -62,7 +64,7 @@ class OpenRouterAdapter(GeneracionRespuestaPort):
             'Authorization': f'Bearer {self._api_key}',
             'Content-Type': 'application/json',
             'HTTP-Referer': 'https://tramites-municipales.app',  # Tu dominio o localhost
-            'X-Title': 'Sistema de Trámites Municipales',
+            'X-Title': 'Sistema de Tramites Municipales',  # sin acentos: httpx codifica headers en ASCII
         }
 
         async with httpx.AsyncClient(timeout=self._timeout_segundos) as cliente:
