@@ -1,6 +1,7 @@
 """Indexa los documentos vigentes sin embedding en la base documental.
 
-Genera los embeddings con BGE-M3 (vía el adaptador del backend) y los guarda
+Genera los embeddings con BGE-M3 local, o con la API de embeddings
+(OpenAI/OpenRouter, si existe OPENAI_API_KEY) y los guarda
 en la columna `embedding` de `documentos`. Funciona tanto con pgvector
 (columnas `vector`) como en servidores sin la extensión (`double precision[]`).
 
@@ -20,6 +21,9 @@ BACKEND_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')))
 
 from infrastructure.adapters.embeddings.BGE_M3Adapter import BGE_M3Adapter
+from infrastructure.adapters.embeddings.OpenAIEmbeddingsAdapter import (
+    OpenAIEmbeddingsAdapter,
+)
 from infrastructure.repositories.Connection import Connection
 
 QUERY_PENDIENTES = """
@@ -42,7 +46,11 @@ async def indexar() -> None:
             return
 
         es_pgvector = await connection.es_pgvector()
-        generador = BGE_M3Adapter()
+        # Mismo switch que el container: API si hay OPENAI_API_KEY, sino BGE-M3 local
+        if os.getenv('OPENAI_API_KEY'):
+            generador = OpenAIEmbeddingsAdapter()
+        else:
+            generador = BGE_M3Adapter()
         if es_pgvector:
             print(f"[indexar] Indexando {len(pendientes)} documentos (columna: 'vector').")
         else:

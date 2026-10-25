@@ -22,9 +22,12 @@ httpx==0.27.0
 pydantic[email]==2.9.2
 python-dotenv==1.0.1
 
-# Embeddings (BGE-M3)
-# Instalar sentence-transformers con torch CPU-only (variables de entorno en Render)
-sentence-transformers==3.0.1
+# Embeddings por API (OpenAI u compatible con OpenRouter: OPENAI_API_KEY,
+# OPENAI_BASE_URL, OPENAI_EMBEDDING_MODEL, OPENAI_EMBEDDING_DIMENSIONS)
+openai==1.109.1
+
+# Embeddings locales BGE-M3: sentence-transformers (y torch) viven en
+# requirements-ml.txt por su peso. En Render (free, 512MB) NO se instalan.
 numpy>=2.0
 
 # Extracción de texto de documentos (HU-01 / D-17)

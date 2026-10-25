@@ -1,0 +1,4 @@
+# ML local pesado (solo desarrollo local y la imagen de Docker/Fly.io).
+# En Render (runtime free de 512MB) esto NO se instala: el backend usa
+# embeddings por API (OpenAIEmbeddingsAdapter) cuando existe OPENAI_API_KEY.
+sentence-transformers==3.0.1

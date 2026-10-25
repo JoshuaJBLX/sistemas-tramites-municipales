@@ -49,6 +49,9 @@ from infrastructure.adapters.documents.DocumentStorageAdapterSupabase import (
     DocumentStorageAdapterSupabase,
 )
 from infrastructure.adapters.embeddings.BGE_M3Adapter import BGE_M3Adapter
+from infrastructure.adapters.embeddings.OpenAIEmbeddingsAdapter import (
+    OpenAIEmbeddingsAdapter,
+)
 from infrastructure.adapters.extraction.ExtraccionTextoAdapter import (
     ExtraccionTextoAdapter,
 )
@@ -219,7 +222,12 @@ class Container:
 def crear_container(dsn: str | None = None) -> Container:
     connection = Connection(dsn)
 
-    generador_embeddings = BGE_M3Adapter()
+    # Embeddings por API si hay OPENAI_API_KEY (Render free: 512MB, sin torch),
+    # sino modelo local BGE-M3 (desarrollo/Docker/Fly con requirements-ml.txt)
+    if os.getenv('OPENAI_API_KEY'):
+        generador_embeddings = OpenAIEmbeddingsAdapter()
+    else:
+        generador_embeddings = BGE_M3Adapter()
     busqueda_semantica = BusquedaVectorialAdapter(connection, generador_embeddings)
 
     # Usar OpenRouter si hay API key, sino Ollama local

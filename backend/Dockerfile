@@ -5,10 +5,10 @@ WORKDIR /app
 # Dependencias.
 # 1) torch CPU-only primero: la rueda CUDA por defecto pesa ~2.5GB y no hace
 #    falta en la nube (BGE-M3 corre en CPU, EMBEDDING_DEVICE=cpu).
-# 2) Luego requirements.txt completo (torch ya satisface a sentence-transformers).
-COPY requirements.txt .
+# 2) requirements.txt (slim, sin ML) + requirements-ml.txt (sentence-transformers).
+COPY requirements*.txt ./
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt -r requirements-ml.txt
 
 # Pre-descarga el modelo BGE-M3 (~2.3GB) dentro de la imagen para que la
 # primera consulta no pague la bajada desde HuggingFace. Capa separada:
