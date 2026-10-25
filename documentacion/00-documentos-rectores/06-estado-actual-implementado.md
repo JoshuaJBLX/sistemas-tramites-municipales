@@ -88,7 +88,7 @@ reportes (HU-18, G-07), manejo de PII (G-03), clasificador ML
 | Base normativa | TUPA 2023 (252 procedimientos) + ordinances y reglamentos oficiales |
 | Portal de referencia | `munihuancayo.gob.pe` / `gob.pe/munihuancayo` |
 | Modelo de lenguaje | `qwen2.5:3b` servido por Ollama (`OLLAMA_MODEL`) |
-| Embeddings | `BAAI/bge-m3`, 1024 dimensiones, CPU (`BGE_M3Adapter.py:25`) |
+| Embeddings | **dual**: `OpenAIEmbeddingsAdapter` (API, 1024 dims) cuando existe `OPENAI_API_KEY`; si no, `BAAI/bge-m3` local en CPU (`container.py:227`) |
 | Base de datos | PostgreSQL 16 + pgvector (`double precision[]` si la extensión no está) |
 | Caché | Redis 7, TTL 3600 s |
 | Front-end | Next.js 14.2.5 (App Router) + React 18.3 + TypeScript + Tailwind CSS 3.4 |
@@ -277,7 +277,8 @@ con `container: Container = Depends(obtener_container)`.
 | Cliente HTTP | httpx | 0.27.0 | `requirements.txt:19` |
 | Validación | pydantic[email] | 2.10.4 | `requirements.txt:22` |
 | Configuración | python-dotenv | 1.0.1 | `requirements.txt:23` |
-| Embeddings | sentence-transformers | 3.0.1 | `requirements.txt:26` |
+| Embeddings (nube) | openai (cliente; OpenAI u OpenRouter) | 1.109.1 | `requirements.txt:27` |
+| Embeddings (local) | sentence-transformers | 3.0.1 | `requirements-ml.txt` (solo local/Docker/Fly) |
 | Cálculo numérico | numpy | ≥2.0 | `requirements.txt:27` |
 | Front-end | next | 14.2.5 | `frontend-tramites/package.json:12` |
 | UI | react / react-dom | ^18.3.1 | `frontend-tramites/package.json:13-14` |
@@ -842,6 +843,13 @@ docker compose up -d      # postgres+pgvector, redis, ollama
 | `RAG_TOP_K` | 5 | `container.py:120` |
 | `DOCUMENTS_PATH` | `./storage/documentos` | `DocumentStorageAdapter.py:12` |
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | `lib/api.ts:1` |
+| `OPENAI_API_KEY` | — (sin valor: se usa BGE-M3 local) | `container.py:227`, `indexar_documentos.py:50` |
+| `OPENAI_BASE_URL` | — (nube: `https://openrouter.ai/api/v1`) | `OpenAIEmbeddingsAdapter.py:30` |
+| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | `OpenAIEmbeddingsAdapter.py:28` |
+| `OPENAI_EMBEDDING_DIMENSIONS` | 1536 (nube: `1024`, igual que `vector(1024)`) | `OpenAIEmbeddingsAdapter.py:33` |
+| `OPENROUTER_API_KEY` | — (si existe se usa OpenRouter, si no Ollama) | `container.py:234` |
+| `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct` | `OpenRouterAdapter.py:34` |
+| `VERCEL_FRONTEND_URL` | — (origen CORS permitido en producción) | `main.py:52` |
 
 ### 9.5 Rendimiento medido
 
@@ -852,6 +860,36 @@ docker compose up -d      # postgres+pgvector, redis, ollama
 | `GET /api/tramites` | < 100 ms |
 
 > La latencia la domina el SLM en CPU: con GPU (bloque comentado en `docker-compose.yml:48-55`) baja sustancialmente. El objetivo de < 3 s de HU-06 **no es medible hoy** porque no existe instrumentación de latencia (brecha **G-16**).
+
+### 9.6 Despliegue en la nube (Render + Vercel — 25-oct-2026)
+
+| Pieza | Servicio | URL / identificador | Plan |
+|---|---|---|---|
+| Back-end FastAPI | Render Web Service `tramites-municipales-backend` (`srv-dbf916navr4c73d8lh90`), región Ohio, `rootDir: backend`, auto-deploy en `main` | <https://tramites-municipales-backend.onrender.com> | free (**512 MB**) |
+| Base de datos | Render Postgres 18 + pgvector 0.8.7 (`dpg-dbe62savcj2c73br3tog-a`) | — | free (**caduca 2026-11-23**; reanudar/renombrar desde el dashboard) |
+| Front-end Next.js | Vercel (`bl-inderex/tramites-municipales-frontend`, repo GitHub conectado) | <https://tramites-municipales-frontend.vercel.app> | Hobby |
+| Embeddings | OpenRouter `openai/text-embedding-3-small` con `dimensions=1024` (calza con `vector(1024)`) | — | pago por uso |
+| Generación de respuesta | OpenRouter `meta-llama/llama-3.3-70b-instruct` (`OPENROUTER_MODEL`) | — | pago por uso (≈ US$0.0003/consulta) |
+
+**Por qué embeddings por API.** El plan free de Render da 512 MB: BGE-M3 (2,3 GB) y torch (~2,5 GB en build) no caben ni en la build ni en runtime (los deploys previos fallaban en `pip install`). El repo ya traía `OpenAIEmbeddingsAdapter`, que ahora es el generador por defecto cuando existe `OPENAI_API_KEY` (switch en `container.py:227` y `scripts/indexar_documentos.py:50`); sin esa variable se sigue usando `BGE_M3Adapter` local. El adaptador soporta `OPENAI_BASE_URL` (compatible con OpenRouter) y `OPENAI_EMBEDDING_DIMENSIONS=1024`.
+
+**Split de dependencias.** `requirements.txt` (slim: `openai==1.109.1`, sin torch) es lo que instala Render; `requirements-ml.txt` (`sentence-transformers==3.0.1`) lo añaden el `Dockerfile`, el entorno local y la imagen de Fly.io, que siguen con BGE-M3 pre-cargado.
+
+**Datos en la nube** (espejo del entorno local canónico): migración `supabase_complete_setup.sql` + 6 seeds → **272 trámites, 45 documentos**; indexación con la API → 45 embeddings; reproceso (`ProcesarDocumento`) → **56 fragmentos con embedding**, los que consulta el RAG.
+
+**Correcciones necesarias durante el despliegue:**
+
+| Síntoma | Causa | Corrección |
+|---|---|---|
+| Runtime `NameError: SentenceTransformer` | `BGE_M3Adapter` anotaba una clase inexistente sin `sentence-transformers` | `from __future__ import annotations` en `BGE_M3Adapter.py` |
+| `POST /api/consultas` → 400 (`ascii codec can't encode`) | httpx codifica *headers* en ASCII y `X-Title` contenía «Municipa**á**l…» | `X-Title` sin acentos (`OpenRouterAdapter.py:65`) |
+| Generación → 404 en `/chat/completions` | `meta-llama/llama-3-8b-instruct` ya no existe en OpenRouter | default `meta-llama/llama-3.3-70b-instruct` |
+
+**Degradación conocida en la nube:** sin Redis la caché se deshabilita con aviso en logs (funciona igual, más lento); sin `SUPABASE_SERVICE_ROLE_KEY` los archivos se guardan en disco efímero.
+
+**⚠️ Umbrales RAG a recalibrar:** `umbral_similitud = 0.3`, `UMBRAL_CONFIANZA_ALTA = 0.75` y `UMBRAL_CONFIANZA_MEDIA = 0.40` se calibraron sobre vectores BGE-M3; el espacio de `text-embedding-3-small` es distinto. Medición del 25-oct-2026 en producción: consulta de prueba → `groundedness 0.473` (confianza MEDIA) con 5 fuentes y trámite probable correcto. Conviene repetir la medición con el set de consultas de referencia antes de dar los umbrales por buenos.
+
+**Reconstrucción desde cero (CLI autenticados):** `render services create` (env vars `POSTGRES_*`, `OPENAI_*`, `OPENROUTER_API_KEY`, `VERCEL_FRONTEND_URL`) → psql con `supabase_complete_setup.sql` y `database/seeds/*.sql` → `python -m backend.scripts.indexar_documentos` con las mismas env → reproceso de fragmentos → `vercel deploy --prod` con `NEXT_PUBLIC_API_URL` apuntando al back-end.
 
 ---
 
