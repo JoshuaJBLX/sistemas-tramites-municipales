@@ -1,8 +1,10 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// El RAG local puede tardar 4–17 segundos en la primera consulta.
-const TIMEOUT_CONSULTA_MS = 45000;
-const TIMEOUT_CATALOGO_MS = 10000;
+// Render free se duerme tras 15 min sin tráfico: la primera petición en frío
+// tarda ~30-60 s en despertar el servicio, así que los timeouts cubren ese
+// arranque (catálogo 60 s, consulta 90 s).
+const TIMEOUT_CONSULTA_MS = 90000;
+const TIMEOUT_CATALOGO_MS = 60000;
 
 export interface FuenteCitada {
   titulo: string;
