@@ -11,16 +11,26 @@
 > y `05-trazabilidad-por-pmv.md` en cuanto a cifras. Esos tres `.md` se conservan como respaldo
 > histórico y se remiten desde aquí.
 >
-> **Fecha de verificación: 20 de octubre de 2026** · HEAD `0d86eaf`
-> (`feat(chat): formato de respuesta con pasos+HU-09 compacta, contenidos RAG y corrección de
-> enlaces 404`).
-> Método: lectura íntegra de los 91 `.py`, 25 `.ts`/`.tsx` de fuente, 14 `.sql`, `instalar.ps1`,
-> `docker-compose.yml` y de los 92 `.md`; **más consulta directa a PostgreSQL local** (esquema real,
-> conteos de `tramites`/`documentos`/`fragmentos_documento`) y ejecución de `import main`. Cada
-> afirmación de este documento es verificable con `grep` sobre el archivo que se cita.
+> **Fecha de verificación: 26 de octubre de 2026** · HEAD `4abc680`
+> (`test(hu-13): script de 12 comprobaciones de autenticación, roles y eventos`).
+> Método: lectura íntegra de los 102 `.py`, 25 `.ts`/`.tsx` de fuente, 17 `.sql`, `instalar.ps1`,
+> `docker-compose.yml` y de los 95 `.md`; **más consulta directa a PostgreSQL** (esquema real,
+> conteos de `tramites`/`documentos`/`fragmentos_documento`/`eventos_seguridad`) y ejecución de
+> `import main` + `/openapi.json` en producción. Cada afirmación de este documento es
+> verificable con `grep` sobre el archivo que se cita.
+>
+> **Actualización del 26 de octubre:** se cierra **HU-13** (5/5 → 12 HU al 100 %, global **85 %**,
+> §9.8/§10): login JWT, contraseñas PBKDF2, roles aplicados a los endpoints admin y eventos de
+> seguridad (G-01 resuelto, D-8 corregido). Se añade el **fallback al catálogo de trámites** para
+> los 235 sin documento (§9.7) y los timeouts del front para el arranque en frío de Render (§9.6).
+> Cifras nuevas: 34 rutas (2 autenticación + 1 listado de usuarios), 102 `.py`, 17 `.sql` (migración
+> `007_usuarios_seguridad.sql`), 95 `.md`.
+>
+> **Actualización del 25 de octubre:** despliegue en la nube — Render free (back-end, embeddings por
+> API vía OpenRouter) + Vercel (front-end); sección 9.6 con las correcciones de runtime.
 >
 > **Actualización del 20 de octubre:** se sincronizan las cifras vigentes (272 trámites, 45
-> documentos 45/45 fragmentados, 56 fragmentos, 31 rutas, 91 `.py`, 14 `.sql`, 92 `.md`), se añaden
+> documentos 45/45 fragmentados, 56 fragmentos), se añaden
 > los contenidos RAG (seeds MPH e institucionales), el formato de respuesta del chat y la corrección
 > de los 20 enlaces 404 (`C-01..C-07` en `07-checklist-implementacion.md`). Todos los `.md` enlazan
 > a este documento como fuente única de verdad.
@@ -35,21 +45,21 @@
 
 | Dimensión | Resultado actual | Referencia |
 |---|---|---|
-| **Avance global de las 18 HU** | **82 %** (83/101 puntos de verificación) — verificado 20-oct-2026 | §10.1 |
+| **Avance global de las 18 HU** | **85 %** (86/101 puntos de verificación) — verificado 26-oct-2026 | §10.1 |
 | **PMV1 · Prototipo funcional** | **100 %** (24/24) — 4 HU ✅ | §10.4 |
 | **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) — 5 HU al 100 % (HU-04, HU-08, HU-10, HU-11, HU-12) | §10.5 |
-| **PMV3 · Sistema integrado** | **63 %** (31/49) — 9 HU (HU-01 y HU-02 al 100 %) | §10.6 |
-| HU completas al 100 % | **11 / 18** — HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12 | §10.3 |
+| **PMV3 · Sistema integrado** | **69 %** (34/49) — 9 HU (HU-01, HU-02 y HU-13 al 100 %) | §10.6 |
+| HU completas al 100 % | **12 / 18** — HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12, HU-13 | §10.3 |
 | HU iniciadas (⚠️ o ✅) | **15 / 18** | §10.3 |
 | HU sin empezar (❌) | **3 / 18** — HU-15, HU-16, HU-18 | §10.3 |
-| Pruebas automatizadas | **0 suites** | §13.2 |
+| Pruebas automatizadas | **0 suites pytest** (sin embargo hay scripts de verificación: `scripts/probar_hu13.py`, 12 comprobaciones) | §13.2 |
 | Catálogo de trámites | **252 TUPA** (272 en BD = 252 + 13 prototipos + 6 servicios MPH + 1 institucional) | §7 |
-| Documentos indexados | **45** (20 TUPA + 19 MPH + 6 institucionales; 45/45 con embedding y **45/45 fragmentados**: `fragmentos_documento` = 56 filas) | §7 |
-| Endpoints REST | **31 rutas servibles** (27 de API + 4 de documentación) | §6.2 |
-| Archivos Python (backend) | **91** | §5 |
-| Archivos `.ts`/`.tsx` de fuente | **25** (5 rutas + 16 componentes + 2 lib + 2 config) | §5 |
-| Archivos SQL | **14** (6 migraciones, 6 seeds, 1 script, 1 schema) | §7 |
-| Documentos Markdown | **92** | §11 |
+| Documentos indexados | **45** (20 TUPA + 19 MPH + 6 institucionales; 45/45 con embedding y **45/45 fragmentados**: `fragmentos_documento` = 56 filas). Los otros **235 trámites sin documento** se atienden por **fallback al catálogo** (§9.7) | §7 |
+| Endpoints REST | **34 rutas servibles** (30 operaciones en `/openapi.json` + 4 de documentación) | §6.2 |
+| Archivos Python (backend) | **102** | §5 |
+| Archivos `.ts`/`.tsx` de fuente | **25** (5 rutas + 17 componentes + 2 lib + 2 config — `AdminGate.tsx` nuevo en HU-13) | §5 |
+| Archivos SQL | **17** (9 en `migrations/` —incluye 2 de Supabase y la nueva `007`—, 6 seeds, 1 script, 1 schema) | §7 |
+| Documentos Markdown | **95** | §11 |
 
 **Lo que funciona de extremo a extremo (código):** el flujo ciudadano completo
 `pregunta → clasificación de intención con confianza → persistencia → caché → recuperación vectorial →
@@ -71,10 +81,11 @@ fragmento → aprobación con metadatos obligatorios), el catálogo con **252 tr
 montos y áreas reales**, la recomendación de trámites relacionados (API + UI) y el dataset de la PoC
 (200 consultas versionadas).
 
-**Lo que no existe todavía:** autenticación y roles (G-01), guardrails anti *prompt-injection* (G-20),
+**Lo que no existe todavía:** guardrails anti *prompt-injection* (G-20),
 métricas reales (G-16), pruebas automatizadas (G-18), retroalimentación ciudadana (G-05),
 reportes (HU-18, G-07), manejo de PII (G-03), clasificador ML
 (G-02) y la **validación SUS con 50 ciudadanos** (P2-17, actividad real no fabricable).
+*(La autenticación y los roles **G-01 ya existen desde el 26-oct-2026** — §9.8.)*
 
 ---
 
@@ -128,30 +139,32 @@ reportes (HU-18, G-07), manejo de PII (G-03), clasificador ML
 ```text
 sistemas-tramites-municipales/            raíz del proyecto
 ├── backend/                                API REST · Python 3.11+ · FastAPI · arquitectura hexagonal
-│   ├── main.py                             punto de entrada: app FastAPI, CORS, 6 routers, /health, lifespan
+│   ├── main.py                             punto de entrada: app FastAPI, CORS, 7 routers, /health, lifespan
 │   ├── domain/                             NÚCLEO — no importa nada de infrastructure
 │   │   ├── entities/                       8 entidades (+ FragmentoDocumento)
 │   │   ├── value_objects/                  8 value objects (+ FormatoDocumento)
 │   │   └── ports/                          10 puertos (interfaces ABC, +3 del PMV2)
 │   ├── application/                        LÓGICA DE APLICACIÓN — casos de uso y servicios
 │   │   ├── use_cases/                      10 casos de uso (+ CargarDocumento, ProcesarDocumento)
-│   │   └── services/                       8 servicios (+ ServicioChunking)
+│   │   └── services/                       8 servicios (+ ServicioChunking y el fallback de catálogo)
 │   ├── infrastructure/                     ADAPTADORES — todo lo que toca el mundo exterior
-│   │   ├── controllers/                    7 controllers FastAPI (tramite_admin ya con router, D-14 ✅)
+│   │   ├── controllers/                    7 controllers (auth nuevo HU-13) + dependencias.py (JWT/roles)
 │   │   ├── schemas/                        schemas Pydantic (documento_admin)
 │   │   ├── repositories/                   Connection + 3 repositorios + base
-│   │   ├── adapters/                       7 familias (rag, embeddings, slm, cache, catalog,
-│   │   │                                   documents, extraction)
+│   │   ├── adapters/                       8 familias (rag, embeddings, slm, cache, catalog,
+│   │   │                                   documents, extraction, auth [PasswordHasher · JWTAdapter])
 │   │   └── container.py                    inyección de dependencias
-│   └── scripts/indexar_documentos.py      indexación masiva de embeddings BGE-M3
+│   └── scripts/                            indexar_documentos · generar_dataset_poc ·
+│                                           generar_seed_tupa · crear_admin (HU-13) · probar_hu13
 ├── frontend-tramites/                      Next.js 14 (App Router) + TypeScript + Tailwind
 │   ├── app/                                rutas: / · /chat · /tramites · /admin + layout + globals.css
-│   ├── components/                         16 componentes (15 + icons.tsx, 20 iconos SVG)
-│   └── lib/                                api.ts (contrato HTTP) · queries.ts (helpers)
+│   ├── components/                         17 componentes (16 + icons.tsx, 20 iconos SVG; + AdminGate HU-13)
+│   └── lib/                                api.ts (contrato HTTP + sesión JWT) · queries.ts (helpers)
 ├── database/
 │   ├── schema.sql                          referencia consolidada del esquema
 │   ├── migrations/                         001 base+extensión · 002 tablas+índices · 003 HNSW
 │   │                                       · 004 PMV2 · 005 área responsable · 006 auditoría
+│   │                                       · 007 usuarios+seguridad (HU-13)
 │   ├── seeds/                              municipios (1) · tramites (22) · documentos (20)
 │   │                                       · tramites_servicios (6) · documentos_mph (19)
 │   │                                       · documentos_institucionales (6 + 1 servicio)
@@ -175,8 +188,9 @@ sistemas-tramites-municipales/            raíz del proyecto
 └── PRESENTACION-PMV1.md                    guion de demostración del PMV1  ⚠️ reescrito localmente (§12.2)
 ```
 
-**Totales:** 91 archivos Python · 25 archivos `.ts`/`.tsx` de fuente · 14 archivos SQL · 92 archivos
-Markdown · 1 script PowerShell · 1 archivo YAML.
+**Totales:** 102 archivos Python · 25 archivos `.ts`/`.tsx` de fuente · 17 archivos SQL · 95 archivos
+Markdown · 1 script PowerShell · 1 archivo YAML (adicional: `Dockerfile`, `.dockerignore`, `fly.toml`
+del respaldo Fly.io).
 
 ---
 
@@ -187,9 +201,10 @@ Markdown · 1 script PowerShell · 1 archivo YAML.
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │  CAPA DE ENTRADA — infrastructure/controllers/                          │
-│  consulta_controller · documento_controller · documento_admin_controller│
-│  tramite_controller · usuario_controller   (FastAPI: parsing, HTTP)     │
-│  tramite_admin_controller  ✅ CON `router` → la app arranca (30 rutas, D-14)│
+│  consulta · documento · documento_admin · tramite · tramite_admin       │
+│  usuario · auth (HU-13)                    (FastAPI: parsing, HTTP)     │
+│  dependencias.py → obtener_usuario_actual / requiere_administrador      │
+│  → todos los endpoints admin exigen JWT con rol administrador (34 rutas)│
 └───────────────────────────────┬──────────────────────────────────────────┘
                                 │ llama casos de uso (no adaptadores)
 ┌───────────────────────────────▼──────────────────────────────────────────┐
@@ -295,7 +310,7 @@ Cada fila indica el archivo, sus líneas y su función real verificada en el có
 
 | Archivo | Líneas | Función |
 |---|---|---|
-| `backend/main.py` | 74 | Crea la app FastAPI (`Sistema de Trámites Municipales API` v0.1.0), carga `.env` con `load_dotenv()`, configura CORS limitado a `localhost:3000` y `127.0.0.1:3000`, incluye los **7 routers** (líneas 58-66), expone `GET /health` y un `lifespan` que abre/cierra el pool de PostgreSQL y Redis. ✅ **Arranca**: **31 rutas** en `/openapi.json` (18 públicas + 9 admin + 4 de documentación). |
+| `backend/main.py` | 93 | Crea la app FastAPI (`Sistema de Trámites Municipales API` v0.1.0), carga `.env` con `load_dotenv()`, configura CORS limitado al front desplegado y a `localhost:3000`, incluye los **7 routers** (líneas 77-87) —los de administración con `Depends(requiere_administrador)` (**HU-13**)—, expone `GET /health` y un `lifespan` que abre/cierra el pool de PostgreSQL y Redis. ✅ **Arranca**: **34 rutas** en `/openapi.json` (29 operaciones de API + 1 `/health` + 4 de documentación). |
 
 ### 5.2 Capa de dominio — entidades (`backend/domain/entities/`)
 
@@ -307,7 +322,7 @@ Cada fila indica el archivo, sus líneas y su función real verificada en el có
 | `Respuesta.py` | 61 | Entidad central: `id`, `consulta_id`, `texto`, `confianza`, `fuentes`, `groundedness`, `confianza_intencion`, `pide_aclaracion`, `tramite_probable`. **Método clave `con_datos_estructurados()`** (líneas 31-66): anexa al texto del modelo los requisitos numerados, el arancel y el plazo **tomados de la base de datos**, más la URL de la ficha. Es lo que hace verificables los datos críticos (HU-07). |
 | `Fuente.py` | 17 | `id`, `documento_id`, `tipo`, `url`, `fragmento`, `titulo`, `puntuacion_relevancia`. El campo `titulo` es el que permite que el front muestre la fuente (**D-3 corregido**). |
 | `Tramite.py` | 21 | `id`, `municipalidad_id`, `nombre`, `descripcion`, `tipo`, `requisitos[]`, `costo`, `duracion_estimada_dias`; `agregar_requisito()`. |
-| `Usuario.py` | 17 | `id`, `nombre`, `correo`, `rol`, `creado_en`; `es_administrador()` — **existe pero nunca se invoca** (defecto **D-8**). |
+| `Usuario.py` | 17 | `id`, `nombre`, `correo`, `rol`, `creado_en`; `es_administrador()` — **ya se invoca vía `dependencias.requiere_administrador`** desde la HU-13 (**D-8 corregido 26-oct-2026**). |
 | `Municipalidad.py` | 14 | `id`, `nombre`, `departamento`, `provincia`, `distrito`, `sitio_web`. |
 | `errors.py` (dominio) | 21 | **Nuevo (PMV2):** `FormatoNoSoportadoError`, `DocumentoIlegibleError`, `DocumentoInvalidoError` — errores de dominio que los controllers traducen a 422/400. |
 
@@ -352,7 +367,7 @@ archivo original y persistir los fragmentos.
 | `ServicioNLP.py` | 131 | **Clasificador léxico de intención.** Diccionario `_PATRONES_INTENCION` (líneas 12-75) con **raíces**, no palabras completas, para tolerar conjugaciones (`requisit` cubre requisito/requisitos/requiere/necesito). Lógica: normaliza (minúsculas, sin tildes, sin puntuación, línea 124-131), puntúa cada intención por nº de patrones coincidentes, desempata por especificidad (suma de longitudes, línea 110), y calcula `confianza = 0.55 + 0.15 × (patrones−1)` con tope 1.0 (líneas 78-79, 117); si hay empate técnico baja la confianza a 0.70 (línea 118-119). Sin patrones → `OTRO` con confianza 0. |
 | `ServicioRAG.py` | 56 | Orquesta recuperación + generación. `recuperar()` (líneas 25-28) llama al `BusquedaSemanticaPort` y **filtra solo documentos vigentes**. `responder()` (30-41): sin documentos devuelve el texto de abstención del SLM con lista de fuentes vacía. `construir_fuentes()` estático (43-56): convierte cada documento en `Fuente` con `fragmento = contenido[:280]` y su `titulo`. |
 | `ServicioSLM.py` | ~250 | Construye el formato de salida y delega. `INSTRUCCION_ESTRUCTURA` pide pasos numerados (máximo 4, título en negrita) + apartados REQUISITOS / PASOS / COSTO / PLAZO / OBSERVACIONES compactos (19-oct-2026); `INSTRUCCION_BREVE` para consultas generales. `generar(..., estructura)`: sin contexto devuelve la abstención *"No encontré información oficial…"*; con estructura aplica `garantizar_estructura` (fallback desde BD, HU-09) y `condensar` (pasos arriba, cada apartado ≤ 200 caracteres y total ≤ 1100 con "…"). `generar` delege al puerto con `instrucciones=…`. |
-| `ServicioOrientacion.py` | 94 | **Orquestador del flujo de orientación.** `orientar()` (líneas 34-72): (1) si la clasificación requiere aclaración devuelve `ACLARACION_AMBIGUA` sin generar ni citar (41-42); (2) recupera documentos; (3) genera respuesta y fuentes; (4) calcula `groundedness` y confianza; (5) si confianza BAJA y hay fuentes, **agrega nota de advertencia visible** al texto (49-54); (6) llama a `IdentificarTramiteProbable` (56-58); (7) anexa los datos estructurados del catálogo (71-72). `ACLARACION_AMBIGUA` (líneas 14-18) es el texto que pide专业课 precisar requisitos/costo/lugar/estado. |
+| `ServicioOrientacion.py` | 382 | **Orquestador del flujo de orientación.** `orientar()`: (1) si la clasificación requiere aclaración devuelve `ACLARACION_AMBIGUA` sin generar ni citar; (2) recupera documentos; (3) genera respuesta y fuentes; (4) calcula `groundedness` y confianza; (5) si confianza BAJA y hay fuentes, **agrega nota de advertencia visible**; (6) llama a `IdentificarTramiteProbable`; (7) anexa los datos estructurados del catálogo. **Fallback de catálogo (§9.7, 22-oct-2026):** `_respuesta_desde_catalogo()`/`_ficha_catalogo()` responden con la ficha real del trámite (requisitos, costo, plazo, área) cuando el RAG no tiene documentos —cubre los **235 trámites sin documento**— usando `TramiteCatalogoAdapter.buscar_por_texto`. `CATALOGO_TRAMITE` define la intención-tema por palabras clave. `ACLARACION_AMBIGUA` es el texto que pide al usuario precisar requisitos/costo/lugar/estado. |
 | `EvaluadorGroundedness.py` | 49 | **Control de alucinaciones por cobertura léxica.** Tokeniza la respuesta (palabras de >3 caracteres, línea 48-49), construye el vocabulario del contexto (contenido + título de cada documento) y calcula `coincidencias / términos_respuesta` (líneas 27-42). Umbrales: `ALTA ≥ 0.75`, `MEDIA ≥ 0.40`, si no `BAJA` (líneas 6-7, 18-25). `esta_grounded()` (44-45). |
 | `ServicioCache.py` | 35 | Abstrae la caché de respuestas. `construir_clave()` (17-20): `consulta:` + SHA-256 de la pregunta normalizada (minúsculas, sin espacios extremos) — así `"¿Cuánto cuesta?"` y `"cuánto cuesta"` comparten entrada. `obtener_respuesta`, `guardar_respuesta` (TTL configurable), `invalidar`. |
 | `ServicioAuditoria.py` | 28 | Centraliza `registrar_interaccion()` y `obtener_consulta()`; usa `AuditoriaPort` + `ConsultaRepository`. |
@@ -381,9 +396,11 @@ archivo original y persistir los fragmentos.
 | `embeddings/BGE_M3Adapter.py` | 41 | Genera vectores de 1024 dimensiones con `BAAI/bge-m3` en CPU. Carga perezosa y en hilo (`asyncio.to_thread`, línea 36) para no bloquear el event loop. `normalize_embeddings=True` (línea 40). |
 | `slm/OllamaAdapter.py` | ~65 | Cliente HTTP de Ollama (`OLLAMA_URL`, por defecto `localhost:11434`; modelo `qwen2.5:3b`). Payload: `temperature 0.2`, `num_predict 320`, `stream false`; acepta `instrucciones` del servicio y las concatena al prompt de sistema. `construir_prompt()` arma `Contexto:` con `Fuente: título (url)` + contenido, o avisa *"No se recuperó contexto documental"* si está vacío. Timeout 120 s. |
 | `cache/RedisAdapter.py` | 89 | Caché tolerante a fallos: captura `RedisConnectionError`/`TimeoutError`, avisa **una sola vez** (`_advertir_una_vez`, 42-45) y sigue sin caché. El sistema no cae si Redis está apagado. `cerrar()` (86-89) para el apagado. |
-| `catalog/TramiteCatalogoAdapter.py` | 48 | Resuelve trámites desde documentos con `JOIN documentos d ON d.tramite_id = t.id WHERE d.id = ANY($1::uuid[])` (líneas 9-18), devolviendo nombre, requisitos, costo, plazo, URL y nº de documentos coincidentes. |
+| `catalog/TramiteCatalogoAdapter.py` | 308 | Resuelve trámites desde documentos con `JOIN documentos d ON d.tramite_id = t.id WHERE d.id = ANY($1::uuid[])`, devolviendo nombre, requisitos, costo, plazo, URL y nº de documentos coincidentes. **Ampliado (§9.7):** `buscar_por_texto(consulta)` hace búsqueda **léxica difusa** sobre los 272 trámites (palabras normalizadas + puntaje por cobertura, sinónimos de dominio y `COBERTURA_MINIMA_NOMBRE = 0.6`), y `ficha_tramite()` devuelve la ficha completa; base del fallback para los trámites sin documento. |
 | `documents/DocumentStorageAdapter.py` | 41 | **Ampliado en PMV2:** guarda, lee, elimina y lista archivos bajo `DOCUMENTS_PATH` (por defecto `./storage/documentos`), con nombre seguro `uuid4 + extensión`. Cumple `AlmacenamientoDocumentosPort`. ⚠️ `eliminar()` **nunca se invoca**: la baja física borra filas pero deja el archivo en disco (D-19). |
 | `extraction/ExtraccionTextoAdapter.py` | 99 | **Nuevo (PMV2).** Implementa `ExtraccionTextoPort`: PDF con `pypdf`, DOCX con `python-docx`, y `.txt`/`.md` como texto plano (UTF-8 → Latin-1 → repetición, tolerante a codificación). Si falta la librería o el archivo es escaneado/vacío, lanza `DocumentoIlegibleError`. ⚠️ **`pypdf` y `python-docx` no están en `requirements.txt`** → hoy solo `.txt`/`.md` se procesan (D-17). |
+| `auth/PasswordHasher.py` | 43 | **Nuevo (HU-13, 26-oct-2026).** PBKDF2-HMAC-SHA256 con salt aleatorio por usuario y **310 000 iteraciones** (OWASP), solo stdlib → sin bcrypt en Render. `hash_password()` / `verify_password()` con `hmac.compare_digest`. Formato almacenable: `pbkdf2_sha256$iteraciones$salt$hash`. |
+| `auth/JWTAdapter.py` | 55 | **Nuevo (HU-13).** Emite y valida tokens **JWT HS256** de 8 h con `sub`, `rol`, `nombre`, `iat`, `exp`. El secreto se lee de `JWT_SECRET`; si no existe se **deriva** de `OPENAI_API_KEY` con SHA-256 (el CLI de Render no permite añadir env vars sin recrear el servicio). `PyJWT==2.10.1` en `requirements.txt`. |
 
 ### 5.8 Capa de infraestructura — repositorios (`backend/infrastructure/repositories/`)
 
@@ -398,27 +415,31 @@ archivo original y persistir los fragmentos.
 
 | Archivo | Líneas | Rutas que expone |
 |---|---|---|
-| `consulta_controller.py` | 240 | `POST /api/consultas`, `GET /api/consultas/{consulta_id}`. Ver flujo detallado en §6. |
+| `consulta_controller.py` | 306 | `POST /api/consultas`, `GET /api/consultas` (auditoría, **solo administrador** desde HU-13), `GET /api/consultas/{consulta_id}`. Ver flujo detallado en §6. |
 | `tramite_controller.py` | 64 | `GET /api/tramites` (opcional `?municipalidad_id=`), `GET /api/tramites/{id}` (incluye documentos vigentes). |
-| `documento_controller.py` | 184 | `POST /api/documentos`, `POST /api/documentos/upload`, `GET /api/documentos` (filtros + paginación), `PUT /api/documentos/{id}/estado`, `GET /api/documentos/{id}`, `POST /api/documentos/{id}/procesar`, `DELETE /api/documentos/{id}` (baja lógica), `DELETE /api/documentos/{id}/fisico`. |
-| `documento_admin_controller.py` | 145 | **Nuevo (PMV2)**, prefijo `/api/admin/documentos`: `GET ''`, `POST ''`, `POST /upload`, `POST /{id}/procesar`, `DELETE /{id}`, `DELETE /{id}/fisico`, `PUT /{id}/estado`. ✅ `ValueError` de `EstadoDocumento(estado)` capturado → **HTTP 422** (D-18 corregido). |
-| `tramite_admin_controller.py` | 91+ líneas | ✅ **Ya no es un stub**: define `router` (resuelto D-14); enlazado en `main.py` con el resto. |
-| `usuario_controller.py` | 84 | `POST /api/usuarios`, `GET /api/usuarios/{id}`, `GET /api/usuarios/{id}/consultas` (historial, `LIMIT 50`). |
+| `documento_controller.py` | 203 | `POST /api/documentos`, `POST /api/documentos/upload`, `GET /api/documentos` (filtros + paginación), `PUT /api/documentos/{id}/estado`, `GET /api/documentos/{id}`, `POST /api/documentos/{id}/procesar`, `DELETE /api/documentos/{id}` (baja lógica), `DELETE /api/documentos/{id}/fisico`. **Las 6 rutas mutantes exigen ahora rol administrador** (HU-13); solo `GET` quedan públicas. |
+| `documento_admin_controller.py` | 145 | Prefijo `/api/admin/documentos`: `GET ''`, `POST ''`, `POST /upload`, `POST /{id}/procesar`, `DELETE /{id}`, `DELETE /{id}/fisico`, `PUT /{id}/estado`. ✅ `ValueError` de `EstadoDocumento(estado)` capturado → **HTTP 422** (D-18 corregido). Router completo protegido con `requiere_administrador` (HU-13). |
+| `tramite_admin_controller.py` | 91+ líneas | ✅ **Ya no es un stub**: define `router` (resuelto D-14); protegido con `requiere_administrador` (HU-13). |
+| `usuario_controller.py` | 160 | **HU-13:** `POST /api/usuarios` (registro con **contraseña PBKDF2**, mínimo 8 caracteres; solo un administrador, con excepción de arranque para crear el primero), `GET /api/usuarios` (**nuevo**, listado, solo admin), `GET /api/usuarios/{id}` y `GET /api/usuarios/{id}/consultas` (historial, `LIMIT 50`; propio o admin). |
+| `auth_controller.py` | 119 | **Nuevo (HU-13).** `POST /api/auth/login` (valida credenciales + usuario activo, registra `login_exitoso`/`login_fallido`, emite JWT 8 h), `GET /api/auth/me` (perfil del token vigente). |
+| `dependencias.py` | 153 | **Nuevo (HU-13).** `obtener_usuario_actual` / `obtener_usuario_opcional` (validan el JWT y recargan el usuario de la BD), `requiere_administrador` (403 + evento `acceso_denegado` si el rol no es administrador) y `registrar_evento_seguridad` (persiste en `eventos_seguridad` sin tumbar la petición si falla). |
 
-`main.py` incluye los **7 routers** (líneas 58-66) y el arranque termina bien: **31 rutas**
-registradas (20 públicas de documentos/consultas/trámites/usuarios + 7 admin + 4 de doc).
+`main.py` incluye los **7 routers** (líneas 77-87) y el arranque termina bien: **34 rutas**
+registradas (29 operaciones de API —incluye auth y usuarios— + `/health` + 4 de doc).
 
 ### 5.10 Scripts de backend
 
 | Archivo | Líneas | Función |
 |---|---|---|
 | `backend/scripts/indexar_documentos.py` | 52 | Genera embeddings BGE-M3 para documentos `vigente` con `embedding IS NULL` (líneas 25-31) y los persiste. Funciona con y sin pgvector (literal `[...]` o lista `double[]`). Ejecutado por `instalar.ps1` en el paso 7. |
+| `backend/scripts/crear_admin.py` | 77 | **Nuevo (HU-13).** Crea o actualiza el administrador inicial con contraseña **por env var** (`ADMIN_CORREO`/`ADMIN_PASSWORD`/`ADMIN_NOMBRE`, mínimo 8 caracteres); hashea con PBKDF2 y nunca imprime ni versiona la clave. Ejecutado contra Render PG el 26-oct-2026. |
+| `backend/scripts/probar_hu13.py` | 135 | **Nuevo (HU-13).** 12 comprobaciones con `TestClient`: login correcto/incorrecto, `/auth/me` con y sin token, endpoints admin sin token (401) y con token (200), token falso (401), registro de ciudadano (201), ciudadano en admin (403), perfil propio/ajeno (200/403), públicos intactos. **12/12 OK** contra Render PG (26-oct-2026). |
 
 ### 5.11 Capa de API del front-end (`frontend-tramites/lib/`)
 
 | Archivo | Líneas | Función |
 |---|---|---|
-| `api.ts` | 225 | **Única capa de comunicación con el back-end.** `API_URL` desde `NEXT_PUBLIC_API_URL` (línea 1). Timeouts: consulta 45 000 ms, catálogo 10 000 ms (líneas 6-7). `pedir()` (62-82) envuelve `fetch` con `AbortController` y traduce `AbortError` a un mensaje en castellano; `leerDetalle()` (53-60) extrae el `detail` del backend. `enviarConsulta()` (80-123), `obtenerTramites()` (138-141), `obtenerEstadoServicios()` (157-165). **Bloque PMV2 (líneas 167-225):** `DocumentoAdmin`, `listarDocumentosAdmin()`, `subirDocumento()`, `reprocesarDocumento()`, `eliminarDocumentoLogico()`, `eliminarDocumentoFisico()`, `listarTramitesAdmin()`. ⚠️ `pedir()` hace `response.json()` incondicional → **D-20**; y `listarTramitesAdmin()` apunta a `GET /api/tramites/admin` → **D-21**. |
+| `api.ts` | 366 | **Única capa de comunicación con el back-end.** `API_URL` desde `NEXT_PUBLIC_API_URL` (línea 1). Timeouts: consulta 90 000 ms, catálogo 60 000 ms (arranque en frío de Render free, §9.6). **Sesión HU-13:** `leerSesion`/`iniciarSesion`/`cerrarSesion`/`obtenerSesionActual` guardan el JWT en `localStorage` y `pedir()` lo adjunta automáticamente en `Authorization: Bearer`. `enviarConsulta()`, `obtenerTramites()`, `obtenerEstadoServicios()`. **Bloque PMV2:** `DocumentoAdmin`, `listarDocumentosAdmin()`, `subirDocumento()`, `reprocesarDocumento()`, `eliminarDocumentoLogico()`, `eliminarDocumentoFisico()`, `listarTramitesAdmin()`. |
 | `queries.ts` | 20 | Helpers `fetchTramites()` (captura errores → `[]`) y `filtrarTramites(tramites, q, categoria)`. |
 
 ### 5.12 Rutas del front-end (`frontend-tramites/app/`)
@@ -429,14 +450,14 @@ registradas (20 públicas de documentos/consultas/trámites/usuarios + 7 admin +
 | `page.tsx` | 120 | Server (`force-dynamic`) | Portada. Llama a `obtenerTramites()` con `.catch(() => [])`: si la BD falla muestra 0, **nunca una lista ficticia**. Muestra nº real de trámites, mockup móvil, catálogo destacado (4 primeros), chat compacto, y sección de métricas con `KpiCard`/`MiniCharts`/`ServiceStatus`/`AuditLog`. |
 | `chat/page.tsx` | 73 | Client | Página del chat + mockup móvil estático + `RobotAgent`. |
 | `tramites/page.tsx` | 65 | Client | Catálogo con buscador, filtro por categoría, estados de carga/error/vacío. |
-| `admin/page.tsx` | 36 | Server (`force-dynamic`) | Dashboard **mixto**: KPIs y gráficos aún ficticios (252 / 1,236 / 98 %, líneas 22-24, **D-6**) + `MiniCharts`, `ServiceStatus`, `AuditLog` y, desde `ea06c9a`, **`DocumentManager` real** (línea 32). |
+| `admin/page.tsx` | 39 | Server (`force-dynamic`) | Dashboard **mixto**: KPIs y gráficos aún ficticios (252 / 1,236 / 98 %, **D-6**) + `MiniCharts`, `ServiceStatus`, `AuditLog` y `DocumentManager` real. **Protegido por `AdminGate` (HU-13):** sin sesión válida solo se muestra el formulario de acceso. |
 | `globals.css` | 142 | CSS | Sistema de diseño "cálido/orgánico": tokens, `glass`, `card-3d`, `bubble-user`/`bubble-bot`, `avatar-muni`, `chip`, `badge-*`, `btn-*`, animaciones `typing-dot`, `animate-float-y`, `blink-eye`. |
 | `tailwind.config.ts` | 122 | Config | Paleta institucional (emerald/primary/amber), sombras suaves, keyframes. |
 | `next.config.js` | 9 | Config | `reactStrictMode`, expone `NEXT_PUBLIC_API_URL`. |
 | `postcss.config.js` | 6 | Config | Plugin Tailwind. |
 | `tsconfig.json` | 23 | Config | TypeScript estricto. |
 
-### 5.13 Componentes del front-end (`frontend-tramites/components/`) — 16 archivos
+### 5.13 Componentes del front-end (`frontend-tramites/components/`) — 17 archivos
 
 | Archivo | Líneas | Estado | Función |
 |---|---|---|---|
@@ -450,7 +471,8 @@ registradas (20 públicas de documentos/consultas/trámites/usuarios + 7 admin +
 | `Navbar.tsx` | 55 | ✅ real | Navegación con 4 enlaces, resaltado de ruta activa, menú móvil. |
 | `QuickAccessCard.tsx` | 30 | ✅ real | Tarjetas de acceso rápido. |
 | `RobotAgent.tsx` | 72 | ✅ real | SVG animado del asistente (MUN AI) con parpadeo, flotación y plataforma. |
-| `DocumentManager.tsx` | 135 | ⚠️ **real, bloqueado** | **Nuevo (PMV2).** Carga con metadatos (`FormData` → `subirDocumento`), tabla con `indexado`/`fragmentado`/estado, y botones *Reprocesar* / *Dar de baja* / *Eliminar*. ⚠️ El `Promise.all` incluye `listarTramitesAdmin()` (**D-21**) y los `DELETE` chocan con `pedir()` (**D-20**): hoy la tabla no carga ni borra. |
+| `DocumentManager.tsx` | 135 | ✅ real | **Nuevo (PMV2).** Carga con metadatos (`FormData` → `subirDocumento`), tabla con `indexado`/`fragmentado`/estado, y botones *Reprocesar* / *Dar de baja* / *Eliminar* (D-20/D-21 corregidos el 16-oct). Requiere sesión de administrador (HU-13). |
+| `AdminGate.tsx` | 118 | ✅ real | **Nuevo (HU-13, 26-oct-2026).** Protege `/admin`: sin sesión muestra el formulario de acceso (`iniciarSesion`), con sesión revalida contra `GET /api/auth/me`, renderiza el panel y ofrece *Cerrar sesión* (`cerrarSesion`). El backend exige además el rol administrador en cada endpoint. |
 | `KpiCard.tsx` | 25 | ⚠️ maqueta | Tarjeta KPI reutilizable; los **valores** los decide quien la usa (en `/admin` son ficticios). |
 | `MiniCharts.tsx` | 60 | ⚠️ maqueta | Barras, donuts y línea de tendencia con **datos fijos**. |
 | `AuditLog.tsx` | 27 | ⚠️ maqueta | 5 filas **hardcodeadas** ("Consulta #8.412…"). No consume la API. |
@@ -566,58 +588,71 @@ es verdadero, el sistema **no genera respuesta ni cita fuentes**: devuelve `ACLA
 ejecuta **también** en el acierto de caché: se reconstruye una `Respuesta` mínima con
 `_respuesta_desde_cuerpo()` (líneas 179-221) y se registra en `auditoria_consultas`.
 
-### 6.2 Los 27 endpoints de API (18 públicos + 9 admin) + 4 de documentación = 31 rutas
+### 6.2 Los 30 endpoints de API (9 públicos + 4 autenticados + 17 admin) + 4 de documentación = 34 rutas
 
-> ✅ **Todos servibles hoy (17-oct-2026, verificado en vivo contra `/openapi.json`):** la tabla
+> ✅ **Todos servibles hoy (26-oct-2026, verificado en vivo contra `/openapi.json`):** la tabla
 > describe el código escrito. Las 4 rutas extra son las de documentación
 > (`/docs`, `/redoc`, `/openapi.json`, `/docs/oauth2-redirect`).
 
-**Públicos (18):**
+**Públicos (9) — sin token:**
 
-| # | Método | Ruta | Archivo:línea | Función |
+| # | Método | Ruta | Archivo | Función |
 |---|---|---|---|---|
 | 1 | POST | `/api/consultas` | `consulta_controller.py` | Consulta RAG completa (flujo §6.1) |
-| 2 | GET | `/api/consultas` | `consulta_controller.py` | **Listado de auditoría (HU-10/HU-14 ✅):** últimas consultas con su respuesta auditada (texto, confianza, groundedness, fuentes, banderas de bloqueo/fuera de dominio); `?limite=` (1..100) |
-| 3 | GET | `/api/consultas/{id}` | `consulta_controller.py` | **Trazabilidad completa (HU-10/D-9 ✅):** la consulta **más** `respuesta`, `confianza`, `groundedness`, `fuentes` (con número/fecha/versión), `afirmaciones_bloqueadas`, `fuera_dominio`, `entidad_sugerida` y `registrado_en` |
-| 4 | GET | `/api/tramites` | `tramite_controller.py:31` | Catálogo; filtro opcional `?municipalidad_id=` |
-| 5 | GET | `/api/tramites/{id}` | `tramite_controller.py:43` | Detalle + documentos vigentes del trámite |
-| 6 | GET | `/api/tramites/{id}/relacionados` | `tramite_controller` | Trámites relacionados por similitud (HU-12 ✅; embedding + fallback léxico, orden decreciente) |
-| 7 | POST | `/api/documentos` | `documento_controller.py:55` | Registra documento **y genera su embedding**; 422 si formato/lectura inválidos |
-| 8 | POST | `/api/documentos/upload` | `documento_controller.py:84` | Valida extensión, extrae texto, guarda archivo, registra, indexa y fragmenta (PMV2) |
-| 9 | GET | `/api/documentos` | `documento_controller.py:115` | Listado con filtros `tramite_id`/`estado`/`incluir_eliminados` + `limite`/`desde` |
-| 10 | PUT | `/api/documentos/{id}/estado` | `documento_controller.py:134` | Cambia `vigente`/`obsoleto`/`en_revision`/`derogado` |
-| 11 | GET | `/api/documentos/{id}` | `documento_controller.py:148` | Detalle de un documento |
-| 12 | POST | `/api/documentos/{id}/procesar` | `documento_controller.py:159` | Reprocesa: fragmenta + embeddea (PMV2) |
-| 13 | DELETE | `/api/documentos/{id}` | `documento_controller.py:171` | **Baja lógica** (marca `eliminado_en`); 204 (PMV2) |
-| 14 | DELETE | `/api/documentos/{id}/fisico` | `documento_controller.py:179` | **Baja física** de filas (borra fragmentos); 204 (PMV2) |
-| 15 | POST | `/api/usuarios` | `usuario_controller.py:48` | Registro; valida rol con regex `^(ciudadano\|administrador)$` |
-| 16 | GET | `/api/usuarios/{id}` | `usuario_controller.py:66` | Detalle de usuario |
-| 17 | GET | `/api/usuarios/{id}/consultas` | `usuario_controller.py:77` | Historial del usuario (`LIMIT 50`) |
-| 18 | GET | `/health` | `main.py:71` | `{"status":"ok"}` — **no** comprueba BD, Redis ni Ollama |
+| 2 | GET | `/api/consultas/{id}` | `consulta_controller.py` | **Trazabilidad completa (HU-10/D-9 ✅):** la consulta **más** `respuesta`, `confianza`, `groundedness`, `fuentes` (con número/fecha/versión), `afirmaciones_bloqueadas`, `fuera_dominio`, `entidad_sugerida` y `registrado_en` |
+| 3 | GET | `/api/tramites` | `tramite_controller.py` | Catálogo; filtro opcional `?municipalidad_id=` |
+| 4 | GET | `/api/tramites/{id}` | `tramite_controller.py` | Detalle + documentos vigentes del trámite |
+| 5 | GET | `/api/tramites/{id}/relacionados` | `tramite_controller` | Trámites relacionados por similitud (HU-12 ✅; embedding + fallback léxico, orden decreciente) |
+| 6 | GET | `/api/documentos` | `documento_controller.py` | Listado con filtros `tramite_id`/`estado`/`incluir_eliminados` + `limite`/`desde` |
+| 7 | GET | `/api/documentos/{id}` | `documento_controller.py` | Detalle de un documento |
+| 8 | POST | `/api/auth/login` | `auth_controller.py` | **HU-13:** valida credenciales (PBKDF2) y usuario activo; registra `login_exitoso`/`login_fallido`; devuelve JWT 8 h |
+| 9 | GET | `/health` | `main.py` | `{"status":"ok"}` — **no** comprueba BD, Redis ni Ollama |
 
-**Administración (9):**
+**Autenticados (4) — requieren JWT válido; el rol decide el alcance:**
 
-| # | Método | Ruta | Archivo:línea | Función |
+| # | Método | Ruta | Archivo | Función |
 |---|---|---|---|---|
-| 19 | GET | `/api/admin/documentos` | `documento_admin_controller.py:39` | Listado con filtros y paginación (hasta 500) |
-| 20 | POST | `/api/admin/documentos` | `documento_admin_controller.py:59` | Crea por JSON y procesa en segundo plano (ignora fallos de fragmentado) |
-| 21 | POST | `/api/admin/documentos/upload` | `documento_admin_controller.py:86` | Carga con `multipart/form-data` (`tramite_id`, `titulo`, `url_origen`, `version`, `fecha_publicacion`, `estado`, `archivo`) |
-| 22 | POST | `/api/admin/documentos/{id}/procesar` | `documento_admin_controller.py:117` | Reprocesa un documento (404 si no existe) |
-| 23 | PUT | `/api/admin/documentos/{id}/estado` | `documento_admin_controller` | Cambia estado con validación (422 si inválido o sin metadatos) — **P2-11 ✅** |
-| 24 | DELETE | `/api/admin/documentos/{id}` | `documento_admin_controller.py:129` | Baja lógica; 204 |
-| 25 | DELETE | `/api/admin/documentos/{id}/fisico` | `documento_admin_controller.py:137` | Baja física; 204 |
-| 26 | GET | `/api/tramites/admin` | `tramite_admin_controller.py:40` | Listado ampliado para el panel admin (272 filas) |
-| 27 | PUT | `/api/tramites/{id}/area` | `tramite_admin_controller.py:49` | Actualiza `area_responsable` (migración 005; HU-07 ✅) |
+| 10 | GET | `/api/auth/me` | `auth_controller.py` | **HU-13:** perfil del usuario del token vigente |
+| 11 | POST | `/api/usuarios` | `usuario_controller.py` | **HU-13:** registro con **contraseña** (mín. 8) y rol `ciudadano\|administrador`; solo un admin (excepción de arranque: crear el primer admin); evento `usuario_registrado` |
+| 12 | GET | `/api/usuarios/{id}` | `usuario_controller.py` | Perfil: el propio, o cualquiera si eres admin (403 si no) |
+| 13 | GET | `/api/usuarios/{id}/consultas` | `usuario_controller.py` | Historial (`LIMIT 50`): el propio, o cualquiera si eres admin |
 
-Los 9 admin **repiten** la funcionalidad pública bajo otro prefijo (7 bajo `/api/admin/documentos` y
-2 bajo `/api/tramites`): son la superficie que el panel `DocumentManager.tsx` consume (✅ verificado
-en vivo). Ninguno valida autenticación ni rol.
+**Administración (17) — requieren JWT con rol `administrador` (HU-13):**
+
+| # | Método | Ruta | Archivo | Función |
+|---|---|---|---|---|
+| 14 | GET | `/api/consultas` | `consulta_controller.py` | **Listado de auditoría (HU-10/HU-14 ✅):** últimas consultas con su respuesta auditada; `?limite=` (1..100) |
+| 15 | GET | `/api/admin/documentos` | `documento_admin_controller.py` | Listado con filtros y paginación (hasta 500) |
+| 16 | POST | `/api/admin/documentos` | `documento_admin_controller.py` | Crea por JSON y procesa en segundo plano (ignora fallos de fragmentado) |
+| 17 | POST | `/api/admin/documentos/upload` | `documento_admin_controller.py` | Carga con `multipart/form-data` (`tramite_id`, `titulo`, `url_origen`, `version`, `fecha_publicacion`, `estado`, `archivo`) |
+| 18 | POST | `/api/admin/documentos/{id}/procesar` | `documento_admin_controller.py` | Reprocesa un documento (404 si no existe) |
+| 19 | PUT | `/api/admin/documentos/{id}/estado` | `documento_admin_controller` | Cambia estado con validación (422 si inválido o sin metadatos) — **P2-11 ✅** |
+| 20 | DELETE | `/api/admin/documentos/{id}` | `documento_admin_controller.py` | Baja lógica; 204 |
+| 21 | DELETE | `/api/admin/documentos/{id}/fisico` | `documento_admin_controller.py` | Baja física; 204 |
+| 22 | GET | `/api/tramites/admin` | `tramite_admin_controller.py` | Listado ampliado para el panel admin (272 filas) |
+| 23 | PUT | `/api/tramites/{id}/area` | `tramite_admin_controller.py` | Actualiza `area_responsable` (migración 005; HU-07 ✅) |
+| 24 | GET | `/api/usuarios` | `usuario_controller.py` | **HU-13 (nuevo):** listado de usuarios (hasta 200) |
+| 25 | POST | `/api/documentos` | `documento_controller.py` | Registra documento y genera su embedding (era público; ahora exige admin) |
+| 26 | POST | `/api/documentos/upload` | `documento_controller.py` | Carga con archivo: valida extensión, extrae texto, guarda, registra, indexa y fragmenta (era público; ahora exige admin) |
+| 27 | PUT | `/api/documentos/{id}/estado` | `documento_controller.py` | Cambia `vigente`/`obsoleto`/`en_revision`/`derogado` (ahora exige admin) |
+| 28 | POST | `/api/documentos/{id}/procesar` | `documento_controller.py` | Reprocesa: fragmenta + embeddea (ahora exige admin) |
+| 29 | DELETE | `/api/documentos/{id}` | `documento_controller.py` | **Baja lógica** (marca `eliminado_en`); 204 (ahora exige admin) |
+| 30 | DELETE | `/api/documentos/{id}/fisico` | `documento_controller.py` | **Baja física** de filas (borra fragmentos); 204 (ahora exige admin) |
+
+Los 7 de `/api/admin/documentos` **repiten** la funcionalidad pública bajo otro prefijo: son la
+superficie que el panel `DocumentManager.tsx` consume (✅ verificado en vivo). Las 6 rutas
+mutantes de `/api/documentos` quedaron **protegidas** con `requiere_administrador` en HU-13
+(las lecturas `GET` siguen públicas).
 
 Documentación interactiva: <http://localhost:8000/docs> (Swagger, automático por FastAPI).
 
-> ⚠️ **Ningún endpoint valida autenticación ni rol.** `es_administrador()` existe en
-> `Usuario.py:16` pero no se invoca en ningún punto (**D-8**), y `container.py` expone el
-> contenedor completo a cualquier petición.
+> ✅ **Control de acceso (HU-13, 26-oct-2026, G-01 cerrado / D-8 corregido).** Todos los
+> endpoints de administración exigen `Authorization: Bearer <JWT>` con rol `administrador`
+> mediante `requiere_administrador` (`dependencias.py`): sin token → **401**, con rol distinto →
+> **403** y evento `acceso_denegado` en `eventos_seguridad`. Los endpoints de usuarios exigen
+> token (el propio usuario o un admin). Verificado en vivo: 8 comprobaciones E2E en producción
+> + 12 con `TestClient` (`scripts/probar_hu13.py`). El contenedor (`container.py`) sigue
+> exponiéndose por petición, pero los endpoints mutantes/admin ya no son alcanzables sin rol.
 
 ---
 
@@ -633,6 +668,7 @@ Documentación interactiva: <http://localhost:8000/docs> (Swagger, automático p
 | `database/migrations/004_documentos_pmv2.sql` | **(PMV2), 29 líneas — ✅ CORREGIDA Y APLICADA (16-oct-2026).** Añade a `documentos` las columnas `version`, `fecha_publicacion`, `archivo_nombre`, `mime_type`, `hash_contenido`, `fragmentado`, `eliminado_en`; crea la tabla `fragmentos_documento` con su índice; y reescribe el `CHECK` de `estado` para admitir `derogado`. Su línea 1 era un docstring Python → corregida a `--` (D-15); verificado: 20/20 documentos con metadatos. |
 | `database/migrations/005_area_responsable.sql` | **Nuevo, ✅ APLICADO (16-oct-2026):** añade `area_responsable` a `tramites` y la expone en las respuestas (HU-07 ✅); 259/272 trámites con área. |
 | `database/migrations/006_auditoria_trazabilidad.sql` | **Nuevo, ✅ APLICADO (17-oct-2026):** HU-10 — añade a `auditoria_consultas` las columnas `groundedness`, `fuentes_detalle JSONB`, `fuera_dominio`, `afirmaciones_bloqueadas` y `entidad_sugerida`, más índices por `consulta_id` y `registrado_en`. |
+| `database/migrations/007_usuarios_seguridad.sql` | **Nuevo, ✅ APLICADO (26-oct-2026, Render PG):** HU-13 — añade a `usuarios` las columnas `password_hash` (PBKDF2), `activo` y `ultimo_acceso_en`, y crea la tabla `eventos_seguridad` (`usuario_id`, `correo`, `evento`, `detalle`, `ip`, `registrado_en`) con índice por `(evento, registrado_en DESC)`. |
 | `database/schema.sql` | Referencia consolidada del esquema (documentación, no se ejecuta). |
 
 **Verificación (16-oct-2026, PostgreSQL local `tramites_municipales`):** `information_schema.columns`
@@ -746,17 +782,22 @@ Rutas faltantes (brecha **G-11**): `/login`, `/tramites/[id]`, `/404`, `/mis-con
 
 | Función | Endpoint | Timeout | Notas de diseño |
 |---|---|---|---|
-| `enviarConsulta` | `POST /api/consultas` | 45 s | Sin fallback; propaga el error real |
-| `obtenerTramites` | `GET /api/tramites` | 10 s | Mapea con `mapearTramite` |
-| `obtenerEstadoServicios` | `GET /health` | 10 s | Solo la API es verificable; el resto = "sin verificar" |
-| `listarDocumentosAdmin` | `GET /api/admin/documentos` | 10 s | Filtros `incluir_eliminados`, `limite`, `desde` (PMV2) |
-| `subirDocumento` | `POST /api/admin/documentos/upload` | 10 s | `multipart/form-data` con metadatos (PMV2) |
-| `reprocesarDocumento` | `POST /api/admin/documentos/{id}/procesar` | 10 s | Devuelve el documento (PMV2) |
-| `eliminarDocumentoLogico` / `eliminarDocumentoFisico` | `DELETE /api/admin/documentos/{id}` y `…/{id}/fisico` | 10 s | ⚠️ **D-20**: 204 sin cuerpo rompe `pedir()` |
-| `listarTramitesAdmin` | `GET /api/tramites/admin` | 10 s | ⚠️ **D-21**: ruta inexistente → 500 |
+| `enviarConsulta` | `POST /api/consultas` | 90 s | Sin fallback; propaga el error real (arranque en frío de Render, §9.6) |
+| `iniciarSesion` | `POST /api/auth/login` | 60 s | **HU-13:** guarda `{access_token, usuario}` en `localStorage` |
+| `obtenerSesionActual` | `GET /api/auth/me` | 60 s | **HU-13:** revalida el JWT; si falla, cierra la sesión |
+| `obtenerTramites` | `GET /api/tramites` | 60 s | Mapea con `mapearTramite` |
+| `obtenerEstadoServicios` | `GET /health` | 60 s | Solo la API es verificable; el resto = "sin verificar" |
+| `listarDocumentosAdmin` | `GET /api/admin/documentos` | 60 s | Filtros `incluir_eliminados`, `limite`, `desde` (PMV2; requiere JWT de admin) |
+| `subirDocumento` | `POST /api/admin/documentos/upload` | 60 s | `multipart/form-data` con metadatos (PMV2; requiere JWT de admin) |
+| `reprocesarDocumento` | `POST /api/admin/documentos/{id}/procesar` | 60 s | Devuelve el documento (PMV2; requiere JWT de admin) |
+| `eliminarDocumentoLogico` / `eliminarDocumentoFisico` | `DELETE /api/admin/documentos/{id}` y `…/{id}/fisico` | 60 s | ✅ D-20 corregido (`pedir()` tolera 204 sin cuerpo) |
+| `listarTramitesAdmin` | `GET /api/tramites/admin` | 60 s | ✅ D-21 corregido (ruta registrada, 272 filas) |
 
-Interfaces TypeScript exportadas: `FuenteCitada`, `TramiteProbable`, `RespuestaConsulta`, `Tramite`, `EstadoServicios`.
-Constante `SUGERENCIAS_RAPIDAS` (líneas 46-51): 4 preguntas de ejemplo.
+Todas las llamadas de `pedir()` adjuntan automáticamente `Authorization: Bearer <token>` si hay
+sesión abierta (HU-13).
+
+Interfaces TypeScript exportadas: `FuenteCitada`, `TramiteProbable`, `RespuestaConsulta`, `Tramite`, `EstadoServicios`, `SesionUsuario`.
+Constante `SUGERENCIAS_RAPIDAS`: 4 preguntas de ejemplo.
 
 ### 8.4 Sistema de diseño
 
@@ -962,7 +1003,7 @@ No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV
 > `next build`). El PMV1 está **cerrado al 100 %** y el PMV2 también: se cerraron HU-08 (umbral de
 > rechazo), HU-10 (trazabilidad completa + bloqueo + fuentes con metadatos + panel real) y HU-11
 > (clasificador de dominio). El PMV3 subió de 59 % a **63 %** (HU-14: respuesta completa en
-> auditoría y panel real).
+> auditoría y panel real) y el **26-oct-2026 a 69 %** con el cierre de HU-13 (JWT + roles).
 
 > **Reasignación (16-oct-2026):** la antigua fila "Transversal" se disolvió: **HU-11 → PMV2** y
 > **HU-17 → PMV3**. Detalle en §10.7.
@@ -976,8 +1017,9 @@ calidad/despliegue (pruebas, contenerización, monitoreo).
 
 > ⚠️ **Historial de correcciones:** en versiones anteriores esta tabla decía 88/50/51 % (60/101),
 > y antes 100 % para el PMV1 con un desglose que sumaba mal (`9+5+5+5`). El 16-oct-2026 las cifras
-> fueron **24/24 + 20/28 + 29/49 = 73/101 = 72 %**; desde el 17-oct-2026 las válidas son las de
-> arriba: **24/24 + 28/28 + 31/49 = 83/101 = 82 %** (§12.7).
+> fueron **24/24 + 20/28 + 29/49 = 73/101 = 72 %**; entre el 17 y el 25-oct-2026 fueron
+> **24/24 + 28/28 + 31/49 = 83/101 = 82 %**; desde el **26-oct-2026** las válidas son las de
+> arriba: **24/24 + 28/28 + 34/49 = 86/101 = 85 %** (§12.7).
 
 ### 10.3 Las 18 HU: estado, % y qué falta
 
@@ -985,7 +1027,7 @@ calidad/despliegue (pruebas, contenerización, monitoreo).
 |---|---|---|---|---|---|---|
 | HU-01 | Carga de documentos oficiales | Gestión documental | ✅ | 9/9 | **100 %** | — cerrada (extracción PDF/DOCX verificada con PDF real + aprobación de calidad) |
 | HU-02 | Vigencia, versión y fuente | Gestión documental | ✅ | 8/8 | **100 %** | — cerrada (004 aplicada: 20/20 documentos con `version` y `fecha_publicacion`) |
-| HU-03 | Aprobar/derogar documentos | Gestión documental | ⚠️ | 6/7 | **86 %** | Flujo con revisor/roles (depende de HU-13) |
+| HU-03 | Aprobar/derogar documentos | Gestión documental | ⚠️ | 6/7 | **86 %** | Flujo con revisor — **desbloqueado por HU-13**: falta añadir el rol `revisor` al CHECK de `usuarios` y `requiere_rol` en el flujo de aprobación |
 | HU-04 | Procesamiento documental y RAG | RAG | ✅ | 9/9 | **100 %** | — cerrada (extracción, OCR con rapidocr, recuperación por fragmento: 20/20 docs fragmentados) |
 | HU-05 | Consulta ciudadana | Consulta | ✅ | 9/9 | **100 %** | — cerrada |
 | HU-06 | Clasificación de intención | NLP | ✅ | 5/5 | **100 %** | — cerrada |
@@ -1078,7 +1120,7 @@ consulta SUNAT → `fuera_dominio=true` con derivación; consulta municipal → 
 enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consultas` y
 `GET /api/consultas/{id}` devuelven la trazabilidad completa.
 
-### 10.6 PMV3 · Sistema integrado — **63 %** (31/49)
+### 10.6 PMV3 · Sistema integrado — **69 %** (34/49)
 
 **Definición:** *¿Producto seguro, accesible y de baja latencia?* Objetivo: API completa + seguridad + UX desplegable.
 
@@ -1086,7 +1128,7 @@ enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consult
 |---|---|---|
 | Docker Compose (BD+Redis+Ollama) | ✅ | `docker-compose.yml` (3 servicios con healthchecks) |
 | Caché de respuestas | ✅ | `ServicioCache` + `RedisAdapter` (TTL 3600, degradable sin Redis) |
-| API completa | ✅ 27 endpoints de API (18 públicos + 9 admin) | 7 controllers; **arranca con 31 rutas** (D-14..D-23 corregidos; verificado contra `/openapi.json`) |
+| API completa | ✅ 30 endpoints de API (9 públicos + 4 autenticados + 17 admin) | 7 controllers (incluye `auth`); **arranca con 34 rutas** (D-14..D-23 corregidos; verificado contra `/openapi.json`) |
 | Seguridad (login, roles, guardrails) | ⚠️ | G-01 cerrado 26-oct-2026 (JWT + roles + eventos de seguridad); queda G-20 (anti prompt-injection) |
 | Accesibilidad y pruebas de carga | ❌ | G-26 (WCAG, k6/JMeter, SonarQube, ZAP) |
 | Latencia < 3 s | ⚠️ no medible | caché sí; sin métricas de latencia (G-16) |
@@ -1095,7 +1137,7 @@ enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consult
 |---|---|---|
 | HU-01 | **100 %** (9/9) | — (extracción PDF/DOCX ✅ verificada con PDF real; aprobación de calidad ✅: `PUT /api/admin/documentos/{id}/estado` + botón "Aprobar") |
 | HU-02 | **100 %** (8/8) | — (migración 004 aplicada: 20/20 documentos con `version` y `fecha_publicacion`) |
-| HU-03 | 86 % (6/7) | flujo con revisor/roles (depende de HU-13) |
+| HU-03 | 86 % (6/7) | flujo con revisor — desbloqueado por HU-13 (falta el rol `revisor`) |
 | HU-13 | **100 %** | — (JWT, roles y eventos de seguridad ✅ 26-oct-2026: `POST /api/auth/login`, PBKDF2, endpoints admin protegidos, `eventos_seguridad`) |
 | HU-14 | 67 % (4/6) | búsqueda de auditoría por filtros y marcado de registros inconsistentes (respuesta completa y panel real ✅ 17-oct-2026) |
 | HU-15 | 0 % | retroalimentación ciudadana |
@@ -1120,16 +1162,17 @@ G-20 (guardrails anti prompt-injection).
 **Justificación:** ambas dependen de funcionalidades de un PMV concreto — HU-11 del clasificador
 de intención y la abstención (PMV2), HU-17 del catálogo y la capa de seguridad (PMV3) — por lo que
 se integraron a ellos en lugar de mantener una cuarta categoría. **El total global no cambia con la
-reasignación.** Las cifras vigentes se encuentran en §10.2 (**83/101 = 82 %** desde el
-17-oct-2026). Las cifras anteriores (Transversal 2/8 = 25 %) quedan
+reasignación.** Las cifras vigentes se encuentran en §10.2 (**86/101 = 85 %** desde el
+26-oct-2026; eran 83/101 = 82 % entre el 17 y el 25-oct). Las cifras anteriores (Transversal 2/8 = 25 %) quedan
 históricas en este documento.
 
 ---
 
 ## 11. Inventario unificado de todos los `.md` del repositorio
 
-**90 documentos Markdown** en 9 ubicaciones (4 en la raíz, 7 rector, 73 temáticos, 6 de
-presentación). Conteo verificado con `Get-ChildItem -Recurse -Filter *.md` el 16-oct-2026.
+**95 documentos Markdown** en 9 ubicaciones (5 en la raíz, 7 rector, 76 temáticos de
+`documentacion/`, 1 en `database/` y 6 de presentación). Conteo verificado con
+`git ls-files '*.md'` el 26-oct-2026.
 
 ### 11.1 Raíz del repositorio (4 documentos)
 
@@ -1251,8 +1294,9 @@ la fuente de verdad y `PRESENTACION-PMV1.md` es una copia derivada.
 
 `documentacion/00-documentos-rectores/indice.md` decía *"37 % global"* y *"porcentajes
 (46 % / 36 % / 34 %)"*. Hoy **ambos archivos** (y el resto de los rectores y de `presentacion/`)
-están alineados con las cifras canónicas de §10: **82 % global** y **100 % / 100 % / 63 %**
-(historial: 49 % → 59 % → 72 % → 82 %).
+están alineados con las cifras canónicas de §10: **85 % global** y **100 % / 100 % / 69 %**
+(historial: 49 % → 59 % → 72 % → 82 % → 85 %; la re-sincronización al 26-oct-2026 queda
+registrada en la fila 9 de §12.6).
 Ambos archivos enlazan a este documento como fuente de verdad y añaden una fila para
 `06-estado-actual-implementado.md`.
 
@@ -1275,6 +1319,7 @@ bloqueante.
 | 6 | Mantener `01-historias-de-usuario.md` como fuente de requisitos (no cambia) | ✅ No requiere acción |
 | 7 | Actualizar `02`, `04`, `05`, `indice.md`, `DOCUMENTACION.md`, `README.md` y `presentacion/01..05` a las cifras de 16-oct-2026 (**72 % global, PMV1 100 %, PMV2 71 %, PMV3 59 %, 30 rutas, 89 `.py`, 92 `.md`**) | ✅ Hecho — todos los rectores, `README`, `DOCUMENTACION`, `PMV2_DOCUMENTOS` y `presentacion/` alineados; `02` marcado como **histórico** con banner que apunta a §10 |
 | 8 | Re-sincronizar todos los rectores y `presentacion/` a las cifras del 17-oct-2026 (**82 % global, PMV1 100 %, PMV2 100 %, PMV3 63 %, 31 rutas, 91 `.py`, 11 `.sql`, 92 `.md`**) tras cerrar HU-08, HU-10, HU-11 y los puntos de HU-14 | ✅ Hecho (17-oct-2026) |
+| 9 | Re-sincronizar a las cifras del 26-oct-2026 (**85 % global, PMV3 69 %, 34 rutas, 102 `.py`, 17 `.sql`, 95 `.md`**) tras cerrar HU-13 (§9.8) y el fallback de catálogo (§9.7) | ✅ Hecho en este documento (`06`); el resto de rectores/`presentacion/` queda pendiente de la misma re-sincronización |
 
 ### 12.7 ⚠️ Corrección del % del PMV1 y del global (16 de octubre de 2026)
 
@@ -1296,9 +1341,14 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 >
 > **Actualización del 17 de octubre de 2026:** con el cierre de HU-08 (umbral de rechazo),
 > HU-10 (trazabilidad completa, bloqueo, fuentes con metadatos, panel real) y HU-11 (clasificador
-> de dominio), más 2 puntos de HU-14, las cifras vigentes son
+> de dominio), más 2 puntos de HU-14, las cifras vigentes fueron
 > **PMV1 24/24 = 100 %**, **PMV2 28/28 = 100 %**, **PMV3 31/49 = 63 %** → **83/101 = 82 % global**
-> (`24+28+31 = 83` ✅). Las cifras vigentes están en §0, §10.2 y §10.3.
+> (`24+28+31 = 83` ✅).
+>
+> **Actualización del 26 de octubre de 2026:** con el cierre de HU-13 (JWT + contraseñas + roles +
+> eventos de seguridad, §9.8) y el fallback de catálogo (§9.7), las cifras vigentes son
+> **PMV1 24/24 = 100 %**, **PMV2 28/28 = 100 %**, **PMV3 34/49 = 69 %** → **86/101 = 85 % global**
+> (`24+28+34 = 86` ✅). Las cifras vigentes están en §0, §10.2 y §10.3.
 
 ---
 
@@ -1308,14 +1358,14 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 
 | # | Defecto | Ubicación | Estado |
 |---|---|---|---|
-| D-1 | Timeout de 6 s < latencia real (4-17 s) con respuesta ficticia al agotarse | `lib/api.ts` | ✅ **Corregido** — timeout 45 s, `respuestaDemo()` eliminada |
+| D-1 | Timeout de 6 s < latencia real (4-17 s) con respuesta ficticia al agotarse | `lib/api.ts` | ✅ **Corregido** — timeout 90 s (consulta) / 60 s (catálogo), `respuestaDemo()` eliminada |
 | D-2 | `groundedness` fijo en 90 % | `lib/api.ts` | ✅ **Corregido** — se muestra el valor real |
 | D-3 | Fuentes nunca mostradas (`{url, fragmento}` vs `titulo`) | `consulta_controller.py` | ✅ **Corregido** — las fuentes incluyen `titulo` |
 | D-4 | El front llamaba `/api/health`; la ruta real es `/health` | `lib/api.ts` | ✅ **Corregido** — consulta `/health` |
 | D-5 | Campos de trámites desalineados (`tipo`/`duracion_estimada_dias` ↔ `categoria`/`plazo`) | `tramite_controller.py` ↔ `lib/api.ts` | ✅ **Corregido** — `mapearTramite` traduce |
-| D-6 | Datos de demostración presentados como reales | `app/admin/page.tsx` | ⚠️ **Parcial** — la portada ya no inventa KPI; `/admin` sigue maqueta |
+| D-6 | Datos de demostración presentados como reales | `app/admin/page.tsx` | ⚠️ **Parcial** — la portada ya no inventa KPI; `/admin` sigue maqueta (el acceso ya está protegido con HU-13) |
 | D-7 | `POST /api/admin/documentos/upload` acepta cualquier archivo | `documento_admin_controller.py` | ✅ **Resuelto 16-oct-2026** — valida extensión (`FormatoDocumento` → 422) y la extracción **funciona**: carga de PDF real del TUPA → 201 con texto extraído |
-| D-8 | `es_administrador()` nunca se invoca | `domain/entities/Usuario.py:16` | ❌ **Abierto** — el campo `rol` no controla ningún acceso; afecta también a los 6 endpoints admin |
+| D-8 | `es_administrador()` nunca se invoca | `domain/entities/Usuario.py:16` | ✅ **Corregido 26-oct-2026 (HU-13)** — `dependencias.requiere_administrador` protege los 17 endpoints admin/mutantes: sin token 401, rol no admin 403 + evento `acceso_denegado` |
 
 **Defectos nuevos detectados en esta revisión (2 de octubre de 2026):**
 
@@ -1354,7 +1404,7 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 | 🔴 Alta | ~~**D-14..D-21**~~ | ✅ **Resueltos 16-oct-2026** (§13.1) + D-22/D-23 corregidos | — |
 | 🔴 Alta | **G-18** | Suite de pruebas automatizadas (pytest) — 0 suites hoy | PMV3 |
 | 🔴 Alta | **G-16/G-06** | Métricas reales (endpoint, agregaciones) — el panel es maqueta | HU-16, PMV3 |
-| 🔴 Alta | **G-01** | Autenticación, contraseñas, JWT, roles, control de acceso | HU-13, PMV3 |
+| 🔴 Alta | ~~**G-01**~~ | ✅ **Resuelto 26-oct-2026 (HU-13, §9.8)** — login JWT HS256 (8 h), contraseñas PBKDF2-SHA256 (310 000 iteraciones), roles aplicados a los 17 endpoints admin/mutantes (401/403) y eventos de seguridad en `eventos_seguridad` | HU-13 ✅ |
 | 🔴 Alta | **G-12** | ⬆️ **Parcial** — `DocumentManager` sube/lista/borra/aprueba de verdad (P2-10, P2-11); siguen ficticios los KPIs y gráficos de `/admin` | HU-01 ✅, HU-16 |
 | 🟠 Media | ~~**G-04**~~ | ✅ **Resuelto 17-oct-2026** — umbral de rechazo por groundedness (`BLOQUEO_AFIRMACIONES` en `ServicioOrientacion`) + clasificador de dominio (`ServicioDominio`); HU-08 y HU-11 cerradas |
 | 🟠 Media | **G-20** | Guardrails anti *prompt-injection* | HU-05, PMV3 |
@@ -1386,10 +1436,11 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 | 0 | ✅ **Desbloqueo (hecho 16-oct)** | D-14..D-19 | ✅ API arranca (30 rutas), `004`/`005` aplicadas, deps completas |
 | 0b | ✅ **Desbloqueo front (hecho 16-oct)** | D-20, D-21 (+ D-22, D-23) | ✅ Panel de documentos operativo; upload real → 201 |
 | 0c | ✅ **Cierre PMV2 (hecho 17-oct)** | HU-08 umbral "no inventar" (G-04) + HU-10 trazabilidad/bloqueo/fuentes/panel (D-9) + HU-11 clasificador de dominio | ✅ **PMV2 71 % → 100 %**; HU-14 33 % → 67 %; global 72 % → **82 %** |
+| 0d | ✅ **Cierre HU-13 (hecho 26-oct)** | JWT + contraseñas + roles + eventos de seguridad (G-01, D-8) + fallback de catálogo (§9.7) | ✅ **PMV3 63 % → 69 %**; global 82 % → **85 %** |
 | 1 | Corrección inmediata | Resolver branding (§12.1) y actualizar `PRESENTACION-PMV1.md` (§12.2) | — (correctitud) |
 | 2 | ✅ Dato crítico (hecho) | Montos reales del TUPA en `tramites.costo` | HU-08 60 % → 80 % |
 | 3 | ✅ PMV2 (hecho) | Motor de trámites relacionados (HU-12) + recuperación por fragmento (G-13) | PMV2 56 % → 71 % |
-| 4 | PMV3 bloque 1 | `pytest` del flujo RAG (G-18) + JWT y roles (G-01) | PMV3 → ~70 % |
+| 4 | PMV3 bloque 1 | `pytest` del flujo RAG (G-18) + rol `revisor` para HU-03 | PMV3 69 % → ~75 % |
 | 5 | PMV3 bloque 2 | Endpoint de métricas (G-16) + guardrails (G-20) | PMV3 → ~80 % |
 | 6 | ✅ PMV1 cierre (hecho) | Área responsable por trámite + estructura garantizada del SLM | PMV1 88 % → **100 %** ✅ |
 | 7 | Validación | k6 + auditoría WCAG + SonarQube (G-26) + **P2-17 (SUS con 50 ciudadanos)** | habilita sustentación |
@@ -1401,9 +1452,10 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 |---|---|---|---|---|
 | **Estado anterior (previo al 16-oct)** | **59 %** | 88 % | 56 % | 52 % |
 | Estado 16-oct-2026 | **72 %** | **100 %** | **71 %** | **59 %** |
-| **Estado actual (verificado 17-oct-2026)** | **82 %** | **100 %** | **100 %** | **63 %** |
-| + pytest (G-18) + JWT y roles (G-01) | ~87 % | 100 % | 100 % | ~70 % |
-| + métricas + guardrails (G-16, G-20) | ~91 % | 100 % | 100 % | ~78 % |
+| Estado 17-oct-2026 | **82 %** | **100 %** | **100 %** | **63 %** |
+| **Estado actual (verificado 26-oct-2026)** | **85 %** | **100 %** | **100 %** | **69 %** |
+| + pytest (G-18) + rol revisor (HU-03) | ~88 % | 100 % | 100 % | ~75 % |
+| + métricas + guardrails (G-16, G-20) | ~92 % | 100 % | 100 % | ~80 % |
 | + retroalimentación + reportes + validación SUS (P2-17) | **94-98 %** | 100 % | 100 % | ~88 % |
 
 > Los porcentajes de PMV2/PMV3 usan la fórmula por HU de §10.5/§10.6; el cierre total exige además
@@ -1419,7 +1471,7 @@ grep -c "^('" database/seeds/tramites.sql              # 252 (procedimientos TUP
 grep -c "0.00" database/seeds/tramites.sql              # 93 filas gratuito/variable (188 con costo > 0 en API)
 grep -c "^\s*('" database/seeds/documentos.sql          # 20
 
-# Endpoints (30 rutas con la API arrancada)
+# Endpoints (34 rutas: 30 operaciones con la API arrancada + 4 de documentación)
 grep -rn "@router\.\(get\|post\|put\|delete\)" backend/infrastructure/controllers/
 
 # Puertos del dominio
