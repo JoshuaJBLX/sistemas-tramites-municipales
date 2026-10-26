@@ -891,6 +891,23 @@ docker compose up -d      # postgres+pgvector, redis, ollama
 
 **Reconstrucción desde cero (CLI autenticados):** `render services create` (env vars `POSTGRES_*`, `OPENAI_*`, `OPENROUTER_API_KEY`, `VERCEL_FRONTEND_URL`) → psql con `supabase_complete_setup.sql` y `database/seeds/*.sql` → `python -m backend.scripts.indexar_documentos` con las mismas env → reproceso de fragmentos → `vercel deploy --prod` con `NEXT_PUBLIC_API_URL` apuntando al back-end.
 
+### 9.7 Fallback al catálogo para trámites sin documentos indexados (26-oct-2026)
+
+**Problema detectado en producción:** solo **37 de 272 trámites** tienen documentos indexados (56 fragmentos). Una consulta como «Adopción Judicial o Notarial» no tenía fragmentos propios: el RAG recuperaba documentos de otros trámites (similitud floja ≥ 0.3), el SLM hablaba sin respaldo y el guardián de groundedness bloqueaba la respuesta (o se pedía aclaración). El catálogo (`tramites`) sí tenía los datos verificados: arancel S/ 44.00, plazo de 5 días, 2 requisitos, Sub Gerencia de Registro Civil.
+
+**Solución (commit `22bdd9c`):** `TramiteCatalogoPort.buscar_por_texto` + implementación en `TramiteCatalogoAdapter` — búsqueda léxica sobre el nombre de los trámites (cobertura de tokens ≥ `COBERTURA_MINIMA_NOMBRE = 0.6`, margen ≥ `MARGEN_MINIMO_CATALOGO = 1.15` contra el segundo candidato). `ServicioOrientacion` lo usa como fallback en los dos puntos donde antes se rendía (consulta general sin documentos y respuesta bloqueada por bajo groundedness): si el catálogo nombra el trámite, responde con requisitos/arancel/plazo/área estructurados, fuente citable (ficha sintética del catálogo) y `tramite_probable` para la tarjeta del front.
+
+**Medido en producción (26-oct-2026):**
+
+| Consulta | Antes | Después |
+|---|---|---|
+| `Adopción Judicial o Notarial` | pide aclaración, 0 fuentes | groundedness 0.872, confianza ALTA, 1 fuente, trámite probable correcto |
+| `¿Cuánto cuesta y en cuántos días…adopción judicial?` | bloqueo anti-alucinación | igual que arriba |
+| `¿Qué requisitos…licencia de funcionamiento?` | RAG (sin cambio) | RAG, groundedness 0.646, 5 fuentes (sin regresión) |
+| `quiero adoptar a un menor` (difusa) | pide aclaración | pide aclaración (el léxico no la resuelve; pendiente búsqueda semántica sobre el catálogo) |
+
+**Timeouts del front:** Render free se duerme a los 15 min y el arranque en frío tarda ~30-60 s → `TIMEOUT_CATALOGO_MS` 10 s → **60 s** y `TIMEOUT_CONSULTA_MS` 45 s → **90 s** (`frontend-tramites/lib/api.ts`, commit `f4be69c`).
+
 ---
 
 ## 10. Estado actualizado de las 18 HU y los 3 PMV
