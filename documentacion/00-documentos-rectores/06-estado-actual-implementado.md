@@ -908,6 +908,23 @@ docker compose up -d      # postgres+pgvector, redis, ollama
 
 **Timeouts del front:** Render free se duerme a los 15 min y el arranque en frío tarda ~30-60 s → `TIMEOUT_CATALOGO_MS` 10 s → **60 s** y `TIMEOUT_CONSULTA_MS` 45 s → **90 s** (`frontend-tramites/lib/api.ts`, commit `f4be69c`).
 
+### 9.8 HU-13 cerrada: autenticación JWT, roles y eventos de seguridad (26-oct-2026)
+
+**Commit `f2ae7cf`** — cierra G-01 y la HU-13 (2/5 → 5/5). Verificado en vivo contra la API de producción (8 comprobaciones) y localmente (12 comprobaciones con `TestClient`).
+
+| Pieza | Implementación |
+|---|---|
+| Contraseñas | PBKDF2-SHA256 con salt por usuario, 310 000 iteraciones (OWASP), sin dependencias externas (`PasswordHasher.py`) |
+| Login | `POST /api/auth/login` → valida credenciales + usuario activo → token JWT HS256 (8 h) con `sub`, `rol`, `nombre`; `GET /api/auth/me` devuelve el perfil |
+| Roles | `requiere_administrador` aplicado a **todos** los endpoints admin: `/api/admin/documentos/*`, `/api/tramites/admin`, `PUT /api/tramites/{id}/area`, `GET /api/consultas` (auditoría) y las rutas mutantes de `/api/documentos` (que duplicaban las admin) |
+| Usuarios | `POST /api/usuarios` exige contraseña y rol admin (excepción de arranque: si no existe ningún administrador se permite crear el primero); lecturas solo del propio usuario o de un admin |
+| Eventos de seguridad | Tabla `eventos_seguridad` (migración `007`): `login_exitoso`, `login_fallido`, `token_invalido`, `acceso_denegado`, `usuario_registrado`, con usuario, correo, detalle e IP |
+| Frontend | `AdminGate` protege `/admin` (formulario de acceso + "Cerrar sesión"); `lib/api.ts` adjunta el JWT en `Authorization` automáticamente |
+| Secretos | `JWT_SECRET` (opcional); si no está definido se deriva de `OPENAI_API_KEY` (el CLI de Render no permite añadir env vars sin recrear el servicio). Nunca se commitea: solo env var |
+| Admin inicial | `backend/scripts/crear_admin.py` (leen `ADMIN_CORREO`/`ADMIN_PASSWORD`/`ADMIN_NOMBRE`); ejecutado contra Render PG → `admin@munihuancayo.gob.pe` |
+
+**Pendiente relacionado:** HU-03 (aprobar/derogar con revisor) necesita el rol `revisor` (hoy los roles son `ciudadano` | `administrador` en el CHECK de `usuarios`); la infraestructura de roles de HU-13 ya lo permite. Queda también G-20 (guardrails anti prompt-injection).
+
 ---
 
 ## 10. Estado actualizado de las 18 HU y los 3 PMV
@@ -938,8 +955,8 @@ No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV
 |---|---|---|---|---|
 | **PMV1** · Prototipo funcional | Chat + SLM + 5 trámites | HU-05, HU-06, HU-07, HU-09 | **24/24** | **100 %** ✅ |
 | **PMV2** · Modelo RAG optimizado | RAG 20+ trámites + abstención | HU-04, HU-08, HU-10, HU-11, HU-12 | **28/28** | **100 %** ✅ |
-| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | 31/49 | **63 %** |
-| **TOTAL** | | 18 HU | **83/101** | **82 %** |
+| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | 34/49 | **69 %** |
+| **TOTAL** | | 18 HU | **86/101** | **85 %** |
 
 > **Actualizado el 17-oct-2026 con verificación en vivo** (API `localhost:8000`, BD local, `tsc` y
 > `next build`). El PMV1 está **cerrado al 100 %** y el PMV2 también: se cerraron HU-08 (umbral de
@@ -978,14 +995,14 @@ calidad/despliegue (pruebas, contenerización, monitoreo).
 | HU-10 | Trazabilidad y anti-alucinación | Confianza | ✅ | 8/8 | **100 %** | — cerrada (`GET /api/consultas/{id}` con respuesta/fuentes/confianza, bloqueo de afirmaciones, fuentes con número/fecha/versión, `AuditLog` real vía `GET /api/consultas`) |
 | HU-11 | Consultas fuera de dominio | Alcance | ✅ | 3/3 | **100 %** | — cerrada (`ServicioDominio` municipal vs. externo, distinción SUNAT/RENIEC/pensiones/… y respuesta de derivación con `entidad_sugerida`) |
 | HU-12 | Trámites relacionados | Recomendación | ✅ | 3/3 | **100 %** | — cerrada (motor + endpoint + UI; embeddings y fallback léxico para los 252 TUPA) |
-| HU-13 | Usuarios y seguridad | Seguridad | ⚠️ | 2/5 | **40 %** | Login, contraseñas, JWT, roles aplicados, eventos de seguridad (G-01) |
+| HU-13 | Usuarios y seguridad | Seguridad | ✅ | 5/5 | **100 %** | — cerrada 26-oct-2026 (login `POST /api/auth/login`, contraseñas PBKDF2-SHA256, JWT HS256 8 h, roles aplicados a los endpoints admin, eventos de seguridad en `eventos_seguridad`: login fallido/exitoso, token inválido, acceso denegado; verificado en vivo en producción) |
 | HU-14 | Auditoría | Auditoría | ⚠️ | 4/6 | **67 %** | Búsqueda por fecha/trámite/usuario y marcado de registros inconsistentes (respuesta completa y panel real ✅ 17-oct-2026) |
 | HU-15 | Retroalimentación ciudadana | Calidad | ❌ | 0/3 | **0 %** | Endpoints útil/no útil, tabla de evaluaciones, UI de votos (G-05) |
 | HU-16 | Métricas y monitoreo | Métricas | ❌ | 0/3 | **0 %** | Endpoint de métricas agregadas y alertas; `/admin` es maqueta (G-16/G-06) |
 | HU-17 | Derivación a atención municipal | Derivación | ⚠️ | 2/5 | **40 %** | Umbral de derivación, canal/área/teléfono, directorio de oficinas, casos de decisión (G-09) |
 | HU-18 | Reportes y exportación | Reportes | ❌ | 0/3 | **0 %** | Reportes por periodo, exportación PDF/Excel, datos reales (G-07) |
 
-Resumen: **11 HU al 100 %** (HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12) · **4 HU parciales** (HU-03, HU-13, HU-14, HU-17) · **3 HU sin empezar** (HU-15, HU-16, HU-18) · **83/101 puntos = 82 % global** (verificado 17-oct-2026) · **0 suites de pruebas**.
+Resumen: **12 HU al 100 %** (HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12, HU-13) · **3 HU parciales** (HU-03, HU-14, HU-17) · **3 HU sin empezar** (HU-15, HU-16, HU-18) · **86/101 puntos = 85 % global** (verificado 26-oct-2026) · **0 suites de pruebas**.
 
 ### 10.4 PMV1 · Prototipo funcional — **100 %** (24/24) ✅
 
@@ -1070,7 +1087,7 @@ enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consult
 | Docker Compose (BD+Redis+Ollama) | ✅ | `docker-compose.yml` (3 servicios con healthchecks) |
 | Caché de respuestas | ✅ | `ServicioCache` + `RedisAdapter` (TTL 3600, degradable sin Redis) |
 | API completa | ✅ 27 endpoints de API (18 públicos + 9 admin) | 7 controllers; **arranca con 31 rutas** (D-14..D-23 corregidos; verificado contra `/openapi.json`) |
-| Seguridad (login, roles, guardrails) | ❌ | G-01 (auth/JWT) y G-20 (anti prompt-injection); `es_administrador()` sin usar (D-8) |
+| Seguridad (login, roles, guardrails) | ⚠️ | G-01 cerrado 26-oct-2026 (JWT + roles + eventos de seguridad); queda G-20 (anti prompt-injection) |
 | Accesibilidad y pruebas de carga | ❌ | G-26 (WCAG, k6/JMeter, SonarQube, ZAP) |
 | Latencia < 3 s | ⚠️ no medible | caché sí; sin métricas de latencia (G-16) |
 
@@ -1079,17 +1096,19 @@ enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consult
 | HU-01 | **100 %** (9/9) | — (extracción PDF/DOCX ✅ verificada con PDF real; aprobación de calidad ✅: `PUT /api/admin/documentos/{id}/estado` + botón "Aprobar") |
 | HU-02 | **100 %** (8/8) | — (migración 004 aplicada: 20/20 documentos con `version` y `fecha_publicacion`) |
 | HU-03 | 86 % (6/7) | flujo con revisor/roles (depende de HU-13) |
-| HU-13 | 40 % | JWT, roles, eventos de seguridad |
+| HU-13 | **100 %** | — (JWT, roles y eventos de seguridad ✅ 26-oct-2026: `POST /api/auth/login`, PBKDF2, endpoints admin protegidos, `eventos_seguridad`) |
 | HU-14 | 67 % (4/6) | búsqueda de auditoría por filtros y marcado de registros inconsistentes (respuesta completa y panel real ✅ 17-oct-2026) |
 | HU-15 | 0 % | retroalimentación ciudadana |
 | HU-16 | 0 % | métricas agregadas |
 | HU-17 | 40 % (2/5) | umbral de derivación, área/teléfono/canal, directorio de oficinas, casos de decisión |
 | HU-18 | 0 % | reportes y exportación |
 
-**PMV3 = (9+8+6+2+4+0+0+2+0) / (9+8+7+5+6+3+3+5+3) = 31/49 = 63 %.**
+**PMV3 = (9+8+6+5+4+0+0+2+0) / (9+8+7+5+6+3+3+5+3) = 34/49 = 69 %.**
 
 **Tres de sus nueve HU (HU-15, HU-16, HU-18) están en 0 %** — y HU-17 solo
-tiene una nota genérica; es el frente con más trabajo.
+tiene una nota genérica; es el frente con más trabajo. HU-13 se cerró el
+26-oct-2026 y con ella el vacío G-01; el hueco de seguridad restante es
+G-20 (guardrails anti prompt-injection).
 
 ### 10.7 Reasignación de HU-11 y HU-17 — **categoría "Transversal" eliminada** (16-oct-2026)
 
