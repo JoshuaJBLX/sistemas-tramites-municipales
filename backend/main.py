@@ -8,7 +8,7 @@ import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Carga variables de entorno desde el .env del proyecto (sube hasta la raíz).
@@ -16,7 +16,9 @@ load_dotenv()
 
 from infrastructure.adapters.cache.RedisAdapter import RedisAdapter
 from infrastructure.container import Container, crear_container
+from infrastructure.controllers.auth_controller import router as auth_router
 from infrastructure.controllers.consulta_controller import router as consulta_router
+from infrastructure.controllers.dependencias import requiere_administrador
 from infrastructure.controllers.documento_controller import router as documento_router
 from infrastructure.controllers.usuario_controller import router as usuario_router
 
@@ -71,12 +73,18 @@ from infrastructure.controllers.tramite_controller import router as tramite_rout
 
 # El router admin se registra antes que el público: `/api/tramites/admin`
 # debe resolverse en su ruta y no en `/api/tramites/{tramite_id}` (D-21).
-app.include_router(tramite_admin_router)
+# Los routers de administración exigen rol administrador (HU-13 / G-01).
+app.include_router(
+    tramite_admin_router, dependencies=[Depends(requiere_administrador)]
+)
 app.include_router(consulta_router)
 app.include_router(tramite_router)
-app.include_router(documento_admin_router)
+app.include_router(
+    documento_admin_router, dependencies=[Depends(requiere_administrador)]
+)
 app.include_router(documento_router)
 app.include_router(usuario_router)
+app.include_router(auth_router)
 
 
 @app.get('/health', tags=['operacion'])

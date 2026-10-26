@@ -10,6 +10,7 @@ from domain.entities.Documento import Documento
 from domain.errors import DocumentoIlegibleError, FormatoNoSoportadoError
 from domain.value_objects.EstadoDocumento import EstadoDocumento
 from infrastructure.container import Container, obtener_container
+from infrastructure.controllers.dependencias import requiere_administrador
 
 router = APIRouter(prefix='/api/documentos', tags=['documentos'])
 
@@ -52,7 +53,10 @@ def _a_response(documento: Documento) -> DocumentoResponse:
     )
 
 
-@router.post('', response_model=DocumentoResponse, status_code=201)
+@router.post(
+    '', response_model=DocumentoResponse, status_code=201,
+    dependencies=[Depends(requiere_administrador)],
+)
 async def registrar_documento(
     payload: DocumentoRequest,
     container: Container = Depends(obtener_container),
@@ -81,7 +85,10 @@ async def registrar_documento(
         raise HTTPException(status_code=400, detail=str(error)) from error
 
 
-@router.post('/upload', response_model=DocumentoResponse, status_code=201)
+@router.post(
+    '/upload', response_model=DocumentoResponse, status_code=201,
+    dependencies=[Depends(requiere_administrador)],
+)
 async def subir_archivo(
     tramite_id: UUID = Form(...),
     titulo: str = Form(...),
@@ -131,7 +138,10 @@ async def listar_documentos(
     return [_a_response(d) for d in documentos]
 
 
-@router.put('/{documento_id}/estado', response_model=DocumentoResponse)
+@router.put(
+    '/{documento_id}/estado', response_model=DocumentoResponse,
+    dependencies=[Depends(requiere_administrador)],
+)
 async def actualizar_estado(
     documento_id: UUID,
     estado: EstadoDocumento,
@@ -156,7 +166,10 @@ async def obtener_documento(
     return _a_response(documento)
 
 
-@router.post('/{documento_id}/procesar', response_model=DocumentoResponse)
+@router.post(
+    '/{documento_id}/procesar', response_model=DocumentoResponse,
+    dependencies=[Depends(requiere_administrador)],
+)
 async def reprocesar_documento(
     documento_id: UUID,
     container: Container = Depends(obtener_container),
@@ -168,7 +181,10 @@ async def reprocesar_documento(
     return _a_response(final or documento)
 
 
-@router.delete('/{documento_id}', status_code=204)
+@router.delete(
+    '/{documento_id}', status_code=204,
+    dependencies=[Depends(requiere_administrador)],
+)
 async def eliminar_documento(
     documento_id: UUID,
     container: Container = Depends(obtener_container),
@@ -176,7 +192,10 @@ async def eliminar_documento(
     await container.gestionar_documentos.eliminar(documento_id)
 
 
-@router.delete('/{documento_id}/fisico', status_code=204)
+@router.delete(
+    '/{documento_id}/fisico', status_code=204,
+    dependencies=[Depends(requiere_administrador)],
+)
 async def eliminar_fisico(
     documento_id: UUID,
     container: Container = Depends(obtener_container),

@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 from domain.value_objects.IntencionConsulta import IntencionConsulta
 from infrastructure.container import Container, obtener_container
+from infrastructure.controllers.dependencias import requiere_administrador
 
 router = APIRouter(prefix='/api/consultas', tags=['consultas'])
 
@@ -284,8 +285,9 @@ def _cuerpo_trazabilidad(trazabilidad) -> TrazabilidadResponse:
 async def listar_consultas(
     limite: int = 20,
     container: Container = Depends(obtener_container),
+    _administrador: dict = Depends(requiere_administrador),
 ) -> list[TrazabilidadResponse]:
-    """HU-10/HU-14: últimas consultas con su respuesta auditada (panel de auditoría)."""
+    """HU-10/HU-14: últimas consultas con su respuesta auditada (solo administradores)."""
     cantidad = max(1, min(limite, 100))
     registros = await container.auditar_consulta.listar_trazabilidad(cantidad)
     return [_cuerpo_trazabilidad(registro) for registro in registros]

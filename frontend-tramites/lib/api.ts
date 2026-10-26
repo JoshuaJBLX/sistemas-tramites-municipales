@@ -6,6 +6,61 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const TIMEOUT_CONSULTA_MS = 90000;
 const TIMEOUT_CATALOGO_MS = 60000;
 
+// ---------- Sesión (HU-13): token JWT en localStorage ----------
+const CLAVE_SESION = 'tramites_sesion';
+
+export interface SesionUsuario {
+  id: string;
+  nombre: string;
+  correo: string;
+  rol: string;
+}
+
+interface SesionGuardada {
+  access_token: string;
+  usuario: SesionUsuario;
+}
+
+export function leerSesion(): SesionGuardada | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const crudo = window.localStorage.getItem(CLAVE_SESION);
+    return crudo ? (JSON.parse(crudo) as SesionGuardada) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function cerrarSesion(): void {
+  if (typeof window !== 'undefined') window.localStorage.removeItem(CLAVE_SESION);
+}
+
+export async function iniciarSesion(correo: string, password: string): Promise<SesionUsuario> {
+  const data = await pedir<SesionGuardada>(
+    '/api/auth/login',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correo, password }),
+    },
+    TIMEOUT_CATALOGO_MS,
+  );
+  if (typeof window !== 'undefined') window.localStorage.setItem(CLAVE_SESION, JSON.stringify(data));
+  return data.usuario;
+}
+
+export async function obtenerSesionActual(): Promise<SesionUsuario | null> {
+  const sesion = leerSesion();
+  if (!sesion) return null;
+  try {
+    const usuario = await pedir<SesionUsuario>('/api/auth/me', {}, TIMEOUT_CATALOGO_MS);
+    return usuario;
+  } catch {
+    cerrarSesion();
+    return null;
+  }
+}
+
 export interface FuenteCitada {
   titulo: string;
   fragmento?: string;
@@ -70,7 +125,13 @@ async function pedir<T>(url: string, init: RequestInit, timeoutMs: number): Prom
   const controller = new AbortController();
   const temporizador = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(`${API_URL}${url}`, { ...init, signal: controller.signal });
+    // HU-13: si hay sesión abierta se adjunta el JWT en Authorization.
+    const sesion = leerSesion();
+    const cabeceras = new Headers(init.headers);
+    if (sesion && !cabeceras.has('Authorization')) {
+      cabeceras.set('Authorization', `Bearer ${sesion.access_token}`);
+    }
+    const response = await fetch(`${API_URL}${url}`, { ...init, headers: cabeceras, signal: controller.signal });
     if (!response.ok) {
       const detalle = await leerDetalle(response);
       throw new Error(detalle ?? `El servidor respondió ${response.status}.`);
