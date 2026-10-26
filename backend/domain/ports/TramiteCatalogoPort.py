@@ -20,6 +20,17 @@ class TramiteCatalogoPort(ABC):
         ...
 
     @abstractmethod
+    async def buscar_por_texto(self, texto: str) -> TramiteProbable | None:
+        """Busca en el catálogo el trámite cuyo nombre coincida con el texto.
+
+        La mayoría de los trámites del TUPA no tienen documentos indexados
+        (el RAG no puede responder sobre ellos); este método permite orientar
+        al ciudadano con los datos estructurados del propio catálogo
+        (requisitos, arancel, plazo y área responsable).
+        """
+        ...
+
+    @abstractmethod
     async def relacionados(
         self, tramite_id: UUID, limite: int = 4
     ) -> list[TramiteProbable]:

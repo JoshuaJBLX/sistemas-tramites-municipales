@@ -50,14 +50,25 @@ UMBRAL_RELACION = 0.30
 
 # Catálogo completo para el fallback léxico (trámites sin documentos indexados).
 QUERY_TRAMITES_CATALOGO = """
-    SELECT id, nombre, descripcion, requisitos, costo, duracion_estimada_dias,
-           area_responsable
-    FROM tramites
-    ORDER BY nombre
+    SELECT t.id, t.nombre, t.descripcion, t.requisitos, t.costo,
+           t.duracion_estimada_dias, t.area_responsable,
+           MIN(d.url_origen) AS url_origen
+    FROM tramites t
+    LEFT JOIN documentos d ON d.tramite_id = t.id AND d.eliminado_en IS NULL
+    GROUP BY t.id, t.nombre, t.descripcion, t.requisitos, t.costo,
+             t.duracion_estimada_dias, t.area_responsable
+    ORDER BY t.nombre
 """
 
 # Umbral de similitud léxica (Jaccard sobre tokens) para el fallback.
 UMBRAL_RELACION_LEXICO = 0.10
+
+# Búsqueda por texto en el catálogo (trámites sin documentos indexados):
+# el nombre del trámite debe estar casi entero en la consulta del ciudadano.
+COBERTURA_MINIMA_NOMBRE = 0.6
+# El mejor candidato debe superar al segundo por este factor (mismo criterio
+# que IdentificarTramiteProbable) para no adivinar entre trámites parecidos.
+MARGEN_MINIMO_CATALOGO = 1.15
 
 _STOPWORDS = frozenset(
     'al algo algun alguna ante bajo cada con contra de del desde donde dos el ella '
@@ -131,6 +142,64 @@ class TramiteCatalogoAdapter(TramiteCatalogoPort):
             )
             for fila in filas
         ]
+
+    async def buscar_por_texto(self, texto: str) -> TramiteProbable | None:
+        """Encuentra en el catálogo el trámite cuyo nombre describe la consulta.
+
+        Muchos trámites del TUPA no tienen documentos indexados, así que el RAG
+        no recupera nada sobre ellos. Aquí se compara el nombre de cada trámite
+        con la consulta del ciudadano (cobertura de tokens): si la consulta
+        contiene (casi) todo el nombre de un trámite y este destaca sobre el
+        segundo candidato, se devuelve con sus datos estructurados.
+        """
+        consulta = _tokens(texto)
+        if not consulta:
+            return None
+
+        filas = await self._repository.obtener_muchos(QUERY_TRAMITES_CATALOGO)
+
+        puntuados: list[tuple[TramiteProbable, float]] = []
+        for fila in filas:
+            nombre = _tokens(fila['nombre'])
+            if not nombre:
+                continue
+            coincidentes = len(nombre & consulta)
+            if coincidentes == 0:
+                continue
+            cobertura_nombre = coincidentes / len(nombre)
+            if cobertura_nombre < COBERTURA_MINIMA_NOMBRE:
+                continue
+            cobertura_consulta = coincidentes / len(consulta)
+            puntaje = (cobertura_nombre + cobertura_consulta) / 2
+            puntuados.append(
+                (
+                    TramiteProbable(
+                        id=fila['id'],
+                        nombre=fila['nombre'],
+                        requisitos=list(fila['requisitos'] or []),
+                        costo=float(fila['costo'] or 0.0),
+                        duracion_estimada_dias=int(
+                            fila['duracion_estimada_dias'] or 0
+                        ),
+                        fuente_url=fila['url_origen'],
+                        area_responsable=fila['area_responsable'],
+                    ),
+                    puntaje,
+                )
+            )
+
+        if not puntuados:
+            return None
+
+        puntuados.sort(key=lambda par: -par[1])
+        mejor, puntaje = puntuados[0]
+        if len(puntuados) > 1:
+            segundo = puntuados[1][1]
+            if segundo > 0 and puntaje / segundo < MARGEN_MINIMO_CATALOGO:
+                return None
+
+        mejor.puntaje_relevancia = round(puntaje, 3)
+        return mejor
 
     async def relacionados(
         self, tramite_id: UUID, limite: int = 4

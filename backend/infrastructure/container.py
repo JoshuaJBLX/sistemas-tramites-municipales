@@ -264,7 +264,11 @@ def crear_container(dsn: str | None = None) -> Container:
     identificar_tramite = IdentificarTramiteProbable(tramite_catalogo)
     servicio_dominio = ServicioDominio()
     servicio_orientacion = ServicioOrientacion(
-        servicio_rag, evaluador_groundedness, identificar_tramite, servicio_dominio
+        servicio_rag,
+        evaluador_groundedness,
+        identificar_tramite,
+        servicio_dominio,
+        catalogo=tramite_catalogo,
     )
     servicio_auditoria = ServicioAuditoria(auditoria, consulta_repository)
     servicio_cache = ServicioCache(

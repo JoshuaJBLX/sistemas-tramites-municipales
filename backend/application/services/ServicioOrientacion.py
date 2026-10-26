@@ -11,9 +11,12 @@ from application.services.ServicioRAG import ServicioRAG
 from application.use_cases.IdentificarTramiteProbable import IdentificarTramiteProbable
 from domain.entities.Documento import Documento
 from domain.entities.Respuesta import Respuesta
+from domain.ports.TramiteCatalogoPort import TramiteCatalogoPort
 from domain.value_objects.ClasificacionIntencion import ClasificacionIntencion
+from domain.value_objects.EstadoDocumento import EstadoDocumento
 from domain.value_objects.IntencionConsulta import IntencionConsulta
 from domain.value_objects.NivelConfianza import NivelConfianza
+from domain.value_objects.TramiteProbable import TramiteProbable
 
 # Mensaje de aclaración cuando la pregunta no permite identificar la intención.
 ACLARACION_AMBIGUA = (
@@ -72,6 +75,15 @@ BLOQUEO_AFIRMACIONES = (
 UMBRAL_CONSULTA_GENERAL = 0.45
 
 
+# Cabecera de la respuesta basada en el catálogo de trámites (fallback para los
+# trámites sin documentos indexados: el RAG no tiene fragmentos, pero el
+# catálogo sí tiene requisitos, arancel, plazo y área responsable verificados).
+CATALOGO_TRAMITE = (
+    'Encontré en el catálogo oficial de la municipalidad el trámite '
+    '«{nombre}». Estos son los datos registrados en el TUPA:'
+)
+
+
 class ServicioOrientacion:
     """Compone la orientación final entregada al ciudadano."""
 
@@ -81,11 +93,13 @@ class ServicioOrientacion:
         evaluador_groundedness: EvaluadorGroundedness,
         identificar_tramite: IdentificarTramiteProbable | None = None,
         servicio_dominio: ServicioDominio | None = None,
+        catalogo: TramiteCatalogoPort | None = None,
     ) -> None:
         self._servicio_rag = servicio_rag
         self._evaluador_groundedness = evaluador_groundedness
         self._identificar_tramite = identificar_tramite
         self._servicio_dominio = servicio_dominio
+        self._catalogo = catalogo
 
     async def orientar(
         self,
@@ -125,6 +139,14 @@ class ServicioOrientacion:
                 if documento.puntuacion_similitud >= UMBRAL_CONSULTA_GENERAL
             ]
         if consulta_general and not documentos:
+            # Si el catálogo sí tiene el trámite (aunque no tenga documentos
+            # indexados) se responde con sus datos estructurados en lugar de
+            # pedir aclaración.
+            respuesta = await self._respuesta_desde_catalogo(
+                consulta_id, pregunta, clasificacion
+            )
+            if respuesta is not None:
+                return respuesta
             return self._respuesta_de_aclaracion(consulta_id, clasificacion)
 
         texto, fuentes = await self._servicio_rag.responder(
@@ -138,6 +160,14 @@ class ServicioOrientacion:
         # se pide verificar el dato con la municipalidad (no inventar).
         bloqueada = puntuacion < UMBRAL_CONFIANZA_MEDIA
         if bloqueada:
+            # Si el trámite existe en el catálogo se responde con sus datos
+            # estructurados (verificados en la BD) en lugar de bloquear o
+            # pedir aclaración: cubre los trámites sin documentos indexados.
+            respuesta = await self._respuesta_desde_catalogo(
+                consulta_id, pregunta, clasificacion
+            )
+            if respuesta is not None:
+                return respuesta
             # En una consulta general sin respaldo se prefiere pedir aclaración
             # antes que entregar un bloqueo críptico.
             if consulta_general:
@@ -166,6 +196,87 @@ class ServicioOrientacion:
 
         # Los datos estructurados del catálogo se anexan al texto del modelo.
         return self._con_datos_estructurados(respuesta)
+
+    async def _respuesta_desde_catalogo(
+        self,
+        consulta_id: UUID,
+        pregunta: str,
+        clasificacion: ClasificacionIntencion | None,
+    ) -> Respuesta | None:
+        """Responde desde el catálogo si la consulta nombra un trámite concreto.
+
+        La mayoría de los trámites del TUPA no tiene documentos indexados, así
+        que el RAG no puede sustentar nada sobre ellos. En ese caso se busca el
+        trámite por nombre en el catálogo y se responde con sus datos
+        estructurados (requisitos, arancel, plazo y área), que provienen
+        directamente de la base de datos y no del redactado del modelo.
+        """
+        if self._catalogo is None:
+            return None
+
+        tramite = await self._catalogo.buscar_por_texto(pregunta)
+        if tramite is None:
+            return None
+
+        ficha = self._ficha_catalogo(tramite)
+        # Documento sintético con la ficha del catálogo: permite citar una
+        # fuente y evaluar el groundedness de la respuesta contra la BD.
+        documento = Documento(
+            id=uuid4(),
+            tramite_id=tramite.id,
+            titulo=f'Catálogo de trámites - {tramite.nombre}',
+            contenido=ficha,
+            url_origen=tramite.fuente_url or 'https://www.gob.pe/munihuancayo',
+            estado=EstadoDocumento.VIGENTE,
+            fragmento_destacado=ficha,
+            puntuacion_similitud=tramite.puntaje_relevancia,
+        )
+        respuesta = Respuesta(
+            id=uuid4(),
+            consulta_id=consulta_id,
+            texto=CATALOGO_TRAMITE.format(nombre=tramite.nombre),
+            confianza=NivelConfianza.MEDIA,
+            fuentes=self._servicio_rag.construir_fuentes([documento]),
+            groundedness=0.0,
+            confianza_intencion=(
+                clasificacion.confianza if clasificacion else 0.0
+            ),
+            tramite_probable=tramite,
+        )
+        # Los datos del catálogo se anexan antes de evaluar el groundedness,
+        # para que la puntuación refleje el texto completo que ve el ciudadano.
+        self._con_datos_estructurados(respuesta)
+        puntuacion = self._evaluador_groundedness.calcular_puntuacion(
+            respuesta.texto, [documento]
+        )
+        respuesta.groundedness = round(puntuacion, 3)
+        respuesta.confianza = self._evaluador_groundedness.evaluar(
+            respuesta.texto, [documento]
+        )
+        respuesta.texto = self._derivar(respuesta, sin_respuesta=False)
+        return respuesta
+
+    @staticmethod
+    def _ficha_catalogo(tramite: TramiteProbable) -> str:
+        """Texto de la ficha del catálogo usada como fuente y contexto."""
+        partes = [
+            CATALOGO_TRAMITE.format(nombre=tramite.nombre),
+            'Datos del catálogo. Ficha del trámite oficial.',
+        ]
+        if tramite.requisitos:
+            partes.append(
+                'Requisitos registrados: '
+                + '; '.join(tramite.requisitos)
+            )
+        if tramite.costo > 0:
+            partes.append(f'Arancel S/ {tramite.costo:.2f} según el catálogo')
+        if tramite.duracion_estimada_dias > 0:
+            partes.append(
+                f'Plazo estimado de {tramite.duracion_estimada_dias} días hábiles'
+            )
+        if tramite.area_responsable:
+            partes.append(f'Área responsable: {tramite.area_responsable}')
+        return '. '.join(partes) + '.'
 
     @staticmethod
     def _derivar(respuesta: Respuesta, sin_respuesta: bool) -> str:
