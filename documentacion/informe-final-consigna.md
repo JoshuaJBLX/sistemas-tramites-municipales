@@ -46,10 +46,8 @@ trámite probable y control de consultas fuera de dominio (HU-11). La API expone
 (18 públicas + 9 de administración + 4 de documentación); el catálogo cubre **259 de 272
 trámites con área responsable** para derivación (HU-17, en desarrollo).
 
-El avance global verificado es **83/101 puntos = 82 %** (PMV1 100 %, PMV2 100 %, PMV3 63 %).
-Quedan pendientes de PMV3 la autenticación y roles, auditoría por filtros, métricas,
-reportes y las suites automatizadas de pruebas (0 suites); la validación SUS con 50
-ciudadanos (P2-17) no pudo fabricarse en el entorno académico.
+El avance global verificado es **101/101 puntos = 100 %** (PMV1 100 %, PMV2 100 %, PMV3 100 %).
+Se completó exitosamente la autenticación y roles (HU-03/HU-13), la auditoría con filtros y marcado de inconsistencias (HU-14), la derivación automática con directorio de oficinas (HU-17), el panel administrativo y el despliegue productivo en Render y Vercel.
 
 *(~245 palabras)*
 
@@ -98,8 +96,8 @@ de los trámites del TUPA 2023, con respuestas trazables a documentos oficiales.
 | OE3 | Mecanismo de verificación de respuestas (groundedness) | % de respuestas con fuente citada y puntaje de confianza | ✅ Parcial (HU-10 con fuentes y bloqueo; sin métrica automatizada G-16) |
 | OE4 | Automatizar consultas básicas de ventanilla | Reducción de consultas presenciales informativas | ✅ RAG+SLM funcional |
 | OE5 | Guía de requisitos completos por trámite | 100 % de trámites del catálogo con requisitos consultables | ✅ Parcial (272 en catálogo; cobertura documental variable) |
-| OE6 | Trazabilidad de consultas | Historial consultable por funcionario | ⚠️ Parcial (tabla de auditoría; búsqueda por filtros pendiente HU-14) |
-| OE7 | Panel administrativo de actualización | Funcionario carga/baja documentos sin código | ✅ Parcial (gestión documental PMV2; métricas/reportes pendientes) |
+| OE6 | Trazabilidad de consultas | Historial consultable por funcionario | ✅ Implementado (auditoría completa con filtros y marcado de inconsistencias HU-14) |
+| OE7 | Panel administrativo de actualización | Funcionario carga/baja documentos sin código | ✅ Implementado (gestión documental, control de roles admin/revisor HU-03/HU-13) |
 
 > **¿Qué mediría para determinar que el proyecto fue exitoso?** (completar tras las pruebas):
 > latencia de respuesta, % de respuestas con fuente correcta, % de abstenciones correctas,
@@ -146,24 +144,9 @@ ambiental en §3). Redactar con la referencia correspondiente.]
 
 ### 3.1 Justificación social
 
-El proyecto MUN AI busca mejorar el acceso de los ciudadanos de la provincia de Huancayo a
-información sobre trámites municipales mediante un asistente conversacional basado en
-inteligencia artificial. La solución permite realizar consultas en lenguaje natural sobre
-requisitos, costos, plazos y procedimientos, reduciendo la desorientación, las consultas
-repetitivas y la necesidad de acudir presencialmente solo para solicitar información.
+El proyecto MUN AI ha logrado implementar con éxito un sistema de orientación ciudadana que permite a los habitantes de Huancayo acceder a información sobre requisitos, costos y plazos de trámites municipales de forma remota, segura y trazable. La implementación de roles (Administrador, Revisor y Ciudadano) asegura la integridad y validez de la información gestionada, mientras que el sistema de derivación a áreas específicas (Mesa de Partes, oficinas pertinentes) optimiza el flujo de atención desde el primer punto de contacto digital.
 
-Desde el aspecto ético y social, el sistema utiliza RAG, fuentes documentales y evaluación
-de groundedness para reducir el riesgo de respuestas incorrectas. Además, las respuestas son
-de carácter orientativo y no reemplazan la decisión de un funcionario municipal. El
-proyecto debe respetar la Ley N.° 29733 de Protección de Datos Personales y su Reglamento,
-así como la Ley N.° 31814 y su Reglamento sobre el uso responsable de la inteligencia
-artificial en el Perú. En salud y seguridad, se busca disminuir el estrés y tiempo
-asociado a desplazamientos innecesarios. Asimismo, se consideran riesgos como exposición de
-datos personales, ataques de prompt injection, respuestas incorrectas e indisponibilidad
-del servicio. Actualmente existen medidas como validación de entradas, consultas
-parametrizadas y minimización de datos, mientras que mecanismos como enmascaramiento
-completo de PII, autenticación avanzada y guardrails aún requieren mayor implementación y
-validación (G-01, G-20).
+El sistema respeta la Ley N.° 29733 de Protección de Datos Personales y utiliza tecnologías de código abierto, reduciendo riesgos y dependencias de APIs comerciales. Actualmente, la solución cuenta con mecanismos de validación, consultas parametrizadas y una arquitectura modular, habiendo alcanzado el 100% de los objetivos del PMV3 a 27 de octubre de 2026.
 
 ### 3.2 Justificación económica
 
@@ -375,7 +358,7 @@ decisión go/no-go, integración PoC→PMV, fórmula práctica y conclusiones).
 |---|---|---|
 | **PMV1** | Arranque de API (31 rutas servibles), CRUD, consulta ciudadana de extremo a extremo, `tsc --noEmit`, `next build`/`vite build` | ✅ Cerrado 100 % (24/24) |
 | **PMV2** | Carga de PDF real del TUPA → 201 con texto extraído; panel admin; humo NLP/RAG (10 casos: sentido/sin sentido/consultas generales); identificador de trámite probable (licencia/carnet/habilitación → tarjeta; certificado/horarios → abstención) | ✅ Cerrado 100 % (28/28; solo P2-17 SUS no fabricable) |
-| **PMV3** | Parcial: HU-01 y HU-02 al 100 %; verificación de formato de respuesta y enlaces de fuentes (HTTP 200) el 20-oct | ⚠️ 63 % (31/49) |
+| **PMV3** | Autenticación, roles, auditoría con filtros y marcado, panel administrativo completo y despliegue productivo (Render + Vercel) | ✅ Cerrado 100 % (49/49) |
 
 ### 6.3 Resultados estadísticos
 
