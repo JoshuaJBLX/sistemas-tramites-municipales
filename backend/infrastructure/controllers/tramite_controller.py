@@ -84,13 +84,14 @@ async def tramites_destacados(
         QUERY_TRAMITES_DESTACADOS, limite
     )
     tramites = []
+    consultas_totales = 0
     for fila in filas:
         tramite = dict(fila)
+        consultas_totales = int(tramite.pop('consultas_totales', 0) or 0)
         tramites.append({
             **tramite,
             'consultas': int(tramite.pop('consultas', 0) or 0),
         })
-    consultas_totales = tramites[0].pop('consultas_totales', 0) if tramites else 0
     return {
         'tramites': tramites,
         'criterio': 'mas_solicitados' if consultas_totales else 'aleatorio',
