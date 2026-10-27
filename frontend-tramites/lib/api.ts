@@ -252,6 +252,30 @@ export async function obtenerTramites(): Promise<Tramite[]> {
   return Array.isArray(data) ? data.map(mapearTramite) : [];
 }
 
+export interface TramiteDestacado extends Tramite {
+  consultas: number;
+}
+
+export interface CatalogoDestacado {
+  tramites: TramiteDestacado[];
+  criterio: 'mas_solicitados' | 'aleatorio';
+}
+
+/** Vitrina de la portada: los trámites más consultados o, sin datos, aleatorios. */
+export async function obtenerTramitesDestacados(limite = 4): Promise<CatalogoDestacado> {
+  const data = await pedir<{ tramites: (TramiteCrudo & { consultas?: number })[]; criterio?: string }>(
+    `/api/tramites/destacados?limite=${limite}`,
+    {},
+    TIMEOUT_CATALOGO_MS,
+  );
+  return {
+    tramites: Array.isArray(data.tramites)
+      ? data.tramites.map((fila) => ({ ...mapearTramite(fila), consultas: fila.consultas ?? 0 }))
+      : [],
+    criterio: data.criterio === 'mas_solicitados' ? 'mas_solicitados' : 'aleatorio',
+  };
+}
+
 export async function obtenerTramitesRelacionados(
   tramiteId: string,
   limite = 4,

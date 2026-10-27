@@ -19,6 +19,28 @@ QUERY_LISTAR_TRAMITES = """
     ORDER BY t.nombre
 """
 
+# Catálogo destacado de la portada: ordena por número de consultas registradas
+# (trámite probable de la auditoría) y usa desempate aleatorio; si nadie ha
+# consultado aún, el orden aleatorio deja la selección siempre renovada.
+QUERY_TRAMITES_DESTACADOS = """
+    WITH conteo AS (
+        SELECT LOWER(TRIM(a.tramite_probable)) AS clave, COUNT(*) AS veces
+        FROM auditoria_consultas a
+        WHERE a.tramite_probable IS NOT NULL
+        GROUP BY 1
+    )
+    SELECT t.id, t.municipalidad_id, t.nombre, t.descripcion, t.tipo,
+           t.requisitos, t.costo, t.duracion_estimada_dias, t.area_responsable,
+           m.nombre AS municipalidad,
+           COALESCE(c.veces, 0) AS consultas,
+           (SELECT COALESCE(SUM(veces), 0) FROM conteo) AS consultas_totales
+    FROM tramites t
+    JOIN municipalidades m ON m.id = t.municipalidad_id
+    LEFT JOIN conteo c ON c.clave = LOWER(TRIM(t.nombre))
+    ORDER BY consultas DESC, RANDOM()
+    LIMIT $1
+"""
+
 QUERY_OBTENER_TRAMITE = """
     SELECT t.id, t.municipalidad_id, t.nombre, t.descripcion, t.tipo,
            t.requisitos, t.costo, t.duracion_estimada_dias, t.area_responsable,
@@ -49,6 +71,30 @@ async def listar_tramites(
         QUERY_LISTAR_TRAMITES, municipalidad_id
     )
     return [dict(fila) for fila in filas]
+
+
+@router.get('/destacados')
+async def tramites_destacados(
+    limite: int = Query(default=4, ge=1, le=8),
+    container: Container = Depends(obtener_container),
+) -> dict[str, Any]:
+    """Catálogo destacado para la portada: los trámites más consultados y, en
+    segundo lugar, un desempate aleatorio para que la vitrina nunca sea estática."""
+    filas = await container.connection.pool.fetch(
+        QUERY_TRAMITES_DESTACADOS, limite
+    )
+    tramites = []
+    for fila in filas:
+        tramite = dict(fila)
+        tramites.append({
+            **tramite,
+            'consultas': int(tramite.pop('consultas', 0) or 0),
+        })
+    consultas_totales = tramites[0].pop('consultas_totales', 0) if tramites else 0
+    return {
+        'tramites': tramites,
+        'criterio': 'mas_solicitados' if consultas_totales else 'aleatorio',
+    }
 
 
 @router.get('/{tramite_id}')

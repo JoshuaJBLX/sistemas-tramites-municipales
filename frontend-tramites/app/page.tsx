@@ -1,24 +1,21 @@
 import Link from 'next/link';
 import RobotAgent from '../components/RobotAgent';
-import QuickAccessCard from '../components/QuickAccessCard';
-import ChatBox from '../components/ChatBox';
 import TramiteCard from '../components/TramiteCard';
-import KpiCard from '../components/KpiCard';
-import MiniCharts from '../components/MiniCharts';
-import ServiceStatus from '../components/ServiceStatus';
-import AuditLog from '../components/AuditLog';
-import DragDropUpload from '../components/DragDropUpload';
-import { TramiteIcon, OrdenanzaIcon, DirectorioIcon, AyudaIcon, ShieldIcon } from '../components/icons';
-import { UsersIcon, HeartIcon, ChartIcon } from '../components/icons';
+import { ShieldIcon } from '../components/icons';
 import GroundednessBadge from '../components/GroundednessBadge';
-import { obtenerTramites, type Tramite } from '../lib/api';
+import { obtenerTramites, obtenerTramitesDestacados, type Tramite } from '../lib/api';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  // El catálogo proviene de la base de datos; si falla se informa en vez de
-  // mostrar una lista ficticia de trámites.
-  const tramites = await obtenerTramites().catch(() => [] as Tramite[]);
+  // Vitrina dinámica: los trámites más consultados (o aleatorios si aún no hay
+  // consultas). Al ser `force-dynamic`, cada visita recalcula la selección.
+  const destacados = await obtenerTramitesDestacados(4).catch(() => null);
+  const tramites = destacados?.tramites ?? (await obtenerTramites().catch(() => [] as Tramite[]));
+  const consultasDestacados = tramites.reduce(
+    (total, t) => total + ('consultas' in t ? (t as { consultas?: number }).consultas ?? 0 : 0),
+    0,
+  );
   return (
     <div className="mx-auto max-w-7xl px-3 pb-20 pt-6 sm:px-6">
       <section className="grid items-start gap-6 xl:grid-cols-[1fr_340px]">
@@ -43,19 +40,12 @@ export default async function HomePage() {
                 <Link href="/chat" className="btn-primary-3d">Hablar con MUN AI →</Link>
                 <Link href="/tramites" className="btn-neu">Ver catálogo</Link>
               </div>
-              <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="mt-6 grid grid-cols-2 gap-3">
                 <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">{tramites.length}</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Trámites en catálogo</p></div>
-                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">20</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Documentos oficiales</p></div>
-                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">—</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Consultas (sin métrica)</p></div>
+                <div className="card-3d px-3 py-3 text-center"><p className="text-lg font-extrabold text-ink">{consultasDestacados > 0 ? consultasDestacados : 'Nuevo'}</p><p className="text-[10px] font-bold uppercase tracking-widest text-mist-500">Consultas a estos trámites</p></div>
               </div>
             </div>
             <div className="flex items-center justify-center"><RobotAgent /></div>
-          </div>
-          <div className="relative mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <QuickAccessCard href="/tramites" title="Trámites" subtitle="Catálogo, costos y plazos" icon={<TramiteIcon />} accent="from-primary-500 to-primary-800" />
-            <QuickAccessCard href="/tramites" title="Ordenanzas" subtitle="Normas vigentes" icon={<OrdenanzaIcon />} accent="from-amber to-amber-deep" />
-            <QuickAccessCard href="/admin" title="Directorio" subtitle="Oficinas y contacto" icon={<DirectorioIcon />} accent="from-emerald to-emerald-deep" />
-            <QuickAccessCard href="/chat" title="Ayuda" subtitle="Pregunta a MUN AI" icon={<AyudaIcon />} accent="from-primary-700 to-primary-950" />
           </div>
         </div>
         <div className="flex justify-center animate-rise-in">
@@ -65,7 +55,7 @@ export default async function HomePage() {
                 <div className="mx-auto mb-2 h-5 w-24 rounded-full bg-primary-950/80" />
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20"><ShieldIcon className="h-6 w-6" /></span>
-                  <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Municipalidad Provincial de Huancayo</p><p className="text-sm font-extrabold">MUN AI · En línea 🟢</p></div>
+                  <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70">Municipalidad Provincial de Huancayo</p><p className="text-sm font-extrabold">MUN AI · En línea</p></div>
                 </div>
               </div>
               <div className="flex h-[340px] flex-col gap-2 overflow-hidden p-3">
@@ -82,39 +72,26 @@ export default async function HomePage() {
         </div>
       </section>
       <section className="mt-10">
-        <div className="flex items-end justify-between">
-          <div><p className="eyebrow">Panel de administración</p><h2 className="text-2xl font-extrabold text-ink">Métricas y operación en vivo</h2></div>
-          <Link href="/admin" className="btn-neu !py-2 text-sm">Abrir panel →</Link>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          <KpiCard icon={<TramiteIcon className="h-6 w-6" />} label="Trámites en catálogo" value={String(tramites.length)} delta="Base de datos oficial" tone="blue" />
-          <KpiCard icon={<UsersIcon className="h-6 w-6" />} label="Consultas registradas" value="—" delta="Métrica no implementada" tone="emerald" />
-          <KpiCard icon={<HeartIcon className="h-6 w-6" />} label="Satisfacción" value="—" delta="Métrica no implementada" tone="amber" />
-        </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <MiniCharts />
-          <ServiceStatus />
-          <AuditLog />
-        </div>
-      </section>
-      <section className="mt-10 grid gap-4 lg:grid-cols-2">
-        <div>
-          <div className="flex items-end justify-between"><h2 className="text-2xl font-extrabold text-ink">Catálogo destacado</h2><Link href="/tramites" className="btn-neu !py-2 text-sm">Ver todo →</Link></div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {tramites.slice(0, 4).map((t, i) => (
-              <TramiteCard key={t.id} tramite={t} index={i} />
-            ))}
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="eyebrow">
+              {destacados?.criterio === 'mas_solicitados'
+                ? 'Los más consultados por la ciudadanía'
+                : 'Selección rotativa del catálogo'}
+            </p>
+            <h2 className="text-2xl font-extrabold text-ink">Catálogo destacado</h2>
           </div>
+          <Link href="/tramites" className="btn-neu !py-2 text-sm">Ver todo →</Link>
         </div>
-        <div className="flex flex-col gap-4">
-          <div className="glass-strong rounded-[2rem] p-5">
-            <h2 className="flex items-center gap-2 font-extrabold text-ink"><ChartIcon className="h-5 w-5 text-primary-600" /> Prueba el chat aquí mismo</h2>
-            <div className="mt-3"><ChatBox compact /></div>
-          </div>
-          <DragDropUpload />
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {tramites.slice(0, 4).map((t, i) => (
+            <TramiteCard key={t.id} tramite={t} index={i} />
+          ))}
         </div>
+        {tramites.length === 0 && (
+          <p className="mt-3 text-xs text-mist-500">El catálogo no está disponible en este momento.</p>
+        )}
       </section>
     </div>
   );
 }
-
