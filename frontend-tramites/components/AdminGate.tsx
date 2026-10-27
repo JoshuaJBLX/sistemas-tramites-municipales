@@ -10,8 +10,8 @@ import {
 
 /**
  * Protege el panel administrativo (HU-13): sin sesión abierta muestra el
- * formulario de acceso; con sesión válida renderiza el panel y permite
- * cerrarla. El backend exige además el rol administrador en cada endpoint.
+ * formulario de acceso; con sesión válida verifica que el rol sea administrador
+ * o revisor (los ciudadanos no pueden acceder al panel administrativo).
  */
 export default function AdminGate({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<SesionUsuario | null>(null);
@@ -22,13 +22,21 @@ export default function AdminGate({ children }: { children: ReactNode }) {
   const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    // Si ya había sesión guardada se revalida contra el backend (token expirado).
     if (!leerSesion()) {
       setCargando(false);
       return;
     }
     obtenerSesionActual()
-      .then((sesion) => setUsuario(sesion))
+      .then((sesion) => {
+        if (sesion && sesion.rol === 'ciudadano') {
+          cerrarSesion();
+          setUsuario(null);
+          setError('Las cuentas de ciudadano no tienen acceso al panel administrativo.');
+        } else {
+          setUsuario(sesion);
+        }
+      })
+      .catch(() => cerrarSesion())
       .finally(() => setCargando(false));
   }, []);
 
@@ -38,9 +46,14 @@ export default function AdminGate({ children }: { children: ReactNode }) {
     setEnviando(true);
     try {
       const sesion = await iniciarSesion(correo.trim(), password);
+      if (sesion.rol === 'ciudadano') {
+        cerrarSesion();
+        setError('Las cuentas de ciudadano no tienen acceso al panel administrativo. Utiliza el chat.');
+        return;
+      }
       setUsuario(sesion);
     } catch {
-      setError('Credenciales incorrectas. Verifica el correo y la contraseña.');
+      setError('Credenciales incorrectas o sin permisos de gestión.');
     } finally {
       setEnviando(false);
     }
@@ -56,7 +69,7 @@ export default function AdminGate({ children }: { children: ReactNode }) {
         <p className="eyebrow">Panel administrativo</p>
         <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-ink">Acceso restringido</h1>
         <p className="mt-2 text-sm text-primary-600">
-          Ingresa con tu cuenta de administrador para gestionar documentos, auditoría y métricas.
+          Ingresa con tu cuenta de administrador o revisor para gestionar el sistema.
         </p>
         <form onSubmit={enviar} className="card-3d mt-6 space-y-4 p-6">
           <label className="block">
@@ -99,8 +112,8 @@ export default function AdminGate({ children }: { children: ReactNode }) {
   return (
     <>
       <div className="mx-auto flex max-w-7xl items-center justify-end gap-3 px-3 pt-4 sm:px-6">
-        <span className="text-sm text-primary-600">
-          {usuario.nombre} · {usuario.rol}
+        <span className="text-sm text-primary-600 font-medium">
+          {usuario.nombre} · <span className="uppercase text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">{usuario.rol}</span>
         </span>
         <button
           onClick={() => {
