@@ -1054,7 +1054,7 @@ No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV
 |---|---|---|---|---|
 | **PMV1** · Prototipo funcional | Chat + SLM + 5 trámites | HU-05, HU-06, HU-07, HU-09 | **24/24** | **100 %** ✅ |
 | **PMV2** · Modelo RAG optimizado | RAG 20+ trámites + abstención | HU-04, HU-08, HU-10, HU-11, HU-12 | **28/28** | **100 %** ✅ |
-| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | 43/49 | **88 %** |
+| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | 49/49 | **100 %** |
 | **TOTAL** | | 18 HU | **95/101** | **94 %** |
 
 > **Actualizado el 17-oct-2026 con verificación en vivo** (API `localhost:8000`, BD local, `tsc` y
@@ -1086,7 +1086,7 @@ de calidad/despliegue (pruebas, contenerización, monitoreo).
 |---|---|---|---|---|---|---|
 | HU-01 | Carga de documentos oficiales | Gestión documental | ✅ | 9/9 | **100 %** | — cerrada (extracción PDF/DOCX verificada con PDF real + aprobación de calidad) |
 | HU-02 | Vigencia, versión y fuente | Gestión documental | ✅ | 8/8 | **100 %** | — cerrada (004 aplicada: 20/20 documentos con `version` y `fecha_publicacion`) |
-| HU-03 | Aprobar/derogar documentos | Gestión documental | ⚠️ | 6/7 | **86 %** | Flujo con revisor — **desbloqueado por HU-13**: falta añadir el rol `revisor` al CHECK de `usuarios` y `requiere_rol` en el flujo de aprobación |
+| HU-03 | Aprobar/derogar documentos | Gestión documental | ✅ | 7/7 | **100 %** | — cerrada 27-oct-2026 (rol `revisor` habilitado, permisos granulares en `documento_controller.py`) |
 | HU-04 | Procesamiento documental y RAG | RAG | ✅ | 9/9 | **100 %** | — cerrada (extracción, OCR con rapidocr, recuperación por fragmento: 20/20 docs fragmentados) |
 | HU-05 | Consulta ciudadana | Consulta | ✅ | 9/9 | **100 %** | — cerrada |
 | HU-06 | Clasificación de intención | NLP | ✅ | 5/5 | **100 %** | — cerrada |
@@ -1097,13 +1097,13 @@ de calidad/despliegue (pruebas, contenerización, monitoreo).
 | HU-11 | Consultas fuera de dominio | Alcance | ✅ | 3/3 | **100 %** | — cerrada (`ServicioDominio` municipal vs. externo, distinción SUNAT/RENIEC/pensiones/… y respuesta de derivación con `entidad_sugerida`) |
 | HU-12 | Trámites relacionados | Recomendación | ✅ | 3/3 | **100 %** | — cerrada (motor + endpoint + UI; embeddings y fallback léxico para los 252 TUPA) |
 | HU-13 | Usuarios y seguridad | Seguridad | ✅ | 5/5 | **100 %** | — cerrada 26-oct-2026 (login `POST /api/auth/login`, contraseñas PBKDF2-SHA256, JWT HS256 8 h, roles aplicados a los endpoints admin, eventos de seguridad en `eventos_seguridad`: login fallido/exitoso, token inválido, acceso denegado; verificado en vivo en producción) |
-| HU-14 | Auditoría | Auditoría | ⚠️ | 4/6 | **67 %** | Búsqueda por fecha/trámite/usuario y marcado de registros inconsistentes (respuesta completa y panel real ✅ 17-oct-2026) |
+| HU-14 | Auditoría | Auditoría | ✅ | 6/6 | **100 %** | — cerrada 27-oct-2026 (filtros por fecha/trámite/usuario, endpoint de marcado de inconsistencias, UI con marcado y filtrado) |
 | HU-15 | Retroalimentación ciudadana | Calidad | ✅ | 3/3 | **100 %** | — cerrada 27-oct-2026 (`POST`/`GET /api/consultas/{id}/evaluacion` público, tabla `evaluaciones_calidad` con upsert que conserva comentario, UI de votos con iconos SVG en `VotoRespuesta.tsx`; G-05 resuelto) |
 | HU-16 | Métricas y monitoreo | Métricas | ✅ | 3/3 | **100 %** | — cerrada 27-oct-2026 (`GET /api/metricas` con alerta por umbral de fundamentación, auditoría con `duracion_ms`/`tramite_probable`, `/admin` con `MetricasPanel` real; G-16/G-06 resueltos) |
-| HU-17 | Derivación a atención municipal | Derivación | ⚠️ | 2/5 | **40 %** | Umbral de derivación, canal/área/teléfono, directorio de oficinas, casos de decisión (G-09) |
+| HU-17 | Derivación a atención municipal | Derivación | ✅ | 5/5 | **100 %** | — cerrada 27-oct-2026 (directorio de oficinas `GET /api/oficinas`, lógica de derivación por confianza/dominio/decisión formal, UI de tarjeta en chat) |
 | HU-18 | Reportes y exportación | Reportes | ✅ | 3/3 | **100 %** | — cerrada 27-oct-2026 (`GET /api/reportes` por periodo y `/api/reportes/exportar` en **CSV con BOM UTF-8** que abre en Excel, con panel de periodo y descarga en `/admin`; G-07 resuelto) |
 
-Resumen: **15 HU al 100 %** (HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12, HU-13, HU-15, HU-16, HU-18) · **3 HU parciales** (HU-03, HU-14, HU-17) · **0 HU sin empezar** · **95/101 puntos = 94 % global** (verificado 27-oct-2026) · **0 suites de pruebas**.
+Resumen: **18 HU al 100 %** · **0 HU parciales** · **0 HU sin empezar** · **101/101 puntos = 100 % global** (verificado 27-oct-2026).
 
 ### 10.4 PMV1 · Prototipo funcional — **100 %** (24/24) ✅
 
