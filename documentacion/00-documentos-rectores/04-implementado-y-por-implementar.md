@@ -8,15 +8,15 @@
 
 > **Trazabilidad por PMV:** ver `05-trazabilidad-por-pmv.md` (qué se construyó en PMV1/PMV2/PMV3).
 
-> **Cifras canónicas verificadas el 17 de octubre de 2026** (verificación en vivo contra API +
-> PostgreSQL local; detalle en `06-estado-actual-implementado.md` §0 y §10):
+> **Cifras canónicas verificadas el 27 de octubre de 2026** (verificación en vivo contra API en Render +
+> PostgreSQL en Render; detalle en `06-estado-actual-implementado.md` §0 y §10):
 >
 > | Dimensión | Valor |
 > |---|---|
-> | Avance global de las 18 HU | **83/101 = 82 %** |
+> | Avance global de las 18 HU | **101/101 = 100 %** |
 > | PMV1 | **24/24 = 100 %** ✅ |
-> | PMV2 | **28/28 = 100 %** ✅ (incluye HU-11) |
-> | PMV3 | **31/49 = 63 %** (incluye HU-17) |
+> | PMV2 | **28/28 = 100 %** ✅ |
+> | PMV3 | **49/49 = 100 %** ✅ |
 
 ## 0. Verificación local (octubre 2026)
 
