@@ -70,6 +70,16 @@ export interface FuenteCitada {
   version?: string;
 }
 
+export interface TramiteProbable {
+  id: string;
+  nombre: string;
+  requisitos: string[];
+  costo: number;
+  duracion_estimada_dias: number;
+  fuente_url?: string | null;
+  area?: string | null;
+}
+
 export interface Derivacion {
   oficina: string;
   area: string;
@@ -194,6 +204,7 @@ export async function enviarConsulta(pregunta: string): Promise<RespuestaConsult
     entidad_sugerida: data.entidad_sugerida ?? '',
     intencion: data.intencion ?? 'desconocida',
     tramite_probable: data.tramite_probable ?? null,
+    derivacion: data.derivacion ?? null,
   };
 }
 

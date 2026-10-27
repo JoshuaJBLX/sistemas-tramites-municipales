@@ -166,6 +166,10 @@ export function DocIcon({ className = base }: IconProps) {
   );
 }
 
+export function FileIcon({ className = base }: IconProps) {
+  return DocIcon({ className });
+}
+
 export function ClockIcon({ className = base }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -175,11 +179,29 @@ export function ClockIcon({ className = base }: IconProps) {
   );
 }
 
+export function CalendarIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="3" y="4" width="18" height="17" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 9h18M8 2v4M16 2v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function UsersIcon({ className = base }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="9" cy="8" r="3.5" stroke="currentColor" strokeWidth="2" />
       <path d="M3 20c1-3.5 3.2-5.5 6-5.5s5 2 6 5.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function UserIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
+      <path d="M5 20c0-4 4-7 7-7s7 3 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
