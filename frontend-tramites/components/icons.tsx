@@ -215,3 +215,23 @@ export function LinkIcon({ className = base }: IconProps) {
     </svg>
   );
 }
+
+/** HU-15: voto positivo (respuesta útil). */
+export function ThumbUpIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3Zm0 0 4.2-7.2a1.6 1.6 0 0 1 3 .7V9h4.3a1.8 1.8 0 0 1 1.75 2.23l-1.4 6.2A1.8 1.8 0 0 1 17.1 20H7"
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** HU-15: voto negativo (respuesta no útil). */
+export function ThumbDownIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M17 13V4h3a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-3Zm0 0-4.2 7.2a1.6 1.6 0 0 1-3-.7V15H5.5a1.8 1.8 0 0 1-1.75-2.23l1.4-6.2A1.8 1.8 0 0 1 6.9 4H17"
+        stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}

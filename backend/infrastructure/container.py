@@ -69,9 +69,9 @@ QUERY_AUDITORIA = """
     INSERT INTO auditoria_consultas (
         id, consulta_id, respuesta, confianza, fuentes, fuentes_detalle,
         groundedness, fuera_dominio, afirmaciones_bloqueadas, entidad_sugerida,
-        registrado_en
+        duracion_ms, tramite_probable, registrado_en
     )
-    VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10, NOW())
+    VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9, $10, $11, $12, NOW())
 """
 
 # HU-10 (D-9): la trazabilidad une la consulta con su última respuesta
@@ -80,12 +80,12 @@ _TRAZABILIDAD_COLUMNAS = """
     SELECT c.id, c.usuario_id, c.pregunta, c.intencion, c.creada_en,
            a.respuesta, a.confianza, a.groundedness, a.fuentes_detalle,
            a.fuera_dominio, a.afirmaciones_bloqueadas, a.entidad_sugerida,
-           a.registrado_en
+           a.duracion_ms, a.tramite_probable, a.registrado_en
     FROM consultas c
     LEFT JOIN LATERAL (
         SELECT respuesta, confianza, groundedness, fuentes_detalle,
                fuera_dominio, afirmaciones_bloqueadas, entidad_sugerida,
-               registrado_en
+               duracion_ms, tramite_probable, registrado_en
         FROM auditoria_consultas
         WHERE consulta_id = c.id
         ORDER BY registrado_en DESC
@@ -153,6 +153,8 @@ def _mapear_trazabilidad(fila) -> Trazabilidad:
         fuera_dominio=bool(fila['fuera_dominio']),
         afirmaciones_bloqueadas=bool(fila['afirmaciones_bloqueadas']),
         entidad_sugerida=fila['entidad_sugerida'] or '',
+        duracion_ms=fila['duracion_ms'],
+        tramite_probable=fila['tramite_probable'],
         registrado_en=fila['registrado_en'],
     )
 
@@ -161,11 +163,17 @@ class _AuditoriaPostgreSQL(AuditoriaPort):
     def __init__(self, connection: Connection) -> None:
         self._connection = connection
 
-    async def registrar(self, consulta: Consulta, respuesta: Respuesta) -> None:
+    async def registrar(
+        self,
+        consulta: Consulta,
+        respuesta: Respuesta,
+        duracion_ms: int | None = None,
+    ) -> None:
         fuentes = ','.join(fuente.url for fuente in respuesta.fuentes) or None
         detalle = json.dumps(
             [_serializar_fuente(fuente) for fuente in respuesta.fuentes]
         )
+        tramite = respuesta.tramite_probable
         async with self._connection.pool.acquire() as conexion:
             await conexion.execute(
                 QUERY_AUDITORIA,
@@ -179,6 +187,8 @@ class _AuditoriaPostgreSQL(AuditoriaPort):
                 respuesta.fuera_dominio,
                 respuesta.afirmaciones_bloqueadas,
                 respuesta.entidad_sugerida or None,
+                duracion_ms,
+                tramite.nombre if tramite is not None else None,
             )
 
     async def obtener_trazabilidad(self, consulta_id: UUID) -> Trazabilidad | None:

@@ -22,4 +22,7 @@ class Trazabilidad:
     fuera_dominio: bool = False
     afirmaciones_bloqueadas: bool = False
     entidad_sugerida: str = ''
+    # HU-16: tiempo de generación (ms) y trámite probable de la respuesta.
+    duracion_ms: int | None = None
+    tramite_probable: str | None = None
     registrado_en: datetime | None = None

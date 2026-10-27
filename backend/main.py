@@ -66,6 +66,11 @@ app.add_middleware(
 from infrastructure.controllers.documento_admin_controller import (
     router as documento_admin_router,
 )
+from infrastructure.controllers.metrica_controller import (
+    router_evaluaciones as evaluaciones_router,
+    router_metricas as metricas_router,
+    router_reportes as reportes_router,
+)
 from infrastructure.controllers.tramite_admin_controller import (
     router as tramite_admin_router,
 )
@@ -85,6 +90,11 @@ app.include_router(
 app.include_router(documento_router)
 app.include_router(usuario_router)
 app.include_router(auth_router)
+# HU-15/HU-16/HU-18: cada endpoint de estos routers exige rol administrador
+# (o es público, en el caso de las evaluaciones del ciudadano).
+app.include_router(metricas_router)
+app.include_router(evaluaciones_router)
+app.include_router(reportes_router)
 
 
 @app.get('/health', tags=['operacion'])

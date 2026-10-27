@@ -10,8 +10,17 @@ from domain.entities.Trazabilidad import Trazabilidad
 
 class AuditoriaPort(ABC):
     @abstractmethod
-    async def registrar(self, consulta: Consulta, respuesta: Respuesta) -> None:
-        """Registra la interacción consulta-respuesta con fines de trazabilidad."""
+    async def registrar(
+        self,
+        consulta: Consulta,
+        respuesta: Respuesta,
+        duracion_ms: int | None = None,
+    ) -> None:
+        """Registra la interacción consulta-respuesta con fines de trazabilidad.
+
+        `duracion_ms` (HU-16) es el tiempo que tardó la generación de la
+        respuesta; `tramite_probable` se toma de la propia respuesta.
+        """
         ...
 
     @abstractmethod

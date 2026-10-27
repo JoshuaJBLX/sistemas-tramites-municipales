@@ -1,10 +1,8 @@
-import KpiCard from '../../components/KpiCard';
-import MiniCharts from '../../components/MiniCharts';
+import MetricasPanel from '../../components/MetricasPanel';
 import ServiceStatus from '../../components/ServiceStatus';
 import AuditLog from '../../components/AuditLog';
 import DocumentManager from '../../components/DocumentManager';
 import AdminGate from '../../components/AdminGate';
-import { TramiteIcon, UsersIcon, HeartIcon } from '../../components/icons';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,13 +18,11 @@ export default function AdminPage() {
             <span className="badge-blue">Huancayo · todas las sedes</span>
           </div>
         </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          <KpiCard icon={<TramiteIcon className="h-6 w-6" />} label="Procedimientos TUPA" value="252" delta="TUPA 2023 vigente" tone="blue" />
-          <KpiCard icon={<UsersIcon className="h-6 w-6" />} label="Consultas" value="1,236" delta="▲ +12% esta semana" tone="emerald" />
-          <KpiCard icon={<HeartIcon className="h-6 w-6" />} label="Satisfacción" value="98%" delta="▲ +0.6 pts · 1.180 votos" tone="amber" />
+        {/* HU-16/HU-18: indicadores y reportes reales de la API (HU-13: solo admin). */}
+        <div className="mt-5">
+          <MetricasPanel />
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <MiniCharts />
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <ServiceStatus />
           <AuditLog />
         </div>

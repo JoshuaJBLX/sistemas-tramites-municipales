@@ -1,10 +1,11 @@
 """Controlador REST del flujo de consultas al asistente."""
 
+import time
 from datetime import datetime
 from uuid import UUID, uuid4
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, ValidationError
 
 from domain.value_objects.IntencionConsulta import IntencionConsulta
@@ -82,8 +83,28 @@ class TrazabilidadResponse(ConsultaResponse):
     afirmaciones_bloqueadas: bool = False
     fuera_dominio: bool = False
     entidad_sugerida: str = ''
+    duracion_ms: int | None = None
+    tramite_probable: str | None = None
     fuentes: list[FuenteResponse] = Field(default_factory=list)
     registrado_en: datetime | None = None
+
+
+class EvaluacionRequest(BaseModel):
+    """HU-15: calificación del ciudadano sobre la respuesta recibida."""
+
+    valoracion: str = Field(
+        ..., pattern='^(util|parcialmente_util|no_util)$'
+    )
+    comentario: str | None = Field(default=None, max_length=1000)
+
+
+class EvaluacionResponse(BaseModel):
+    id: UUID
+    consulta_id: UUID
+    valoracion: str
+    comentario: str | None = None
+    creada_en: datetime
+    actualizada_en: datetime | None = None
 
 
 def _datos_fuente(fuente) -> dict:
@@ -134,6 +155,7 @@ async def crear_consulta(
     container: Container = Depends(obtener_container),
 ) -> RespuestaResponse:
     """Registra la consulta, clasifica su intención y genera la orientación."""
+    inicio = time.monotonic()
     try:
         # 1. Clasificación de intención con confianza y detección de ambigüedad.
         clasificacion = await container.clasificar_intencion.ejecutar_detallado(
@@ -161,6 +183,7 @@ async def crear_consulta(
                 await container.auditar_consulta.ejecutar(
                     consulta,
                     _respuesta_desde_cuerpo(cuerpo_cache, consulta.id),
+                    duracion_ms=int((time.monotonic() - inicio) * 1000),
                 )
                 return RespuestaResponse(
                     consulta_id=consulta.id, intencion=intencion, **cuerpo_cache
@@ -185,8 +208,12 @@ async def crear_consulta(
                 ),
             ) from error
 
-        # 6. Auditoría de la interacción.
-        await container.auditar_consulta.ejecutar(consulta, respuesta)
+        # 6. Auditoría de la interacción (con el tiempo real de generación, HU-16).
+        await container.auditar_consulta.ejecutar(
+            consulta,
+            respuesta,
+            duracion_ms=int((time.monotonic() - inicio) * 1000),
+        )
 
         cuerpo = _cuerpo_respuesta(respuesta)
         await container.servicio_cache.guardar_respuesta(payload.pregunta, cuerpo)
@@ -276,6 +303,8 @@ def _cuerpo_trazabilidad(trazabilidad) -> TrazabilidadResponse:
         afirmaciones_bloqueadas=trazabilidad.afirmaciones_bloqueadas,
         fuera_dominio=trazabilidad.fuera_dominio,
         entidad_sugerida=trazabilidad.entidad_sugerida,
+        duracion_ms=trazabilidad.duracion_ms,
+        tramite_probable=trazabilidad.tramite_probable,
         fuentes=[_datos_fuente(fuente) for fuente in trazabilidad.fuentes],
         registrado_en=trazabilidad.registrado_en,
     )
@@ -304,3 +333,68 @@ async def obtener_consulta(
         raise HTTPException(status_code=404, detail='Consulta no encontrada')
 
     return _cuerpo_trazabilidad(trazabilidad)
+
+
+# ---------- HU-15: retroalimentación ciudadana ----------
+
+QUERY_CONSULTA_EXISTE = """
+    SELECT 1 FROM consultas WHERE id = $1
+"""
+
+QUERY_UPSERT_EVALUACION = """
+    INSERT INTO evaluaciones_calidad (id, consulta_id, valoracion, comentario)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (consulta_id) DO UPDATE
+    SET valoracion = EXCLUDED.valoracion,
+        comentario = COALESCE(EXCLUDED.comentario, evaluaciones_calidad.comentario),
+        actualizada_en = NOW()
+    RETURNING id, consulta_id, valoracion, comentario, creada_en, actualizada_en
+"""
+
+QUERY_SELECT_EVALUACION = """
+    SELECT id, consulta_id, valoracion, comentario, creada_en, actualizada_en
+    FROM evaluaciones_calidad
+    WHERE consulta_id = $1
+"""
+
+
+@router.post(
+    '/{consulta_id}/evaluacion',
+    response_model=EvaluacionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def calificar_respuesta(
+    consulta_id: UUID,
+    payload: EvaluacionRequest,
+    container: Container = Depends(obtener_container),
+) -> EvaluacionResponse:
+    """HU-15: el ciudadano califica la respuesta (útil / parcialmente útil / no útil).
+
+    Es pública (no requiere cuenta): solo identifica la consulta. Si la consulta
+    ya fue calificada, la calificación se actualiza (una vigente por consulta).
+    """
+    async with container.connection.pool.acquire() as conexion:
+        existe = await conexion.fetchval(QUERY_CONSULTA_EXISTE, consulta_id)
+        if existe is None:
+            raise HTTPException(status_code=404, detail='Consulta no encontrada')
+        fila = await conexion.fetchrow(
+            QUERY_UPSERT_EVALUACION,
+            uuid4(),
+            consulta_id,
+            payload.valoracion,
+            payload.comentario.strip() if payload.comentario else None,
+        )
+    return EvaluacionResponse(**dict(fila))
+
+
+@router.get('/{consulta_id}/evaluacion', response_model=EvaluacionResponse)
+async def obtener_evaluacion(
+    consulta_id: UUID,
+    container: Container = Depends(obtener_container),
+) -> EvaluacionResponse:
+    """HU-15: calificación vigente de una consulta (404 si aún no fue calificada)."""
+    async with container.connection.pool.acquire() as conexion:
+        fila = await conexion.fetchrow(QUERY_SELECT_EVALUACION, consulta_id)
+    if fila is None:
+        raise HTTPException(status_code=404, detail='Consulta sin calificación')
+    return EvaluacionResponse(**dict(fila))

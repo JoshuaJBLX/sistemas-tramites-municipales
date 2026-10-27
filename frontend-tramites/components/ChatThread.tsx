@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import GroundednessBadge from './GroundednessBadge';
 import TramiteProbableCard from './TramiteProbableCard';
+import VotoRespuesta from './VotoRespuesta';
 import type { FuenteCitada, TramiteProbable } from '../lib/api';
 
 export interface ChatMsg {
@@ -17,6 +18,8 @@ export interface ChatMsg {
   entidadSugerida?: string;
   tramiteProbable?: TramiteProbable | null;
   fallo?: boolean;
+  /** HU-15: id de la consulta para poder calificar la respuesta. */
+  consultaId?: string;
 }
 
 /** Límite de caracteres visibles antes de ofrecer "Ver más". */
@@ -185,6 +188,7 @@ function MensajeAsistente({ m }: { m: ChatMsg }) {
           )}
           {m.tramiteProbable && <TramiteProbableCard tramite={m.tramiteProbable} />}
           {!m.fallo && <GroundednessBadge score={m.groundedness} fuentes={m.fuentes} />}
+          {!m.fallo && <VotoRespuesta consultaId={m.consultaId} />}
         </div>
       </div>
     </div>

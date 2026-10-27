@@ -80,6 +80,7 @@ export interface TramiteProbable {
 }
 
 export interface RespuestaConsulta {
+  consulta_id: string;
   texto: string;
   fuentes: FuenteCitada[];
   confianza: string;
@@ -165,6 +166,7 @@ export async function enviarConsulta(pregunta: string): Promise<RespuestaConsult
   );
 
   return {
+    consulta_id: data.consulta_id ?? '',
     texto: data.texto ?? 'Sin respuesta del servidor.',
     fuentes: Array.isArray(data.fuentes) ? (data.fuentes as FuenteCitada[]) : [],
     confianza: data.confianza ?? 'desconocida',
@@ -363,4 +365,155 @@ export async function eliminarDocumentoFisico(id: string): Promise<void> {
 
 export async function listarTramitesAdmin(): Promise<TramiteCrudo[]> {
   return pedir<TramiteCrudo[]>('/api/tramites/admin', {}, TIMEOUT_CATALOGO_MS);
+}
+
+// ---------- Retroalimentación (HU-15): voto sobre la respuesta ----------
+export type Valoracion = 'util' | 'parcialmente_util' | 'no_util';
+
+export interface Evaluacion {
+  id: string;
+  consulta_id: string;
+  valoracion: Valoracion;
+  comentario: string | null;
+  creada_en: string;
+  actualizada_en?: string | null;
+}
+
+export async function evaluarConsulta(
+  consultaId: string,
+  valoracion: Valoracion,
+  comentario?: string,
+): Promise<Evaluacion> {
+  return pedir<Evaluacion>(
+    `/api/consultas/${consultaId}/evaluacion`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ valoracion, comentario: comentario || null }),
+    },
+    TIMEOUT_CATALOGO_MS,
+  );
+}
+
+export async function obtenerEvaluacion(consultaId: string): Promise<Evaluacion | null> {
+  try {
+    return await pedir<Evaluacion>(
+      `/api/consultas/${consultaId}/evaluacion`,
+      {},
+      TIMEOUT_CATALOGO_MS,
+    );
+  } catch {
+    return null;
+  }
+}
+
+// ---------- Métricas (HU-16) y reportes (HU-18): solo administrador ----------
+export interface Metricas {
+  periodo_dias: number;
+  generado_en: string;
+  total_consultas: number;
+  consultas_periodo: number;
+  serie_diaria: { fecha: string; cantidad: number }[];
+  por_intencion: { clave: string; cantidad: number }[];
+  por_confianza: { clave: string; cantidad: number }[];
+  groundedness_promedio: number;
+  tasa_fundamentadas: number;
+  respuestas_bloqueadas: number;
+  consultas_fuera_dominio: number;
+  duracion_promedio_ms: number | null;
+  tramites_frecuentes: { nombre: string; cantidad: number }[];
+  total_evaluaciones: number;
+  satisfaccion_pct: number | null;
+  alerta: boolean;
+  alerta_mensaje: string | null;
+}
+
+export interface Reporte {
+  desde: string;
+  hasta: string;
+  generado_en: string;
+  consultas: number;
+  serie_diaria: { fecha: string; cantidad: number }[];
+  tramites_frecuentes: { nombre: string; cantidad: number }[];
+  por_confianza: { clave: string; cantidad: number }[];
+  groundedness_promedio: number;
+  tasa_fundamentadas: number;
+  respuestas_rechazadas: number;
+  consultas_fuera_dominio: number;
+  duracion_promedio_ms: number | null;
+  total_evaluaciones: number;
+  utiles: number;
+  parcialmente_utiles: number;
+  no_utiles: number;
+  satisfaccion_pct: number | null;
+}
+
+export interface EvaluacionAdmin {
+  id: string;
+  consulta_id: string;
+  pregunta: string;
+  intencion?: string | null;
+  valoracion: Valoracion;
+  comentario: string | null;
+  creada_en: string;
+}
+
+export async function obtenerMetricas(dias = 30): Promise<Metricas> {
+  return pedir<Metricas>(`/api/metricas?dias=${dias}`, {}, TIMEOUT_CATALOGO_MS);
+}
+
+export async function obtenerEvaluacionesAdmin(limite = 50): Promise<EvaluacionAdmin[]> {
+  const data = await pedir<EvaluacionAdmin[]>(
+    `/api/evaluaciones?limite=${limite}`,
+    {},
+    TIMEOUT_CATALOGO_MS,
+  );
+  return Array.isArray(data) ? data : [];
+}
+
+export async function obtenerReporte(desde?: string, hasta?: string): Promise<Reporte> {
+  const search = new URLSearchParams();
+  if (desde) search.set('desde', desde);
+  if (hasta) search.set('hasta', hasta);
+  const qs = search.toString();
+  return pedir<Reporte>(`/api/reportes${qs ? `?${qs}` : ''}`, {}, TIMEOUT_CATALOGO_MS);
+}
+
+/**
+ * HU-18: descarga el reporte del periodo como CSV (el backend emite UTF-8 con
+ * BOM para que Excel lo abra con acentos correctos).
+ */
+export async function descargarReporteCsv(desde?: string, hasta?: string): Promise<void> {
+  const search = new URLSearchParams();
+  if (desde) search.set('desde', desde);
+  if (hasta) search.set('hasta', hasta);
+  const qs = search.toString();
+  const sesion = leerSesion();
+  const controller = new AbortController();
+  const temporizador = setTimeout(() => controller.abort(), TIMEOUT_CATALOGO_MS);
+  try {
+    const response = await fetch(`${API_URL}/api/reportes/exportar${qs ? `?${qs}` : ''}`, {
+      headers: sesion ? { Authorization: `Bearer ${sesion.access_token}` } : undefined,
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`El servidor respondió ${response.status}.`);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    const disposicion = response.headers.get('content-disposition') ?? '';
+    const coincide = /filename="([^"]+)"/.exec(disposicion);
+    enlace.href = url;
+    enlace.download = coincide?.[1] ?? 'reporte_tramites.csv';
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('La exportación está tardando demasiado. Intenta de nuevo.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(temporizador);
+  }
 }

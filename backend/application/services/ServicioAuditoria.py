@@ -21,9 +21,12 @@ class ServicioAuditoria:
         self._consulta_repository = consulta_repository
 
     async def registrar_interaccion(
-        self, consulta: Consulta, respuesta: Respuesta
+        self,
+        consulta: Consulta,
+        respuesta: Respuesta,
+        duracion_ms: int | None = None,
     ) -> None:
-        await self._auditoria.registrar(consulta, respuesta)
+        await self._auditoria.registrar(consulta, respuesta, duracion_ms)
 
     async def obtener_consulta(self, consulta_id: UUID) -> Consulta | None:
         return await self._consulta_repository.obtener_por_id(consulta_id)

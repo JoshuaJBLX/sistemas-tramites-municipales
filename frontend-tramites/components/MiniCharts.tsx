@@ -21,28 +21,49 @@ const bars = [
   { d: 'Jue', h: 86 }, { d: 'Vie', h: 72 }, { d: 'Sáb', h: 38 }, { d: 'Dom', h: 26 },
 ];
 
-export default function MiniCharts() {
+export default function MiniCharts({
+  serie,
+  satisfaccion,
+  fundamentadas,
+}: {
+  /** Serie diaria real de consultas (HU-16); si no hay, se usa la de demo. */
+  serie?: { fecha: string; cantidad: number }[];
+  satisfaccion?: number | null;
+  fundamentadas?: number;
+} = {}) {
+  const datos = (serie && serie.length > 0
+    ? serie.slice(-7).map((p) => ({
+        d: new Date(`${p.fecha}T00:00:00Z`).toLocaleDateString('es-PE', { weekday: 'short' }),
+        h: p.cantidad,
+      }))
+    : bars
+  ).map((b) => ({ ...b, alto: b.h > 0 ? b.h : 0 }));
+  const maximo = Math.max(...datos.map((b) => b.alto), 1);
+  const pctSatisfaccion =
+    satisfaccion === undefined || satisfaccion === null ? 98 : Math.round(satisfaccion);
+  const pctFundamentadas = fundamentadas === undefined ? 87 : Math.round(fundamentadas);
+
   return (
     <div className="card-3d p-5">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-ink">Métricas de atención</h3>
-        <span className="badge-blue">Últimos 7 días</span>
+        <span className="badge-blue">Últimos {datos.length} días</span>
       </div>
       <div className="mt-4 flex items-end justify-between gap-2">
-        {bars.map((b, i) => (
-          <div key={b.d} className="flex flex-1 flex-col items-center gap-1.5">
+        {datos.map((b, i) => (
+          <div key={`${b.d}-${i}`} className="flex flex-1 flex-col items-center gap-1.5">
             <div
-              className={`w-full max-w-[38px] rounded-xl border border-white/50 bg-gradient-to-t shadow-soft-sm ${i === 3 ? 'from-amber-deep via-amber to-[#ffd97a]' : 'from-primary-800 via-primary-500 to-primary-300'}`}
-              style={{ height: `${b.h * 1.5}px` }}
-              title={`${b.d}: ${b.h * 18} consultas`}
+              className={`w-full max-w-[38px] rounded-xl border border-white/50 bg-gradient-to-t shadow-soft-sm ${i === datos.length - 1 ? 'from-amber-deep via-amber to-[#ffd97a]' : 'from-primary-800 via-primary-500 to-primary-300'}`}
+              style={{ height: `${Math.max(6, (b.alto / maximo) * 96)}px` }}
+              title={`${b.d}: ${b.alto} consultas`}
             />
             <span className="text-[10px] font-bold text-mist-500">{b.d}</span>
           </div>
         ))}
       </div>
       <div className="mt-5 grid grid-cols-1 gap-4 border-t border-mist-200 pt-4 sm:grid-cols-2">
-        <Donut value={98} label="Satisfacción" color="#10b981" />
-        <Donut value={87} label="Resueltas 1er contacto" color="#3569a5"/>
+        <Donut value={pctSatisfaccion} label="Satisfacción" color="#10b981" />
+        <Donut value={pctFundamentadas} label="Fundamentadas" color="#3569a5"/>
       </div>
       {/* línea de tendencia */}
       <svg viewBox="0 0 300 60" className="mt-4 h-14 w-full" aria-hidden="true">

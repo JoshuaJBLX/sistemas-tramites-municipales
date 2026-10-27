@@ -20,7 +20,7 @@ export default function ChatBox({ compact = false }: { compact?: boolean }) {
     try {
       const r = await enviarConsulta(pregunta);
       setMensajes((prev) => [...prev, {
-        autor: 'asistente', texto: r.texto,
+        autor: 'asistente', texto: r.texto, consultaId: r.consulta_id,
         fuentes: r.fuentes, groundedness: r.groundedness, confianza: r.confianza,
         intencion: r.intencion, pideAclaracion: r.pide_aclaracion,
         afirmacionBloqueada: r.afirmaciones_bloqueadas,
