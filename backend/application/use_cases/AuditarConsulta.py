@@ -1,5 +1,6 @@
 """Caso de uso: AuditarConsulta."""
 
+from datetime import datetime
 from uuid import UUID
 
 from application.services.ServicioAuditoria import ServicioAuditoria
@@ -30,3 +31,27 @@ class AuditarConsulta:
 
     async def listar_trazabilidad(self, limite: int = 20) -> list[Trazabilidad]:
         return await self._servicio_auditoria.listar_trazabilidad(limite)
+
+    # HU-14
+    async def listar_trazabilidad_filtrada(
+        self,
+        limite: int = 20,
+        desde: datetime | None = None,
+        hasta: datetime | None = None,
+        texto: str | None = None,
+        usuario_id: UUID | None = None,
+    ) -> list[Trazabilidad]:
+        return await self._servicio_auditoria.listar_trazabilidad_filtrada(
+            limite, desde, hasta, texto, usuario_id
+        )
+
+    async def marcar_inconsistente(
+        self,
+        consulta_id: UUID,
+        marcado: bool,
+        nota: str | None,
+        marcado_por: str,
+    ) -> None:
+        await self._servicio_auditoria.marcar_inconsistente(
+            consulta_id, marcado, nota, marcado_por
+        )

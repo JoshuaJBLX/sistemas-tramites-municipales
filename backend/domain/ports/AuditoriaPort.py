@@ -1,6 +1,7 @@
 """Puerto: AuditoriaPort."""
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 from uuid import UUID
 
 from domain.entities.Consulta import Consulta
@@ -31,4 +32,27 @@ class AuditoriaPort(ABC):
     @abstractmethod
     async def listar_trazabilidad(self, limite: int = 20) -> list[Trazabilidad]:
         """HU-10/HU-14: últimas consultas con su respuesta auditada."""
+        ...
+
+    @abstractmethod
+    async def listar_trazabilidad_filtrada(
+        self,
+        limite: int = 20,
+        desde: datetime | None = None,
+        hasta: datetime | None = None,
+        texto: str | None = None,
+        usuario_id: UUID | None = None,
+    ) -> list[Trazabilidad]:
+        """HU-14: auditoría con filtros por fecha, texto y usuario."""
+        ...
+
+    @abstractmethod
+    async def marcar_inconsistente(
+        self,
+        consulta_id: UUID,
+        marcado: bool,
+        nota: str | None,
+        marcado_por: str,
+    ) -> None:
+        """HU-14: marcar manualmente un registro como inconsistente para revisión."""
         ...

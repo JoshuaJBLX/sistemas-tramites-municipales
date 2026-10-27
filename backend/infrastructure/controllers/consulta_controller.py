@@ -1,7 +1,10 @@
 """Controlador REST del flujo de consultas al asistente."""
 
+from __future__ import annotations
+
 import time
 from datetime import datetime
+from typing import Optional
 from uuid import UUID, uuid4
 
 import httpx
@@ -11,6 +14,7 @@ from pydantic import BaseModel, Field, ValidationError
 from domain.value_objects.IntencionConsulta import IntencionConsulta
 from infrastructure.container import Container, obtener_container
 from infrastructure.controllers.dependencias import requiere_administrador
+import re
 
 router = APIRouter(prefix='/api/consultas', tags=['consultas'])
 
@@ -64,6 +68,19 @@ class RespuestaResponse(BaseModel):
     )
     tramite_probable: TramiteProbableResponse | None = None
     fuentes: list[FuenteResponse] = Field(default_factory=list)
+    # HU-17: derivación a atención municipal cuando no hay respuesta confiable.
+    derivacion: Optional[DerivacionResponse] = None
+
+
+class DerivacionResponse(BaseModel):
+    """HU-17: información de la oficina a la que se deriva al ciudadano."""
+    oficina: str
+    area: str
+    telefono: str | None = None
+    correo: str | None = None
+    horario: str
+    direccion: str
+    motivo: str
 
 
 class ConsultaResponse(BaseModel):
@@ -87,6 +104,10 @@ class TrazabilidadResponse(ConsultaResponse):
     tramite_probable: str | None = None
     fuentes: list[FuenteResponse] = Field(default_factory=list)
     registrado_en: datetime | None = None
+    # HU-14: marcado manual e inconsistencia automática.
+    marcado_inconsistente: bool = False
+    nota_revision: str | None = None
+    inconsistente: bool = False
 
 
 class EvaluacionRequest(BaseModel):
@@ -96,6 +117,13 @@ class EvaluacionRequest(BaseModel):
         ..., pattern='^(util|parcialmente_util|no_util)$'
     )
     comentario: str | None = Field(default=None, max_length=1000)
+
+
+class MarcarInconsistenteRequest(BaseModel):
+    """HU-14: marcar/desmarcar un registro de auditoría como inconsistente."""
+
+    marcado: bool
+    nota: str | None = Field(default=None, max_length=500)
 
 
 class EvaluacionResponse(BaseModel):
@@ -118,8 +146,11 @@ def _datos_fuente(fuente) -> dict:
     }
 
 
-def _cuerpo_respuesta(respuesta) -> dict:
-    """Serializa la respuesta en el formato que consume el front-end."""
+async def _cuerpo_respuesta(respuesta, container: Container | None = None, pregunta: str = '') -> dict:
+    """Serializa la respuesta en el formato que consume el front-end.
+
+    Si se pasa `container` y `pregunta`, computa la derivación (HU-17).
+    """
     cuerpo = {
         'texto': respuesta.texto,
         'confianza': respuesta.confianza.value,
@@ -146,7 +177,74 @@ def _cuerpo_respuesta(respuesta) -> dict:
         if tramite is not None
         else None
     )
+
+    # HU-17: derivación si confianza es baja o caso requiere decisión formal.
+    if container and pregunta:
+        cuerpo['derivacion'] = await _derivacion_para(container, pregunta, cuerpo)
+    else:
+        cuerpo['derivacion'] = None
+
     return cuerpo
+
+
+# HU-17: detecta si la pregunta requiere decisión formal (aprobación, denegatoria, etc.)
+_PATRON_DECISION_FORMAL = re.compile(
+    r'\b(aprobaci[oó]n|aprobar|denegaci[oó]n|denegar|resoluci[oó]n|expediente|recurso\s+de\s+apelaci[oó]n|reclamo)\b',
+    re.IGNORECASE,
+)
+
+async def _derivacion_para(container: Container, pregunta: str, cuerpo: dict) -> dict | None:
+    """Determina si corresponde derivar y a qué oficina."""
+    confianza = cuerpo.get('confianza', 'alta')
+    fuera_dominio = cuerpo.get('fuera_dominio', False)
+    tramite = cuerpo.get('tramite_probable')
+
+    # Criterios: confianza baja O fuera de dominio O decisión formal detectada.
+    if not (confianza == 'baja' or fuera_dominio or _PATRON_DECISION_FORMAL.search(pregunta)):
+        return None
+
+    motivo = ''
+    if confianza == 'baja':
+        motivo = 'La confianza de la respuesta es baja; se recomienda contacto directo.'
+    elif fuera_dominio:
+        motivo = 'La consulta está fuera del ámbito municipal.'
+    else:
+        motivo = 'El caso requiere una decisión administrativa formal.'
+
+    # Buscar oficina: prioridad por área del trámite probable, si no, Oficina de Atención al Ciudadano.
+    area_objetivo = tramite.get('area') if tramite else None
+    oficina = None
+    if area_objetivo:
+        filas = await container.connection.pool.fetch(
+            "SELECT * FROM oficinas WHERE activa AND (area ILIKE $1 OR nombre ILIKE $1) LIMIT 1",
+            f'%{area_objetivo}%',
+        )
+        if filas:
+            oficina = filas[0]
+    if not oficina:
+        filas = await container.connection.pool.fetch(
+            "SELECT * FROM oficinas WHERE activa AND nombre ILIKE '%atencion%ciudadano%' LIMIT 1"
+        )
+        if filas:
+            oficina = filas[0]
+    if not oficina:
+        filas = await container.connection.pool.fetch(
+            "SELECT * FROM oficinas WHERE activa LIMIT 1"
+        )
+        if filas:
+            oficina = filas[0]
+
+    if oficina:
+        return {
+            'oficina': oficina['nombre'],
+            'area': oficina['area'],
+            'telefono': oficina['telefono'],
+            'correo': oficina['correo'],
+            'horario': oficina['horario'],
+            'direccion': oficina['direccion'],
+            'motivo': motivo,
+        }
+    return None
 
 
 @router.post('', response_model=RespuestaResponse)
@@ -215,7 +313,7 @@ async def crear_consulta(
             duracion_ms=int((time.monotonic() - inicio) * 1000),
         )
 
-        cuerpo = _cuerpo_respuesta(respuesta)
+        cuerpo = await _cuerpo_respuesta(respuesta, container, payload.pregunta)
         await container.servicio_cache.guardar_respuesta(payload.pregunta, cuerpo)
 
         return RespuestaResponse(
@@ -307,18 +405,38 @@ def _cuerpo_trazabilidad(trazabilidad) -> TrazabilidadResponse:
         tramite_probable=trazabilidad.tramite_probable,
         fuentes=[_datos_fuente(fuente) for fuente in trazabilidad.fuentes],
         registrado_en=trazabilidad.registrado_en,
+        # HU-14
+        marcado_inconsistente=trazabilidad.marcado_inconsistente,
+        nota_revision=trazabilidad.nota_revision,
+        inconsistente=trazabilidad.inconsistente,
     )
 
 
 @router.get('', response_model=list[TrazabilidadResponse])
 async def listar_consultas(
     limite: int = 20,
+    desde: str | None = None,
+    hasta: str | None = None,
+    tramite: str | None = None,
+    usuario_id: str | None = None,
     container: Container = Depends(obtener_container),
     _administrador: dict = Depends(requiere_administrador),
 ) -> list[TrazabilidadResponse]:
-    """HU-10/HU-14: últimas consultas con su respuesta auditada (solo administradores)."""
+    """HU-10/HU-14: últimas consultas con su respuesta auditada (solo administradores).
+
+    Filtros (HU-14): desde/hasta (ISO 8601), tramite (texto en pregunta o trámite probable),
+    usuario_id (UUID). Limite 1..100.
+    """
+    from datetime import datetime
+    from uuid import UUID as UUIDType
+
     cantidad = max(1, min(limite, 100))
-    registros = await container.auditar_consulta.listar_trazabilidad(cantidad)
+    d = datetime.fromisoformat(desde) if desde else None
+    h = datetime.fromisoformat(hasta) if hasta else None
+    u = UUIDType(usuario_id) if usuario_id else None
+    registros = await container.auditar_consulta.listar_trazabilidad_filtrada(
+        cantidad, d, h, tramite, u
+    )
     return [_cuerpo_trazabilidad(registro) for registro in registros]
 
 
@@ -332,6 +450,29 @@ async def obtener_consulta(
     if trazabilidad is None:
         raise HTTPException(status_code=404, detail='Consulta no encontrada')
 
+    return _cuerpo_trazabilidad(trazabilidad)
+
+
+# ---------- HU-14: marcar inconsistencias ----------
+
+@router.post(
+    '/{consulta_id}/marcar',
+    response_model=TrazabilidadResponse,
+    dependencies=[Depends(requiere_administrador)],
+)
+async def marcar_inconsistente(
+    consulta_id: UUID,
+    payload: MarcarInconsistenteRequest,
+    container: Container = Depends(obtener_container),
+    admin: dict = Depends(requiere_administrador),
+) -> TrazabilidadResponse:
+    """HU-14: marcar/desmarcar un registro de auditoría como inconsistente."""
+    await container.auditar_consulta.marcar_inconsistente(
+        consulta_id, payload.marcado, payload.nota, admin['correo']
+    )
+    trazabilidad = await container.auditar_consulta.consultar_trazabilidad(consulta_id)
+    if trazabilidad is None:
+        raise HTTPException(status_code=404, detail='Consulta no encontrada')
     return _cuerpo_trazabilidad(trazabilidad)
 
 

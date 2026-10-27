@@ -994,7 +994,7 @@ docker compose up -d      # postgres+pgvector, redis, ollama
 | Eventos de seguridad | Tabla `eventos_seguridad` (migración `007`): `login_exitoso`, `login_fallido`, `token_invalido`, `acceso_denegado`, `usuario_registrado`, con usuario, correo, detalle e IP |
 | Frontend | `AdminGate` protege `/admin` (formulario de acceso + "Cerrar sesión"); `lib/api.ts` adjunta el JWT en `Authorization` automáticamente |
 | Secretos | `JWT_SECRET` (opcional); si no está definido se deriva de `OPENAI_API_KEY` (el CLI de Render no permite añadir env vars sin recrear el servicio). Nunca se commitea: solo env var |
-| Admin inicial | `backend/scripts/crear_admin.py` (leen `ADMIN_CORREO`/`ADMIN_PASSWORD`/`ADMIN_NOMBRE`); ejecutado contra Render PG → `admin@munihuancayo.gob.pe` |
+| Admin inicial | `backend/scripts/crear_admin.py` (leen `ADMIN_CORREO`/`ADMIN_PASSWORD`/`ADMIN_NOMBRE`); ejecutado contra Render PG → correo definido por env var (ej. `admin@...`) |
 
 **Pendiente relacionado:** HU-03 (aprobar/derogar con revisor) necesita el rol `revisor` (hoy los roles son `ciudadano` | `administrador` en el CHECK de `usuarios`); la infraestructura de roles de HU-13 ya lo permite. Queda también G-20 (guardrails anti prompt-injection).
 

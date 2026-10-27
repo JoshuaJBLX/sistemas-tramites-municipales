@@ -70,13 +70,27 @@ export interface FuenteCitada {
   version?: string;
 }
 
-export interface TramiteProbable {
+export interface Derivacion {
+  oficina: string;
+  area: string;
+  telefono: string | null;
+  correo: string | null;
+  horario: string;
+  direccion: string;
+  motivo: string;
+}
+
+export interface Oficina {
   id: string;
   nombre: string;
-  requisitos: string[];
-  costo: number;
-  duracion_estimada_dias: number;
-  fuente_url?: string | null;
+  area: string;
+  telefono: string | null;
+  correo: string | null;
+  horario: string;
+  direccion: string;
+  responsable: string | null;
+  activa: boolean;
+  creada_en: string;
 }
 
 export interface RespuestaConsulta {
@@ -92,6 +106,8 @@ export interface RespuestaConsulta {
   entidad_sugerida: string;
   intencion: string;
   tramite_probable: TramiteProbable | null;
+  // HU-17
+  derivacion: Derivacion | null;
 }
 
 export interface Tramite {
@@ -195,15 +211,51 @@ export interface RegistroAuditoria {
   entidad_sugerida: string;
   fuentes: FuenteCitada[];
   registrado_en?: string | null;
+  // HU-14
+  marcado_inconsistente?: boolean;
+  nota_revision?: string | null;
+  inconsistente?: boolean;
 }
 
-export async function obtenerAuditoria(limite = 20): Promise<RegistroAuditoria[]> {
+export interface FiltrosAuditoria {
+  limite?: number;
+  desde?: string; // ISO 8601
+  hasta?: string; // ISO 8601
+  tramite?: string;
+  usuario_id?: string;
+}
+
+export async function obtenerAuditoria(filtros: FiltrosAuditoria = {}): Promise<RegistroAuditoria[]> {
+  const { limite = 20, desde, hasta, tramite, usuario_id } = filtros;
+  const search = new URLSearchParams();
+  search.set('limite', String(limite));
+  if (desde) search.set('desde', desde);
+  if (hasta) search.set('hasta', hasta);
+  if (tramite) search.set('tramite', tramite);
+  if (usuario_id) search.set('usuario_id', usuario_id);
   const data = await pedir<RegistroAuditoria[]>(
-    `/api/consultas?limite=${limite}`,
+    `/api/consultas?${search.toString()}`,
     {},
     TIMEOUT_CATALOGO_MS,
   );
   return Array.isArray(data) ? data : [];
+}
+
+/** HU-14: marcar/desmarcar registro como inconsistente (solo admin). */
+export async function marcarInconsistente(
+  consultaId: string,
+  marcado: boolean,
+  nota?: string,
+): Promise<RegistroAuditoria> {
+  return pedir<RegistroAuditoria>(
+    `/api/consultas/${consultaId}/marcar`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ marcado, nota: nota || null }),
+    },
+    TIMEOUT_CATALOGO_MS,
+  );
 }
 
 interface TramiteCrudo {
@@ -288,6 +340,16 @@ export async function obtenerTramitesRelacionados(
   return Array.isArray(data)
     ? data.map((fila) => ({ ...mapearTramite(fila), similitud: fila.similitud ?? 0 }))
     : [];
+}
+
+// ---------- Directorio de oficinas (HU-17) ----------
+export async function listarOficinas(soloActivas = true): Promise<Oficina[]> {
+  const data = await pedir<Oficina[]>(
+    `/api/oficinas?solo_activas=${soloActivas}`,
+    {},
+    TIMEOUT_CATALOGO_MS,
+  );
+  return Array.isArray(data) ? data : [];
 }
 
 export interface EstadoServicios {

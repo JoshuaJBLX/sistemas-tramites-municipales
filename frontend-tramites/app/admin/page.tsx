@@ -1,10 +1,9 @@
 import MetricasPanel from '../../components/MetricasPanel';
-import ServiceStatus from '../../components/ServiceStatus';
 import AuditLog from '../../components/AuditLog';
 import DocumentManager from '../../components/DocumentManager';
 import AdminGate from '../../components/AdminGate';
 import QuickAccessCard from '../../components/QuickAccessCard';
-import { ChartIcon, DocIcon, ClockIcon, ShieldIcon } from '../../components/icons';
+import { ChartIcon, DocIcon, ClockIcon } from '../../components/icons';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,21 +21,19 @@ export default function AdminPage() {
         </div>
         {/* Accesos rápidos del administrador (diseño de tarjetas de la portada). */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <QuickAccessCard href="#documentos" title="Carga de documentos" subtitle="Subir y indexar normas oficiales" icon={<DocIcon />} accent="from-primary-500 to-primary-800" />
+          <QuickAccessCard href="#documentos" title="Gestión Documental" subtitle="Subir, indexar y aprobar documentos" icon={<DocIcon />} accent="from-primary-500 to-primary-800" />
           <QuickAccessCard href="#metricas" title="Métricas" subtitle="KPIs, satisfacción y reportes" icon={<ChartIcon />} accent="from-amber to-amber-deep" />
-          <QuickAccessCard href="#auditoria" title="Auditoría" subtitle="Registro de consultas en vivo" icon={<ClockIcon />} accent="from-emerald to-emerald-deep" />
-          <QuickAccessCard href="#estado" title="Estado del servicio" subtitle="API, base de datos e IA" icon={<ShieldIcon />} accent="from-primary-700 to-primary-950" />
+          <QuickAccessCard href="#auditoria" title="Auditoría" subtitle="Registro de consultas con filtros" icon={<ClockIcon />} accent="from-emerald to-emerald-deep" />
         </div>
         {/* HU-16/HU-18: indicadores y reportes reales de la API (HU-13: solo admin). */}
         <div className="mt-5" id="metricas">
           <MetricasPanel />
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div id="estado"><ServiceStatus /></div>
-          <div id="auditoria"><AuditLog /></div>
+        <div className="mt-4" id="auditoria">
+          <AuditLog />
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-1">
-          <div id="documentos"><DocumentManager /></div>
+        <div className="mt-4" id="documentos">
+          <DocumentManager />
         </div>
       </section>
     </AdminGate>

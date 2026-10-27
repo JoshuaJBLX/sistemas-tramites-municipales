@@ -27,6 +27,7 @@ export default function ChatBox({ compact = false }: { compact?: boolean }) {
         fueraDominio: r.fuera_dominio,
         entidadSugerida: r.entidad_sugerida,
         tramiteProbable: r.tramite_probable,
+        derivacion: r.derivacion,
       }]);
     } catch (error) {
       setMensajes((prev) => [...prev, {

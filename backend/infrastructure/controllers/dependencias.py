@@ -151,3 +151,26 @@ async def requiere_administrador(
             detail='No tienes permisos de administrador para esta operación.',
         )
     return usuario
+
+
+async def requiere_revisor(
+    request: Request,
+    usuario: dict = Depends(obtener_usuario_actual),
+    container: Container = Depends(obtener_container),
+) -> dict:
+    """HU-03: exige rol revisor o administrador (flujo de aprobación y
+    derogación de documentos); registra el acceso denegado como evento."""
+    if usuario['rol'] not in ('revisor', 'administrador'):
+        await registrar_evento_seguridad(
+            container,
+            'acceso_denegado',
+            usuario_id=usuario['id'],
+            correo=usuario['correo'],
+            detalle=f'Rol "{usuario["rol"]}" sin permiso para {request.url.path}',
+            ip=_cliente_ip(request),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Se requiere el rol revisor o administrador para esta operación.',
+        )
+    return usuario

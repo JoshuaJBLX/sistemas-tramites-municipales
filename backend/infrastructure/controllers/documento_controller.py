@@ -10,7 +10,10 @@ from domain.entities.Documento import Documento
 from domain.errors import DocumentoIlegibleError, FormatoNoSoportadoError
 from domain.value_objects.EstadoDocumento import EstadoDocumento
 from infrastructure.container import Container, obtener_container
-from infrastructure.controllers.dependencias import requiere_administrador
+from infrastructure.controllers.dependencias import (
+    requiere_administrador,
+    requiere_revisor,
+)
 
 router = APIRouter(prefix='/api/documentos', tags=['documentos'])
 
@@ -140,13 +143,14 @@ async def listar_documentos(
 
 @router.put(
     '/{documento_id}/estado', response_model=DocumentoResponse,
-    dependencies=[Depends(requiere_administrador)],
+    dependencies=[Depends(requiere_revisor)],
 )
 async def actualizar_estado(
     documento_id: UUID,
     estado: EstadoDocumento,
     container: Container = Depends(obtener_container),
 ) -> DocumentoResponse:
+    """HU-03: el revisor aprueba (vigente) o deroga/desactiva el documento."""
     documento = await container.gestionar_documentos.actualizar_estado(
         documento_id, estado
     )
@@ -183,12 +187,13 @@ async def reprocesar_documento(
 
 @router.delete(
     '/{documento_id}', status_code=204,
-    dependencies=[Depends(requiere_administrador)],
+    dependencies=[Depends(requiere_revisor)],
 )
 async def eliminar_documento(
     documento_id: UUID,
     container: Container = Depends(obtener_container),
 ) -> None:
+    """HU-03: baja lógica (desactivar) por el revisor; se conserva la auditoría."""
     await container.gestionar_documentos.eliminar(documento_id)
 
 

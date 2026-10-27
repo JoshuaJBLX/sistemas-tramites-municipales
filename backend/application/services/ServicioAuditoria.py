@@ -1,5 +1,6 @@
 """Servicio de aplicación: ServicioAuditoria."""
 
+from datetime import datetime
 from uuid import UUID
 
 from domain.entities.Consulta import Consulta
@@ -38,3 +39,25 @@ class ServicioAuditoria:
     async def listar_trazabilidad(self, limite: int = 20) -> list[Trazabilidad]:
         """HU-10/HU-14: últimas consultas con su respuesta auditada."""
         return await self._auditoria.listar_trazabilidad(limite)
+
+    # HU-14
+    async def listar_trazabilidad_filtrada(
+        self,
+        limite: int = 20,
+        desde: datetime | None = None,
+        hasta: datetime | None = None,
+        texto: str | None = None,
+        usuario_id: UUID | None = None,
+    ) -> list[Trazabilidad]:
+        return await self._auditoria.listar_trazabilidad_filtrada(
+            limite, desde, hasta, texto, usuario_id
+        )
+
+    async def marcar_inconsistente(
+        self,
+        consulta_id: UUID,
+        marcado: bool,
+        nota: str | None,
+        marcado_por: str,
+    ) -> None:
+        await self._auditoria.marcar_inconsistente(consulta_id, marcado, nota, marcado_por)

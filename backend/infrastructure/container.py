@@ -3,6 +3,7 @@
 import json
 import os
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID, uuid4
 
 from fastapi import Request
@@ -76,16 +77,24 @@ QUERY_AUDITORIA = """
 
 # HU-10 (D-9): la trazabilidad une la consulta con su última respuesta
 # auditada (texto, confianza, groundedness y fuentes con metadatos).
+# HU-14: añade marcado_inconsistente, nota_revision e inconsistencia automática
+# (respuesta existe Y (sin fuentes O sin evaluación)).
 _TRAZABILIDAD_COLUMNAS = """
     SELECT c.id, c.usuario_id, c.pregunta, c.intencion, c.creada_en,
            a.respuesta, a.confianza, a.groundedness, a.fuentes_detalle,
            a.fuera_dominio, a.afirmaciones_bloqueadas, a.entidad_sugerida,
-           a.duracion_ms, a.tramite_probable, a.registrado_en
+           a.duracion_ms, a.tramite_probable, a.registrado_en,
+           a.marcado_inconsistente, a.nota_revision,
+           (a.respuesta IS NOT NULL AND (
+               COALESCE(a.fuentes_detalle, '[]') = '[]' OR
+               NOT EXISTS (SELECT 1 FROM evaluaciones_calidad e WHERE e.consulta_id = c.id)
+           )) AS inconsistente
     FROM consultas c
     LEFT JOIN LATERAL (
         SELECT respuesta, confianza, groundedness, fuentes_detalle,
                fuera_dominio, afirmaciones_bloqueadas, entidad_sugerida,
-               duracion_ms, tramite_probable, registrado_en
+               duracion_ms, tramite_probable, registrado_en,
+               marcado_inconsistente, nota_revision
         FROM auditoria_consultas
         WHERE consulta_id = c.id
         ORDER BY registrado_en DESC
@@ -97,6 +106,28 @@ QUERY_TRAZABILIDAD_POR_ID = _TRAZABILIDAD_COLUMNAS + 'WHERE c.id = $1'
 QUERY_TRAZABILIDAD_LISTA = (
     _TRAZABILIDAD_COLUMNAS + 'ORDER BY c.creada_en DESC LIMIT $1'
 )
+
+# HU-14: listado filtrado por fecha, texto (pregunta o trámite probable), usuario.
+QUERY_TRAZABILIDAD_FILTRADA = (
+    _TRAZABILIDAD_COLUMNAS + """
+    WHERE ($2::timestamptz IS NULL OR c.creada_en >= $2)
+      AND ($3::timestamptz IS NULL OR c.creada_en <= $3)
+      AND ($4::text IS NULL OR c.pregunta ILIKE '%' || $4 || '%'
+                       OR a.tramite_probable ILIKE '%' || $4 || '%')
+      AND ($5::uuid IS NULL OR c.usuario_id = $5)
+    ORDER BY c.creada_en DESC LIMIT $1
+"""
+)
+
+# HU-14: marcar/desmarcar registro como inconsistente para revisión.
+QUERY_MARCAR_INCONSISTENTE = """
+    UPDATE auditoria_consultas
+    SET marcado_inconsistente = $2,
+        nota_revision = $3,
+        marcado_en = NOW(),
+        marcado_por = $4
+    WHERE consulta_id = $1
+"""
 
 
 def _serializar_fuente(fuente) -> dict:
@@ -156,6 +187,10 @@ def _mapear_trazabilidad(fila) -> Trazabilidad:
         duracion_ms=fila['duracion_ms'],
         tramite_probable=fila['tramite_probable'],
         registrado_en=fila['registrado_en'],
+        # HU-14
+        marcado_inconsistente=bool(fila.get('marcado_inconsistente', False)),
+        nota_revision=fila.get('nota_revision'),
+        inconsistente=bool(fila.get('inconsistente', False)),
     )
 
 
@@ -200,6 +235,34 @@ class _AuditoriaPostgreSQL(AuditoriaPort):
         async with self._connection.pool.acquire() as conexion:
             filas = await conexion.fetch(QUERY_TRAZABILIDAD_LISTA, limite)
         return [_mapear_trazabilidad(fila) for fila in filas]
+
+    # HU-14: listado filtrado.
+    async def listar_trazabilidad_filtrada(
+        self,
+        limite: int = 20,
+        desde: datetime | None = None,
+        hasta: datetime | None = None,
+        texto: str | None = None,
+        usuario_id: UUID | None = None,
+    ) -> list[Trazabilidad]:
+        async with self._connection.pool.acquire() as conexion:
+            filas = await conexion.fetch(
+                QUERY_TRAZABILIDAD_FILTRADA, limite, desde, hasta, texto, usuario_id
+            )
+        return [_mapear_trazabilidad(fila) for fila in filas]
+
+    # HU-14: marcar/desmarcar como inconsistente.
+    async def marcar_inconsistente(
+        self,
+        consulta_id: UUID,
+        marcado: bool,
+        nota: str | None,
+        marcado_por: str,
+    ) -> None:
+        async with self._connection.pool.acquire() as conexion:
+            await conexion.execute(
+                QUERY_MARCAR_INCONSISTENTE, consulta_id, marcado, nota, marcado_por
+            )
 
 
 @dataclass

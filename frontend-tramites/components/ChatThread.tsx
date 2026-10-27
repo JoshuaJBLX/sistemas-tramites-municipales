@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import GroundednessBadge from './GroundednessBadge';
 import TramiteProbableCard from './TramiteProbableCard';
 import VotoRespuesta from './VotoRespuesta';
-import type { FuenteCitada, TramiteProbable } from '../lib/api';
+import DerivacionCard from './DerivacionCard';
+import type { FuenteCitada, TramiteProbable, Derivacion } from '../lib/api';
 
 export interface ChatMsg {
   autor: 'usuario' | 'asistente';
@@ -17,6 +18,8 @@ export interface ChatMsg {
   fueraDominio?: boolean;
   entidadSugerida?: string;
   tramiteProbable?: TramiteProbable | null;
+  /** HU-17: derivación a atención municipal cuando no hay respuesta confiable. */
+  derivacion?: Derivacion | null;
   fallo?: boolean;
   /** HU-15: id de la consulta para poder calificar la respuesta. */
   consultaId?: string;
@@ -187,6 +190,7 @@ function MensajeAsistente({ m }: { m: ChatMsg }) {
             </p>
           )}
           {m.tramiteProbable && <TramiteProbableCard tramite={m.tramiteProbable} />}
+          {m.derivacion && <DerivacionCard derivacion={m.derivacion} />}
           {!m.fallo && <GroundednessBadge score={m.groundedness} fuentes={m.fuentes} />}
           {!m.fallo && <VotoRespuesta consultaId={m.consultaId} />}
         </div>

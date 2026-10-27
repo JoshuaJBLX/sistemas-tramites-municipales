@@ -26,3 +26,7 @@ class Trazabilidad:
     duracion_ms: int | None = None
     tramite_probable: str | None = None
     registrado_en: datetime | None = None
+    # HU-14: marcado manual + inconsistencia automática (sin fuente o sin evaluación).
+    marcado_inconsistente: bool = False
+    nota_revision: str | None = None
+    inconsistente: bool = False

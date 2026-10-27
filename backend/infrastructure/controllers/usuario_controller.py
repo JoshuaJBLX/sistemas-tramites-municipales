@@ -58,7 +58,7 @@ QUERY_CONSULTAS_USUARIO = """
 class UsuarioRequest(BaseModel):
     nombre: str = Field(..., min_length=3)
     correo: EmailStr
-    rol: str = Field(default='ciudadano', pattern='^(ciudadano|administrador)$')
+    rol: str = Field(default='ciudadano', pattern='^(ciudadano|revisor|administrador)$')
     password: str = Field(..., min_length=8)
 
 
