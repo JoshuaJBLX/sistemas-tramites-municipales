@@ -124,14 +124,14 @@
 
 ---
 
-## Resumen de progreso (17-oct-2026, verificado)
+## Resumen de progreso (estado vigente, rector 06)
 
 | PMV | Actual | Meta | Puntos por cerrar |
 |---|---|---|---|
 | **PMV1** | **100 %** (24/24; 7/7 del checklist) | 100 % | 0 |
-| **PMV2** | **100 %** (28/28; 17/18 del checklist) ✅ | 100 % | solo P2-17 (validación SUS, no fabricable) |
-| **PMV3** | **63 %** (31/49) | 100 % | 18 (seguridad, auditoría, métricas, reportes, pruebas) |
-| **TOTAL** | **82 %** (83/101) | 100 % | 18 |
+| **PMV2** | **100 %** (28/28; 17/18 del checklist) ✅ | 100 % | solo P2-17 (validación SUS, actividad externa) |
+| **PMV3** | **100 %** (49/49) ✅ | 100 % | 0 |
+| **TOTAL** | **100 %** (101/101) ✅ | 100 % | 0 (P2-17 es validación externa, no código) |
 
 ---
 

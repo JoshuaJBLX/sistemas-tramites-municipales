@@ -6,12 +6,12 @@ Análisis detallado de las 18 HU contra el código real del repositorio.
 schema/migraciones), `database/` y `frontend-tramites/`. Verificado el **16 de octubre de 2026**
 (HEAD `ea06c9a`; 101 puntos de verificación contra el código y la base de datos PostgreSQL local).
 
-> ⚠️ **Documento histórico (desactualizado en sus cifras).** Este análisis corresponde a la
-> verificación de las 10:00 del 16-oct-2026 (commit `ea06c9a`); **las cifras vigentes son
-> posteriores** y están en [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) §10:
-> **83/101 = 82 % global · PMV1 100 % ✅ · PMV2 100 % ✅ · PMV3 63 %** (11 HU al 100 %: HU-01, 02, 04–12).
-> Los defectos **D-14..D-23 están corregidos** (la API arranca con 31 rutas, `004`/`005`/`006` aplicadas,
-> carga de PDF real → 201). El detalle por punto de este documento se mantiene como
+> ⚠️ **Documento histórico (snapshot del 16-oct-2026).** Este análisis corresponde a la
+> verificación de las 10:00 del 16-oct-2026 (commit `ea06c9a`); **el estado vigente es 100 %
+> (101/101)**, con 18/18 HU cerradas, PMV1/PMV2/PMV3 al 100 % y 40 rutas servibles, según
+> [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) §10.
+> Los defectos **D-14..D-23 están corregidos** (la API arranca con 40 rutas, `004`/`005`/`006`
+> aplicadas, carga de PDF real → 201). El detalle por punto de este documento se mantiene como
 > **auditoría de partida**; para el estado actual, usar el documento 06 y el
 > [`07-checklist-implementacion.md`](07-checklist-implementacion.md).
 
@@ -55,20 +55,19 @@ verificables con `grep` sobre el repositorio.
 
 ### Avance global
 
-| Métrica | Valor |
+| Métrica | Valor (16-oct-2026, histórico) |
 |---|---|
 | Puntos de verificación cumplidos | **60 / 101** |
-| **Avance total del alcance de las 18 HU** | **59 %** |
+| **Avance total del alcance de las 18 HU** | **59 %** (histórico) |
 | HU al 100 % | **2 de 18** — HU-05, HU-06 |
 | HU implementadas (⚠️ parcial o mejor) | **13 de 18 (72 %)** |
 | HU sin implementar (❌) | **5 de 18 (28 %)** — HU-11, HU-12, HU-15, HU-16, HU-18 |
 | HU más avanzada | **HU-05 y HU-06 · 100 %** |
 | Pruebas automatizadas | **0 suites** (ningún `test_*.py`, `*.test.ts` ni `conftest.py` en el repo; **G-18** sigue abierto) |
 
-> ⚠️ **Cifra histórica (ver ver banner superior):** el 59 % era el estado al comienzo de la jornada
-> del 16-oct-2026. El estado al final de ese día fue **72 % (73/101)**; el **17-oct-2026** se cerró
-> PMV2 al **100 %** (HU-08, HU-10, HU-11 y puntos de HU-14) y el estado verificado es
-> **82 % (83/101)** — ver §10 de [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md).
+> ✅ **Estado vigente (fuente única de verdad: rector 06):** **101/101 = 100 %**, 18/18 HU al
+> 100 %, PMV1 24/24, PMV2 28/28 y PMV3 49/49; 40 rutas servibles. Las cifras de esta tabla son
+> el **snapshot histórico del 16-oct-2026** y se conservan como auditoría de partida.
 
 ---
 
@@ -211,7 +210,7 @@ verificables con `grep` sobre el repositorio.
 - [x] Tabla `auditoria_consultas` guarda `respuesta`, `confianza`, `fuentes` (URLs), fecha (`container.py:42`).
 - [x] `EvaluadorGroundedness` calcula cobertura léxica con umbrales (alta ≥0.75, media ≥0.40) (`EvaluadorGroundedness.py`).
 - [x] Si confianza BAJA con fuentes, se agrega advertencia visible a la respuesta (`ServicioOrientacion.orientar`, línea 28).
-- [ ] ❌ **Trazabilidad incompleta en API:** `GET /api/consultas/{id}` devuelve solo `consulta` (pregunta/intención/fecha), **no respuesta, fuentes ni confianza** (`consulta_controller.py:90`).
+- [ ] ❌ **Trazabilidad API (histórico):** en el snapshot, `GET /api/consultas/{id}` devolvía solo `consulta` (pregunta/intención/fecha), **no respuesta, fuentes ni confianza** (`consulta_controller.py:90`). Cerrado en el estado vigente (D-9).
 - [ ] ❌ **Bloqueo de afirmaciones:** el sistema advierte pero no bloquea/elimina afirmaciones no fundamentadas.
 - [ ] ❌ **Fuentes detalladas** (número, fecha, versión, artículo, página): la BD solo guarda una cadena de URLs, no el detalle citado.
 
@@ -317,7 +316,7 @@ verificables con `grep` sobre el repositorio.
 | HU-07 | Orientación de requisitos | ✅ | **80 %** | Sin derivación al área responsable (no hay dato en BD) |
 | HU-08 | Costos y plazos | ⚠️ | 60 % | Arancel del TUPA sin cargar en la BD |
 | HU-09 | Respuestas con SLM | ⚠️ | 60 % | Sin estructura garantizada ni derivación |
-| HU-10 | Trazabilidad/anti-alucinación | ⚠️ | 50 % | Trazabilidad API incompleta, sin bloqueo real |
+| HU-10 | Trazabilidad/anti-alucinación | ⚠️ | 50 % | Trazabilidad API limitada en el snapshot; cerrada en el estado vigente |
 | HU-11 | Consultas fuera de dominio | ❌ | 0 % | Sin clasificador de dominio |
 | HU-12 | Trámites relacionados | ❌ | 0 % | Sin motor de recomendaciones |
 | HU-13 | Usuarios y seguridad | ⚠️ | 40 % | Solo registro; sin login, roles ni seguridad |
@@ -370,6 +369,6 @@ El avance global ese día fue **72 % (73/101)**.
 > G-04), **HU-10** (trazabilidad completa, bloqueo de afirmaciones, fuentes con metadatos, panel
 > real — D-9) y **HU-11** (clasificador de dominio con derivación a la entidad correspondiente),
 > más 2 puntos de **HU-14** (respuesta completa en auditoría + panel real). **PMV2 llegó a
-> 100 % (28/28)** y el global a **82 % (83/101)**. Sigue abierto: HU-13 (auth/roles),
-> HU-14 (búsqueda por filtros), HU-15/HU-16/HU-18 (0 %), HU-17 (40 %) y la validación SUS
-> (P2-17). Detalle en §10 de `06-estado-actual-implementado.md`.
+> 100 % (28/28)** y el global a **82 % (83/101)**. Posteriormente se cerró el resto del alcance:
+> **estado vigente 100 % (101/101)**, 18/18 HU, PMV3 49/49. Detalle en §10 de
+> `06-estado-actual-implementado.md`.

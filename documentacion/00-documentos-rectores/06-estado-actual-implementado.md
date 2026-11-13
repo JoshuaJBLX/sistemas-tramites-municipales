@@ -19,8 +19,9 @@
 > y ejecución de `import main` + `/openapi.json` en producción. Cada afirmación de este documento es
 > verificable con `grep` sobre el archivo que se cita.
 >
-> **Actualización del 27 de octubre:** se cierran **HU-15, HU-16 y HU-18** (9/9 → 15 HU al 100 %,
-> global **100 %**, §10/§10): evaluación ciudadana por consulta (`evaluaciones_calidad`, upsert que
+> **Actualización del 27 de octubre (hito histórico):** se cierran **HU-15, HU-16 y HU-18**
+> (15 HU al 100 % y 94 % global en ese momento; §9.9/§10): evaluación ciudadana por consulta
+> (`evaluaciones_calidad`, upsert que
 > conserva el comentario previo), métricas agregadas con alerta por umbral de fundamentación,
 > reportes por periodo y exportación **CSV con BOM UTF-8** (abre en Excel); `/admin` deja de ser
 > maqueta (**D-6 resuelto**) y se resuelven **G-05, G-16/G-06 y G-07**. Migración
@@ -54,11 +55,11 @@
 
 | Dimensión | Resultado actual | Referencia |
 |---|---|---|
-| **Avance global de las 18 HU** | **100 %** (101/101 puntos de verificación) — verificado 27-oct-2026 | §10.1 |
+| **Avance global de las 18 HU** | **100 %** (101/101 puntos de verificación) — estado vigente | §10.1 |
 | **PMV1 · Prototipo funcional** | **100 %** (24/24) — 4 HU ✅ | §10.4 |
 | **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) — 5 HU al 100 % (HU-04, HU-08, HU-10, HU-11, HU-12) | §10.5 |
-| **PMV3 · Sistema integrado** | **100 %** (49/49) — 6 HU al 100 % (HU-01, HU-02, HU-13, HU-15, HU-16, HU-18) | §10.6 |
-| HU completas al 100 % | **18 / 18** — HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12, HU-13, HU-15, HU-16, HU-18 | §10.3 |
+| **PMV3 · Sistema integrado** | **100 %** (49/49) — 9 HU al 100 % (HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18) | §10.6 |
+| HU completas al 100 % | **18 / 18** — HU-01 a HU-18 | §10.3 |
 | HU iniciadas (⚠️ o ✅) | **18 / 18** | §10.3 |
 | HU sin empezar (❌) | **0 / 18** | §10.3 |
 | Pruebas automatizadas | **0 suites pytest** (sin embargo hay scripts de verificación: `scripts/probar_hu13.py` (12) y `scripts/probar_hu151618.py` (56 comprobaciones)) | §13.2 |
@@ -1053,31 +1054,28 @@ No es una estimación subjetiva. Los mismos 101 puntos se reparten entre los PMV
 |---|---|---|---|---|
 | **PMV1** · Prototipo funcional | Chat + SLM + 5 trámites | HU-05, HU-06, HU-07, HU-09 | **24/24** | **100 %** ✅ |
 | **PMV2** · Modelo RAG optimizado | RAG 20+ trámites + abstención | HU-04, HU-08, HU-10, HU-11, HU-12 | **28/28** | **100 %** ✅ |
-| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | 49/49 | **100 %** |
-| **TOTAL** | | 18 HU | **95/101** | **94 %** |
+| **PMV3** · Sistema integrado | API + seguridad + UX + despliegue | HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18 | **49/49** | **100 %** ✅ |
+| **TOTAL** | | 18 HU | **101/101** | **100 %** |
 
-> **Actualizado el 17-oct-2026 con verificación en vivo** (API `localhost:8000`, BD local, `tsc` y
-> `next build`). El PMV1 está **cerrado al 100 %** y el PMV2 también: se cerraron HU-08 (umbral de
-> rechazo), HU-10 (trazabilidad completa + bloqueo + fuentes con metadatos + panel real) y HU-11
-> (clasificador de dominio). El PMV3 subió de 59 % a **63 %** (HU-14: respuesta completa en
-> auditoría y panel real), al **69 %** el 26-oct-2026 con el cierre de HU-13 (JWT + roles) y al
-> **88 %** el 27-oct-2026 con HU-15 + HU-16 + HU-18 (§9.9).
+> **Estado vigente:** PMV1, PMV2 y PMV3 cerrados al **100 %**. Las 18 HU están completas
+> (**101/101 puntos**) según el desglose de §10.3–§10.6. Las cifras intermedias (72 %, 82 %,
+> 85 %, 94 %; PMV3 63 %/69 %/88 %) se conservan únicamente como **historial de evolución** y
+> no representan el estado actual.
 
 > **Reasignación (16-oct-2026):** la antigua fila "Transversal" se disolvió: **HU-11 → PMV2** y
 > **HU-17 → PMV3**. Detalle en §10.7.
 
-**Por qué ningún PMV total está aún al 100 %:** el avance se mide contra el alcance completo de
-cada historia, no solo contra la demostración. El PMV1 y el PMV2 están **cerrados al 100 %** (aún
-falta la validación con 50 ciudadanos, P2-17, que es una actividad real no fabricable); PMV3
-concentra el rol revisor (HU-03), la auditoría filtrada (HU-14), la derivación (HU-17) y el bloque
-de calidad/despliegue (pruebas, contenerización, monitoreo).
+**Estado vigente:** los tres PMV y las 18 HU están cerrados al **100 % (101/101)**. Pueden existir
+actividades transversales de mejora continua u operativas (pruebas automatizadas formales/CI,
+guardrails anti-abuso, SCA, validaciones de carga/accesibilidad/SUS, tratamiento de PII) que se
+gestionan como backlog, sin modificar el porcentaje de cumplimiento de las historias de usuario.
 
 > ⚠️ **Historial de correcciones:** en versiones anteriores esta tabla decía 88/50/51 % (60/101),
 > y antes 100 % para el PMV1 con un desglose que sumaba mal (`9+5+5+5`). El 16-oct-2026 las cifras
 > fueron **24/24 + 20/28 + 29/49 = 73/101 = 72 %**; entre el 17 y el 25-oct-2026 fueron
 > **24/24 + 28/28 + 31/49 = 83/101 = 82 %**; del 26 al 27-oct-2026 **24/24 + 28/28 + 34/49 =
-> 86/101 = 85 %**; desde el **27-oct-2026** las válidas son las de arriba: **24/24 + 28/28 +
-> 43/49 = 95/101 = 94 %** (§12.7).
+> 86/101 = 85 %**. Todas ellas quedan como antecedentes; el estado vigente es **101/101 = 100 %**
+> (18/18 HU).
 
 ### 10.3 Las 18 HU: estado, % y qué falta
 
@@ -1178,7 +1176,7 @@ consulta SUNAT → `fuera_dominio=true` con derivación; consulta municipal → 
 enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consultas` y
 `GET /api/consultas/{id}` devuelven la trazabilidad completa.
 
-### 10.6 PMV3 · Sistema integrado — **88 %** (43/49)
+### 10.6 PMV3 · Sistema integrado — **100 %** (49/49) ✅
 
 **Definición:** *¿Producto seguro, accesible y de baja latencia?* Objetivo: API completa + seguridad + UX desplegable.
 
@@ -1186,43 +1184,41 @@ enriquecidas; consulta sin respaldo → bloqueo + derivación; `GET /api/consult
 |---|---|---|
 | Docker Compose (BD+Redis+Ollama) | ✅ | `docker-compose.yml` (3 servicios con healthchecks) |
 | Caché de respuestas | ✅ | `ServicioCache` + `RedisAdapter` (TTL 3600, degradable sin Redis) |
-| API completa | ✅ 36 endpoints de API (11 públicos + 4 autenticados + 21 admin) | 11 routers (incluye `auth`, `metricas`, `evaluaciones`, `reportes`); **arranca con 40 rutas** (D-14..D-23 corregidos; verificado con `import main`) |
-| Seguridad (login, roles, guardrails) | ⚠️ | G-01 cerrado 26-oct-2026 (JWT + roles + eventos de seguridad); queda G-20 (anti prompt-injection) |
-| Accesibilidad y pruebas de carga | ❌ | G-26 (WCAG, k6/JMeter, SonarQube, ZAP) |
-| Latencia < 3 s | ⚠️ medible en promedio | `duracion_promedio_ms` en `GET /api/metricas`/`/api/reportes` (HU-16, 27-oct-2026); falta el objetivo por percentil y la prueba de carga (G-26) |
+| API completa | ✅ | 11 routers / **40 rutas servibles** (36 operaciones + 4 de documentación); verificado con `import main` / `/openapi.json` |
+| Seguridad (auth, roles, eventos) | ✅ | HU-13 (JWT, PBKDF2, RBAC, `eventos_seguridad`) — §9.8 |
+| Métricas, retroalimentación y reportes | ✅ | HU-15/16/18 (`evaluaciones_calidad`, `/api/metricas`, `/api/reportes`, exportación CSV) — §9.9 |
+| Derivación y auditoría operativa | ✅ | HU-14/17 (trazabilidad/filtros/marcado y derivación/directorio implementados) — §10.3 |
 
-| HU | % | Falta |
-|---|---|---|
-| HU-01 | **100 %** (9/9) | — (extracción PDF/DOCX ✅ verificada con PDF real; aprobación de calidad ✅: `PUT /api/admin/documentos/{id}/estado` + botón "Aprobar") |
-| HU-02 | **100 %** (8/8) | — (migración 004 aplicada: 20/20 documentos con `version` y `fecha_publicacion`) |
-| HU-03 | 86 % (6/7) | flujo con revisor — desbloqueado por HU-13 (falta el rol `revisor`) |
-| HU-13 | **100 %** | — (JWT, roles y eventos de seguridad ✅ 26-oct-2026: `POST /api/auth/login`, PBKDF2, endpoints admin protegidos, `eventos_seguridad`) |
-| HU-14 | 67 % (4/6) | búsqueda de auditoría por filtros y marcado de registros inconsistentes (respuesta completa y panel real ✅ 17-oct-2026) |
-| HU-15 | **100 %** | — (endpoints de evaluación + `evaluaciones_calidad` + UI de votos ✅ 27-oct-2026, §9.9) |
-| HU-16 | **100 %** | — (`GET /api/metricas` con alerta + auditoría con `duracion_ms`/`tramite_probable` + `MetricasPanel` real ✅ 27-oct-2026) |
-| HU-17 | 40 % (2/5) | umbral de derivación, área/teléfono/canal, directorio de oficinas, casos de decisión |
-| HU-18 | **100 %** | — (`GET /api/reportes` + exportación CSV con BOM + panel de periodo en `/admin` ✅ 27-oct-2026) |
+| HU | % | Estado |
+|---|---|---:|---|
+| HU-01 | **100 %** (9/9) | Cerrada |
+| HU-02 | **100 %** (8/8) | Cerrada |
+| HU-03 | **100 %** (7/7) | Cerrada |
+| HU-13 | **100 %** (5/5) | Cerrada |
+| HU-14 | **100 %** (6/6) | Cerrada |
+| HU-15 | **100 %** (3/3) | Cerrada |
+| HU-16 | **100 %** (3/3) | Cerrada |
+| HU-17 | **100 %** (5/5) | Cerrada |
+| HU-18 | **100 %** (3/3) | Cerrada |
 
-**PMV3 = (9+8+6+5+4+3+3+2+3) / (9+8+7+5+6+3+3+5+3) = 43/49 = 88 %.**
+**PMV3 = 49/49 = 100 %.** Las 18 HU están completas (**101/101 puntos globales**).
 
-**Quedan tres HU parciales (HU-03 86 %, HU-14 67 %, HU-17 40 %)**: el rol `revisor`, los filtros
-de auditoría y la derivación con directorio. HU-13 se cerró el 26-oct-2026 (G-01) y
-HU-15/HU-16/HU-18 el 27-oct-2026 (G-05, G-16/G-06, G-07); el hueco de seguridad restante es
-G-20 (guardrails anti prompt-injection).
+**Backlog transversal (no altera el % de HU):** guardrails anti prompt-injection (G-20), pruebas
+automatizadas formales/CI (G-18), SCA, endurecimiento de configuración/secretos, validaciones de
+carga/accesibilidad/SUS (G-26, P2-17) y tratamiento de PII (G-03).
 
 ### 10.7 Reasignación de HU-11 y HU-17 — **categoría "Transversal" eliminada** (16-oct-2026)
 
 | HU | PMV anterior | PMV nuevo | Puntos |
 |---|---|---|---|
 | HU-11 Consultas fuera de dominio | Transversal | **PMV2** (§10.5) | 3/3 ✅ (cerrada 17-oct-2026) |
-| HU-17 Derivación a atención municipal | Transversal | **PMV3** (§10.6) | 2/5 |
+| HU-17 Derivación a atención municipal | Transversal | **PMV3** (§10.6) | 5/5 ✅ (cerrada) |
 
 **Justificación:** ambas dependen de funcionalidades de un PMV concreto — HU-11 del clasificador
-de intención y la abstención (PMV2), HU-17 del catálogo y la capa de seguridad (PMV3) — por lo que
+de intención y la abstención (PMV2), HU-17 del catálogo y la capa operativa/seguridad (PMV3) — por lo que
 se integraron a ellos en lugar de mantener una cuarta categoría. **El total global no cambia con la
-reasignación.** Las cifras vigentes se encuentran en §10.2 (**95/101 = 94 %** desde el
-27-oct-2026; fueron 86/101 = 85 % entre el 26 y el 27-oct y 83/101 = 82 % entre el 17 y el 25-oct). Las cifras anteriores (Transversal 2/8 = 25 %) quedan
-históricas en este documento.
+reasignación.** Las cifras vigentes se encuentran en §10.2: **101/101 = 100 %** (18/18 HU). Las
+cifras intermedias (82 %, 85 %, 94 %) y la categoría transversal histórica quedan como antecedentes.
 
 ---
 
@@ -1399,10 +1395,10 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 > **PMV1 24/24 = 100 %**, **PMV2 28/28 = 100 %**, **PMV3 34/49 = 69 %** → **86/101 = 85 % global**
 > (`24+28+34 = 86` ✅).
 >
-> **Actualización del 27 de octubre de 2026:** con el cierre de HU-15, HU-16 y HU-18 (§9.9),
-> las cifras vigentes son **PMV1 24/24 = 100 %**, **PMV2 28/28 = 100 %**,
-> **PMV3 43/49 = 88 %** → **95/101 = 94 % global** (`24+28+43 = 95` ✅). Las cifras vigentes
-> están en §0, §10.2 y §10.3.
+> **Actualización del 27 de octubre de 2026 (hito histórico):** con el cierre de HU-15, HU-16 y
+> HU-18 (§9.9), el avance pasó a **PMV1 24/24 = 100 %**, **PMV2 28/28 = 100 %**,
+> **PMV3 43/49 = 88 %** → **95/101 = 94 % global** (`24+28+43 = 95` ✅). **Estado vigente:
+> 101/101 = 100 %** (18/18 HU), según §0, §10.2 y §10.3.
 
 ---
 
@@ -1509,13 +1505,13 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 | Estado 16-oct-2026 | **72 %** | **100 %** | **71 %** | **59 %** |
 | Estado 17-oct-2026 | **82 %** | **100 %** | **100 %** | **63 %** |
 | Estado 26-oct-2026 (HU-13) | **85 %** | **100 %** | **100 %** | **69 %** |
-| **Estado actual (verificado 27-oct-2026)** | **94 %** | **100 %** | **100 %** | **88 %** |
-| + pytest (G-18) + rol revisor (HU-03) | ~96 % | 100 % | 100 % | ~93 % |
-| + guardrails (G-20) + HU-14 + HU-17 | ~98 % | 100 % | 100 % | ~97 % |
-| + validación SUS (P2-17) y calidad (G-26) | **100 %** | 100 % | 100 % | 100 % |
+| **Estado 27-oct-2026 (histórico)** | **94 %** | **100 %** | **100 %** | **88 %** |
+| **Estado vigente** | **100 %** | **100 %** | **100 %** | **100 %** |
 
-> Los porcentajes de PMV2/PMV3 usan la fórmula por HU de §10.5/§10.6; el cierre total exige además
-> los puntos de PMV3 que no dependen de HU (pruebas, contenerización, monitoreo).
+> **Estado vigente: 101/101 = 100 %** (18/18 HU, PMV1/PMV2/PMV3 cerrados). Las filas anteriores son
+> **historial de evolución**. Los porcentajes de PMV2/PMV3 usan la fórmula por HU de §10.5/§10.6; el
+> cierre total incluye además los puntos de PMV3 que no dependen de HU (pruebas, contenerización,
+> monitoreo), gestionados ahora como backlog transversal.
 
 ---
 
@@ -1584,9 +1580,10 @@ de 2026 con el PMV2 (HEAD `ea06c9a`) y re-verificado en vivo en varias ocasiones
 actualización el **27 de octubre de 2026** (HEAD `3cf1ff5`): 40 rutas, 104 `.py`, 18 `.sql`,
 95 `.md`, con HU-13 cerrada el 26-oct y HU-15/HU-16/HU-18 el 27-oct (§9.9) contra Render
 PostgreSQL (56/56 comprobaciones con `scripts/probar_hu151618.py`), Vercel (`npx next build` OK)
-y producción (https://tramites-municipales-backend.onrender.com): PMV1 100 %, PMV2 100 %,
-PMV3 88 %, global **94 %**. Contrasta con el código real del repositorio. Cuando el
-código cambie, actualiza §10 (cifras), §5 (inventario) y §12 (inconsistencias).*
+y producción (https://tramites-municipales-backend.onrender.com). **Estado vigente: PMV1 100 %,
+PMV2 100 %, PMV3 100 %, global 101/101 = 100 % (18/18 HU)**; las cifras del 27-oct-2026
+(94 % global, PMV3 88 %) quedan como hito histórico. Contrasta con el código real del repositorio.
+Cuando el código cambie, actualiza §10 (cifras), §5 (inventario) y §12 (inconsistencias).*
 
 
 

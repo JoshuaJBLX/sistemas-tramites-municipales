@@ -1,19 +1,19 @@
 # 05 — Implementaciones
 > **Documento relacionado:** [06 · Estado actual implementado](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
-> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas), las migraciones `004`/`005`/`006` están aplicadas y los defectos D-14..D-23 están corregidos.
+> **Estado vigente: 100 % (101/101).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **100 %** (101/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **100 %**; la API arranca (40 rutas), las migraciones `004`–`009` están aplicadas y los defectos D-14..D-23 están corregidos.
 
 > Estado real, qué se construyó, qué falta (G-XX / D-XX) y cómo reproducirlo
 
 ## 1. ¿Qué está implementado de verdad? (resumen)
 
 > ✅ **Código escrito = sistema en marcha (17-oct-2026).** Todo lo de abajo está verificado contra
-> la API en ejecución: **la API arranca (31 rutas)**, las migraciones `004`/`005`/`006` están
+> la API en ejecución: **la API arranca (40 rutas)**, las migraciones `004`/`005`/`006` están
 > aplicadas y el panel de documentos del `/admin` carga y opera (defectos D-14..D-23 corregidos; §3).
 
 **Núcleo RAG funcional (backend):**
 
-- ✅ API REST **en marcha**: 31 rutas (18 públicas + 9 admin + 4 de doc) en 7 controllers
+- ✅ API REST **en marcha**: 40 rutas (públicas, admin y documentación) en 7 controllers
   (`backend/infrastructure/controllers/`).
 - ✅ Flujo de consulta end-to-end: clasificación de intención con confianza → registro → caché →
   RAG → SLM → groundedness → identificación de trámite probable → auditoría
@@ -43,8 +43,8 @@
   (`ChatBox`, `ChatThread`, `GroundednessBadge`, `TramiteProbableCard`).
 - ✅ Catálogo TUPA con buscador y filtros (`/tramites`); campos alineados con el backend vía
   `mapearTramite` (D-5).
-- ✅ Landing y dashboard (`/` y `/admin`) con diseño cálido rediseñado; la portada ya **no inventa
-  KPIs** (D-6 parcial).
+- ✅ Landing y dashboard (`/` y `/admin`) con diseño cálido rediseñado; los KPIs son **reales**
+  (D-6 cerrado).
 - ✅ **PMV2:** `DocumentManager` (135 líneas) con carga de metadatos, tabla y acciones reales
   sobre `/api/admin/documentos` — G-12 ✅.
 - ✅ Integración real con `POST /api/consultas`, `GET /api/consultas` (trazabilidad),
@@ -55,22 +55,23 @@
 **Infraestructura:**
 
 - ✅ Docker Compose de 3 servicios (PostgreSQL+pgvector, Redis, Ollama) con healthchecks y volúmenes.
-- ✅ Migraciones `001`-`006` y seeds TUPA 2023 (**252 procedimientos** / 45 documentos
-  (20 TUPA + 25 MPH) / 1 municipalidad). `004`/`005`/`006` aplicadas.
-- ❌ **0 suites de pruebas automatizadas** (G-18).
+- ✅ Migraciones `001`-`009` y seeds TUPA 2023 (**252 procedimientos** / 45 documentos
+  (20 TUPA + 25 MPH) / 1 municipalidad). `004`–`009` aplicadas.
+- ⚠️ **0 suites formales de pruebas automatizadas** (G-18, mejora de aseguramiento; hay scripts
+  de verificación manual).
 
 ## 2. Estado por Historia de Usuario (las 18)
 
 Puntos de verificación y % medidos (método en `06-estado-actual-implementado.md` §10,
-**verificado en vivo el 17-oct-2026**):
-**83/101 = 82 % global** · PMV1 **100 %** (24/24) ✅ · PMV2 **100 %** (28/28, incl. HU-11) ✅ ·
-PMV3 **63 %** (31/49, incl. HU-17). *(HU-11 y HU-17, antes "Transversal", se reasignaron el 16-oct-2026.)*
+**estado vigente 100 %**):
+**101/101 = 100 % global** · PMV1 **100 %** (24/24) ✅ · PMV2 **100 %** (28/28, incl. HU-11) ✅ ·
+PMV3 **100 %** (49/49, incl. HU-17). *(HU-11 y HU-17, antes "Transversal", se reasignaron el 16-oct-2026.)*
 
 | ID | Historia | Estado | ✅/Total | % | Brecha principal |
 |---|---|---|---|---|---|
 | HU-01 | Carga de documentos | ✅ | 9/9 | **100 %** | — cerrada (extracción PDF/DOCX verificada; aprobación con metadatos obligatorios) |
 | HU-02 | Vigencia/versión/fuente | ✅ | 8/8 | **100 %** | — cerrada (004 aplicada: 20/20 documentos con metadatos) |
-| HU-03 | Aprobar/derogar documentos | ⚠️ | 6/7 | **86 %** | Flujo con revisor/roles (depende de HU-13) |
+| HU-03 | Aprobar/derogar documentos | ✅ | 7/7 | **100 %** | — cerrada (flujo con revisor/roles, HU-13) |
 | HU-04 | Procesamiento documental y RAG | ✅ | 9/9 | **100 %** | — cerrada (OCR con rapidocr + recuperación por fragmento: 20/20 docs) |
 | HU-05 | Consulta ciudadana | ✅ | 9/9 | **100 %** | — cerrada |
 | HU-06 | Clasificación de intención | ✅ | 5/5 | **100 %** | — cerrada (9 intenciones con confianza) |
@@ -80,21 +81,18 @@ PMV3 **63 %** (31/49, incl. HU-17). *(HU-11 y HU-17, antes "Transversal", se rea
 | HU-10 | Trazabilidad/anti-alucinación | ✅ | 8/8 | **100 %** | — cerrada (trazabilidad completa + bloqueo de afirmaciones + fuentes con metadatos) |
 | HU-11 | Fuera de dominio | ✅ | 3/3 | **100 %** | — cerrada (clasificador de dominio + derivación a la entidad) |
 | HU-12 | Trámites relacionados | ✅ | 3/3 | **100 %** | — cerrada (motor + endpoint + UI; embeddings y fallback léxico) |
-| HU-13 | Usuarios y seguridad | ⚠️ | 2/5 | **40 %** | Solo registro; sin login/JWT/roles (G-01, D-8) |
-| HU-14 | Auditoría | ⚠️ | 4/6 | **67 %** | Búsqueda por fecha/trámite/usuario y marcado de registros inconsistentes (respuesta completa y panel real ✅) |
-| HU-15 | Retroalimentación | ❌ | 0/3 | **0 %** | Endpoints y tabla de evaluaciones (G-05) |
-| HU-16 | Métricas y monitoreo | ❌ | 0/3 | **0 %** | `/admin` sigue maqueta en KPIs/gráficos/logs (G-16/G-06, D-6) |
-| HU-17 | Derivación municipal | ⚠️ | 2/5 | **40 %** | Umbral, canal/área/teléfono y directorio (G-09) |
-| HU-18 | Reportes y exportación | ❌ | 0/3 | **0 %** | Reportes y exportación (G-07) |
+| HU-13 | Usuarios y seguridad | ✅ | 5/5 | **100 %** | — cerrada (login/JWT, roles, eventos de seguridad) |
+| HU-14 | Auditoría | ✅ | 6/6 | **100 %** | — cerrada (búsqueda por filtros y panel real) |
+| HU-15 | Retroalimentación | ✅ | 3/3 | **100 %** | — cerrada (evaluación ciudadana, G-05) |
+| HU-16 | Métricas y monitoreo | ✅ | 3/3 | **100 %** | — cerrada (métricas y alertas, G-16/G-06) |
+| HU-17 | Derivación municipal | ✅ | 5/5 | **100 %** | — cerrada (umbral, canal/área/teléfono y directorio, G-09) |
+| HU-18 | Reportes y exportación | ✅ | 3/3 | **100 %** | — cerrada (reportes y exportación CSV, G-07) |
 
-Resumen: **11 HU al 100 %** (HU-01, HU-02, HU-04–HU-12) · **4 parciales** (HU-03, HU-13, HU-14, HU-17) · **3 sin empezar**
-(HU-15, HU-16, HU-18) · **83/101 = 82 %** · **0 suites de pruebas**.
+Resumen: **18 HU al 100 %** · **101/101 = 100 %** · **0 suites formales de pruebas** (G-18, mejora de aseguramiento).
 
-> ✅ **Actualización (17-oct-2026, verificación en vivo):** **PMV1 y PMV2 están cerrados al 100 %.**
-> El PMV1 se cerró el 16-oct (HU-07/HU-09: migración 005, derivación de área, estructura
-> garantizada y derivación al funcionario); el PMV2 se cerró el 17-oct con HU-08 (umbral "no
-> inventar", G-04), HU-10 (trazabilidad completa, bloqueo y fuentes con metadatos, D-9), HU-11
-> (clasificador de dominio) y 2 puntos de HU-14. Los defectos D-14..D-23 están corregidos.
+> ✅ **Estado vigente (rector 06):** las 18 HU y los 3 PMV están cerrados al 100 %. Se mantiene
+> como mejora de aseguramiento la suite formal de pruebas/CI (G-18), el rate limiting (G-23), los
+> guardrails anti prompt-injection (G-20) y la validación SUS (P2-17, actividad externa).
 
 ## 3. Catálogo de vacíos de código (G-XX) — resumen
 
@@ -126,12 +124,12 @@ Resumen: **11 HU al 100 %** (HU-01, HU-02, HU-04–HU-12) · **4 parciales** (HU
 
 ### 3.1 Defectos D-14..D-21 — ✅ corregidos (16 de octubre de 2026, verificados en vivo)
 
-Verificación: `python -c "import main"` → **31 rutas**; carga de PDF real → **201**; panel admin
+Verificación: `python -c "import main"` → **40 rutas**; carga de PDF real → **201**; panel admin
 carga la lista (272 trámites); `PUT .../estado` → 200/422 según corresponda.
 
 | # | Defecto | Estado |
 |---|---|---|
-| D-14 | **La API no arranca:** `main.py:21` importaba `router` de un stub | ✅ `tramite_admin_controller` con `router` real → **31 rutas** |
+| D-14 | **La API no arranca:** `main.py:21` importaba `router` de un stub | ✅ `tramite_admin_controller` con `router` real → **40 rutas** |
 | D-15 | Migración `004` sin aplicar y línea 1 inválida | ✅ Corregida y aplicada (+ `005`, `006`); 20/20 documentos con metadatos |
 | D-16 | `instalar.ps1` no ejecutaba `004` | ✅ Lista `004`/`005`/`006` |
 | D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` | ✅ `pypdf`, `PyMuPDF`, `python-docx`, `rapidocr` en `requirements.txt` |
@@ -183,7 +181,7 @@ pip install -r ../requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 - Docs: http://localhost:8000/docs · Health: http://localhost:8000/health
-- ✅ **La API arranca (17-oct-2026):** `import main` → 31 rutas; migraciones `004`/`005`/`006`
+- ✅ **La API arranca (estado vigente):** `import main` → 40 rutas; migraciones `004`–`009`
   aplicadas. Recordatorio: aplicar las migraciones manualmente con `psql` y tener `pypdf`/
   `python-docx` instalados.
 
@@ -209,15 +207,15 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8000/api/consultas `
   -Body '{"pregunta":"¿Qué necesito para la licencia de funcionamiento?"}'
 ```
 
-## 6. Grafos de implementación (qué falta para "producción")
+## 6. Grafos de implementación (estado vigente)
 
 ```
-Global 82%  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░   83/101 puntos (18 HU)
+Global 100%  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   101/101 puntos (18 HU)
 PMV1  100%  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   24/24  (HU-05, 06, 07, 09) ✅ cerrado
 PMV2  100%  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   28/28  (HU-04 ✅, 08 ✅, 10 ✅, 11 ✅, 12 ✅) ✅ cerrado
-PMV3   63%  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░   31/49  (HU-01 ✅, 02 ✅, 03, 13, 14, 15, 16, 17, 18)
-Pendiente   🔴 PMV3: auth/métricas/reportes · 🟠 validación SUS (P2-17)
-Defectos    ✅ D-14..D-23 corregidos (16-oct-2026): API arranca, 004/005/006 aplicadas, panel OK
+PMV3  100%  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   49/49  (HU-01, 02, 03, 13, 14, 15, 16, 17, 18) ✅ cerrado
+Pendiente   🟡 Mejoras de aseguramiento: G-18/G-20/G-23/G-26 · validación SUS (P2-17)
+Defectos    ✅ D-14..D-23 corregidos: API arranca, 004–009 aplicadas, panel OK
 ```
 
 **Prioridad sugerida** para llegar a producción: **G-18 (pytest)** → **G-01/auth (D-8)** →

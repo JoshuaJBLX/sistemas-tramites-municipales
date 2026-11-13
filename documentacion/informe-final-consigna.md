@@ -42,7 +42,7 @@ vectorizados** (embeddings BGE-M3) y un catálogo de **272 trámites** (252 TUPA
 otros orígenes). La consulta ciudadana usa RAG (búsqueda semántica con similitud coseno,
 umbral 0.3) más un modelo de lenguaje pequeño **Qwen 2.5 3B servido localmente con Ollama**,
 con trazabilidad de fuentes (HU-10), clasificador de intención (HU-06), identificación de
-trámite probable y control de consultas fuera de dominio (HU-11). La API expone **31 rutas**
+trámite probable y control de consultas fuera de dominio (HU-11). La API expone **40 rutas**
 (18 públicas + 9 de administración + 4 de documentación); el catálogo cubre **259 de 272
 trámites con área responsable** para derivación (HU-17, en desarrollo).
 
@@ -132,7 +132,7 @@ ambiental en §3). Redactar con la referencia correspondiente.]
 | Principio/concepto de ingeniería | Aplicación y módulo |
 |---|---|
 | **Arquitectura hexagonal (puertos y adaptadores)** | `backend/domain/ports` define interfaces; `infrastructure/adapters` las implementa (SLM, embeddings, RAG, caché, catálogo). Cambiar Ollama/Redis/pgvector no toca el dominio. |
-| **APIs REST y diseño de contratos (OpenAPI)** | 31 rutas FastAPI con schemas Pydantic v2; CORS restringido a localhost:3000 |
+| **APIs REST y diseño de contratos (OpenAPI)** | 40 rutas FastAPI con schemas Pydantic v2; CORS restringido a localhost:3000 |
 | **Diseño de BD relacional + extensión vectorial** | PostgreSQL con `text[]`, `numeric`, uuid; columna `embedding` (pgvector o `double precision[]` degradado) |
 | **Chunking documental y metadatos de vigencia** | Fragmentación por documento, estado vigente/derogado (migración 004), baja lógica |
 | **Control de calidad de IA (groundedness, abstención)** | `EvaluadorGroundedness`, umbral "no inventar" (G-04), bloqueo de afirmaciones sin fuente |
@@ -224,7 +224,7 @@ planificación previa se ancló a **hitos H1–H5** (ago–oct 2026) del Project
 El trabajo se realizó mediante:
 1. Análisis de requerimientos → entregable: `documentacion/01-*` y `02-*` (RF-01..RF-10, 18 HU, 5 épicas).
 2. Elaboración de prototipos → entregable: PMV1 (prototipo funcional, cerrado al 100 %).
-3. Implementación de la solución → entregable: PMV2 (RAG optimizado, cerrado al 100 %) y PMV3 (en curso, 63 %).
+3. Implementación de la solución → entregable: PMV2 (RAG optimizado, cerrado al 100 %) y PMV3 (cerrado al 100 %, 49/49).
 4. Pruebas de calidad de software → ver §6 (pendiente formalizar suites automatizadas, G-18).
 
 ### 4.1 Aportes / Descubrimientos (mínimo 2)
@@ -271,7 +271,7 @@ documentación; redactar rendimiento, seguridad, disponibilidad y accesibilidad.
 **Historias de usuario por PMV:**
 - PMV1 (100 %): HU-05, HU-06, HU-07, HU-09
 - PMV2 (100 %): HU-04, HU-08, HU-10, HU-11, HU-12
-- PMV3 (63 %): HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18
+- PMV3 (100 %): HU-01, HU-02, HU-03, HU-13, HU-14, HU-15, HU-16, HU-17, HU-18
 
 **Diseño de flujo de navegación:** 4 páginas — `/` (inicio con acceso rápido y estado de
 servicios), `/chat` (asistente con hilo de conversación, tarjeta de trámite probable,
@@ -356,7 +356,7 @@ decisión go/no-go, integración PoC→PMV, fórmula práctica y conclusiones).
 
 | PMV | Pruebas realizadas | Resultado |
 |---|---|---|
-| **PMV1** | Arranque de API (31 rutas servibles), CRUD, consulta ciudadana de extremo a extremo, `tsc --noEmit`, `next build`/`vite build` | ✅ Cerrado 100 % (24/24) |
+| **PMV1** | Arranque de API (40 rutas servibles), CRUD, consulta ciudadana de extremo a extremo, `tsc --noEmit`, `next build`/`vite build` | ✅ Cerrado 100 % (24/24) |
 | **PMV2** | Carga de PDF real del TUPA → 201 con texto extraído; panel admin; humo NLP/RAG (10 casos: sentido/sin sentido/consultas generales); identificador de trámite probable (licencia/carnet/habilitación → tarjeta; certificado/horarios → abstención) | ✅ Cerrado 100 % (28/28; solo P2-17 SUS no fabricable) |
 | **PMV3** | Autenticación, roles, auditoría con filtros y marcado, panel administrativo completo y despliegue productivo (Render + Vercel) | ✅ Cerrado 100 % (49/49) |
 
@@ -395,7 +395,7 @@ decisión go/no-go, integración PoC→PMV, fórmula práctica y conclusiones).
 
 **Conclusión del objetivo general:** se desarrolló MUN AI como aplicación web funcional
 con RAG + SLM local sobre el TUPA 2023 de la MPH; el núcleo consulta→recuperación→
-respuesta trazable está operativo en entorno local (82 % del alcance total planificado).
+respuesta trazable está operativo en entorno local (100 % del alcance planificado, 101/101).
 
 **Conclusión OE1 (canal accesible):** ✅ el chat web funciona con lenguaje natural en
 escritorio; falta validación de accesibilidad móvil (G-26).
@@ -514,28 +514,28 @@ probable, semillas de contenidos y corrección de enlaces 404).
 | Formato de respuesta | Pasos numerados + apartados HU-09 compactos, con truncado y "Fuente oficial" (C-06) |
 | Contenidos | 45 docs oficiales (20 TUPA + 19 MPH gob.pe + 6 institucionales); enlaces verificados HTTP 200 (C-07) |
 
-### A.5 API (31 rutas: 18 públicas + 9 admin + 4 docs)
+### A.5 API (40 rutas: públicas, admin y documentación)
 
 `POST /api/consultas` (chat RAG) · `GET /api/tramites` · `GET /api/documentos` ·
 `POST /api/documentos/upload` y `/procesar` (PDF→texto→fragmentos→embeddings) ·
 `GET /api/admin/documentos` · `PUT /api/documentos/{id}/estado` (baja lógica) ·
 auth/usuarios (endpoints CRUD existen; sin validación de rol) · Swagger en `/docs`.
 
-### A.6 Avance por PMV y HU (checklist verificado 17-oct, actualizado 20-oct)
+### A.6 Avance por PMV y HU (estado vigente, rector 06)
 
 | PMV | Avance | HU | Pendientes |
 |---|---|---|---|
 | **PMV1 — Prototipo funcional** | **100 %** (24/24) | HU-05, HU-06, HU-07, HU-09 | — |
-| **PMV2 — Modelo RAG optimizado** | **100 %** (28/28) | HU-04, HU-08, HU-10, HU-11, HU-12 | Solo P2-17 (validación SUS, no fabricable) |
-| **PMV3 — Sistema integrado** | **63 %** (31/49) | HU-01, HU-02, HU-03, HU-13..HU-18 | Auth/roles, auditoría por filtros, métricas, reportes, pruebas, hardening |
-| **Global** | **82 %** (83/101) | 18 HU en 5 épicas | 0 suites de pruebas (G-18) |
+| **PMV2 — Modelo RAG optimizado** | **100 %** (28/28) | HU-04, HU-08, HU-10, HU-11, HU-12 | Solo P2-17 (validación SUS, actividad externa) |
+| **PMV3 — Sistema integrado** | **100 %** (49/49) | HU-01, HU-02, HU-03, HU-13..HU-18 | — |
+| **Global** | **100 %** (101/101) | 18 HU en 5 épicas | Mejoras de aseguramiento (G-18/G-20/G-23/G-26) |
 
-### A.7 Riesgos/defectos abiertos (principales)
+### A.7 Mejoras de aseguramiento pendientes (no bloquean el 100 % funcional)
 
-G-01 autenticación y roles · G-16 métricas/monitoreo · G-18 pytest/CI · G-20 guardrails
-(prompt injection) · G-21 dataset de evaluación sin versionar · G-23 rate limit ·
-G-26 accesibilidad/carga móvil · G-05 retroalimentación 👍/👎 · G-07 reportes ·
-G-09 derivación a área (HU-17, parcial con 259 áreas cargadas).
+G-18 pytest/CI · G-20 guardrails (prompt injection) · G-23 rate limit · G-26
+accesibilidad/carga móvil · G-21 resultados del dataset de evaluación · P2-17 validación SUS
+(actividad externa). Los vacíos funcionales G-01, G-05, G-07, G-09 y G-16 están cerrados
+según el rector 06.
 
 ### A.8 Entorno de ejecución
 

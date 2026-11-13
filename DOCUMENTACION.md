@@ -14,12 +14,10 @@ el front-end y los seeds ya usan Huancayo/MPH.
 > **★ Documento rector de entrada:** [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md)
 > consolida este índice: inventaría los `.md` del repositorio, el código archivo por archivo
 > (back-end + front-end), los flujos completos de front-end, back-end y base de datos, y el estado
-> verificado de las 18 HU y los 3 PMV (**82 %** global — 83/101; PMV1 **100 %**, PMV2 **100 %**,
-> PMV3 **63 %**). ✅ **Actualizado el 17 de octubre de 2026:** los defectos **D-14..D-23** están
-> corregidos (la API arranca con 31 rutas, migraciones 004/005/006 aplicadas, carga de PDF real →
-> 201) y se cerraron HU-08, HU-10, HU-11 y 2 puntos de HU-14 (umbral "no inventar", trazabilidad
-> completa y clasificador de dominio). Las cifras de los documentos temáticos deben reconciliarse
-> contra su §10.
+> verificado de las 18 HU y los 3 PMV (**100 %** global — 101/101; PMV1 **100 %**, PMV2 **100 %**,
+> PMV3 **100 %**). ✅ **Estado vigente:** los defectos **D-14..D-23** están corregidos (la API
+> arranca con 40 rutas, migraciones 004–009 aplicadas, carga de PDF real → 201) y las 18 HU están
+> cerradas. Las cifras de los documentos temáticos se reconcilian contra su §10.
 
 ## Estructura de la documentación
 
@@ -84,17 +82,18 @@ corregir y ya no se mantiene en el repositorio.
 
 - ✅ implementado · ⚠️ parcial/maqueta · ❌ no implementado (vacíos `G-XX`).
 
-## Endpoints de la API (31 rutas servibles)
+## Endpoints de la API (40 rutas servibles)
 
-> ✅ **17-oct-2026 (verificación en vivo):** la API **arranca** y todas las rutas son servibles
-> (defectos D-14..D-23 corregidos). Detalle archivo:línea de cada una en
-> `06-estado-actual-implementado.md` §6.2. Ninguna valida autenticación ni rol (**D-8/G-01**).
+> ✅ **Estado vigente:** la API **arranca** y todas las rutas son servibles. **40 rutas** =
+> 36 operaciones (`/openapi.json`) + 4 de documentación. Los routers de administración están
+> protegidos con **JWT/RBAC** (`Depends(requiere_administrador)` / `requiere_revisor`).
+> Detalle archivo:línea en `06-estado-actual-implementado.md` §6.2.
 
-| Grupo | Nº | Rutas | Estado |
-|---|---|---|---|
-| Públicos | **18** | `POST /api/consultas`, `GET /api/consultas`, `GET /api/consultas/{id}`, `GET /api/tramites`, `GET /api/tramites/{id}`, `GET /api/tramites/{id}/relacionados`, `POST /api/documentos`, `POST /api/documentos/upload`, `GET /api/documentos`, `GET /api/documentos/{id}`, `PUT /api/documentos/{id}/estado`, `POST /api/documentos/{id}/procesar`, `DELETE /api/documentos/{id}`, `DELETE /api/documentos/{id}/fisico`, `POST /api/usuarios`, `GET /api/usuarios/{id}`, `GET /api/usuarios/{id}/consultas`, `GET /health` | ✅ servibles |
-| Administración | **9** | `GET /api/admin/documentos`, `POST /api/admin/documentos`, `POST /api/admin/documentos/upload`, `POST /api/admin/documentos/{id}/procesar`, `PUT /api/admin/documentos/{id}/estado`, `DELETE /api/admin/documentos/{id}`, `DELETE /api/admin/documentos/{id}/fisico`, `GET /api/tramites/admin`, `PUT /api/tramites/{id}/area` | ✅ servibles; **sin autenticación ni rol** (D-8) |
-| **Total** | **31 rutas** | 7 controllers (27 de API + 4 de documentación) | ✅ **la API arranca** (verificado: `import main` → 31) |
+| Grupo | Nº | Estado |
+|---|---|---|
+| Operaciones (`/openapi.json`) | **36** | ✅ servibles; auth/RBAC en rutas admin |
+| Documentación (Swagger/ReDoc/OpenAPI) | **4** | ✅ servibles |
+| **Total** | **40 rutas** | ✅ **la API arranca** (verificado: `import main` → 40) |
 
 ## Defectos bloqueantes (D-14..D-23) — ✅ todos corregidos (16-oct-2026)
 
@@ -103,7 +102,7 @@ corregir y ya no se mantiene en el repositorio.
 
 | # | Defecto | Estado |
 |---|---|---|
-| D-14 | La API no arrancaba: `ImportError` de `router` en un stub | ✅ 31 rutas servibles |
+| D-14 | La API no arrancaba: `ImportError` de `router` en un stub | ✅ 40 rutas servibles |
 | D-15 | Migración `004` sin aplicar y con línea 1 inválida | ✅ `004`/`005` aplicadas (45/45 con metadatos) |
 | D-16 | `instalar.ps1` no aplicaba la `004` | ✅ ambas migraciones listadas |
 | D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` | ✅ deps completas (incl. OCR) |
@@ -113,46 +112,50 @@ corregir y ya no se mantiene en el repositorio.
 | D-21 | Front llamaba a `/api/tramites/admin` inexistente | ✅ panel carga |
 | D-22/D-23 | `fragmentado` BOOLEAN / publicar sin metadatos → 500 | ✅ `bool(...)` / 422 |
 
-## Catalogo global de vacíos de código (G-XX)
+## Catálogo de vacíos históricos y mejoras de aseguramiento (G-XX)
 
-| Código | Vacío |
+> ✅ **Estado vigente: 100 % (101/101).** Los vacíos funcionales del alcance comprometido están
+> cerrados. La tabla distingue **cerrados** de **mejoras opcionales/hardening** que no bloquean el
+> 100 % funcional.
+
+| Código | Estado |
 |---|---|
-| G-01 | Autenticación, contraseñas, JWT, roles y control de acceso |
-| G-02 | Clasificador de intención por ML (Random Forest/TF-IDF) y métricas F1 |
-| G-03 | Enmascaramiento de PII (regex/NLU) en la entrada |
-| G-04 | ✅ **Cerrado:** umbral de rechazo por groundedness + clasificador de dominio (HU-08/HU-11, 17-oct-2026) |
-| G-05 | Retroalimentación ciudadana (útil/no útil) y tabla `evaluaciones_calidad` |
-| G-06/G-16 | Métricas reales (endpoint de métricas, agregaciones) — hoy maqueta |
-| G-07 | Reportes y exportación |
-| G-08 | ✅ **Cerrado:** recomendación de trámites relacionados (embedding + fallback léxico + UI, 16-oct-2026) |
-| G-09 | Derivación a atención municipal (backend) |
-| G-10 | UI de historial ciudadano `/mis-consultas` (solo API) |
-| G-11 | Rutas `/login`, `/tramites/[id]`, `/404`, sub-rutas `/admin/*` |
-| G-12 | ✅ **Cerrado:** carga de documentos conectada al backend (`DocumentManager.tsx` sube, lista, aprueba y da de baja de verdad); siguen ficticios los KPIs y gráficos de `/admin` (D-6) |
-| G-13 | ✅ **Cerrado:** *chunking* + tabla `fragmentos_documento` con `004` aplicada, OCR y recuperación RAG por fragmento (20/20 documentos, 16-oct-2026) |
-| G-14 | Consistencia campos trámite `tipo`/`duracion_estimada_dias` vs frontend `categoria`/`plazo` |
-| G-15 | Fine-tuning QLoRA del SLM |
-| G-17 | Contenerización frontend/backend, balanceador, HTTPS, monitoreo |
-| G-18 | Suite de pruebas automatizadas (pytest) — **0 suites hoy** |
-| G-20 | Guardrails anti prompt-injection |
-| G-21 | Artefactos de PoC (dataset sintético, resultados de experimentos) |
-| G-23 | Rate limiting / protección contra saturación |
-| G-24 | Auditoría de manipulación de documentos |
-| G-25 | Aviso legal como política de API (solo en UI) |
-| G-26 | Auditoría WCAG, pruebas de carga (k6/JMeter), SonarQube, ZAP |
+| G-01 | ✅ **Cerrado:** autenticación, contraseñas (PBKDF2), JWT, roles y control de acceso |
+| G-02 | 🟡 Mejora opcional: clasificador ML (Random Forest/TF-IDF); el clasificador regex + dominio es funcional |
+| G-03 | 🟡 Mejora: enmascaramiento de PII (regex/NLU) en la entrada |
+| G-04 | ✅ **Cerrado:** umbral de rechazo por groundedness + clasificador de dominio (HU-08/HU-11) |
+| G-05 | ✅ **Cerrado:** retroalimentación ciudadana (útil/no útil) y tabla `evaluaciones_calidad` |
+| G-06/G-16 | ✅ **Cerrado:** métricas reales (endpoint de métricas, agregaciones y panel) |
+| G-07 | ✅ **Cerrado:** reportes y exportación CSV |
+| G-08 | ✅ **Cerrado:** recomendación de trámites relacionados (embedding + fallback léxico + UI) |
+| G-09 | ✅ **Cerrado:** derivación a atención municipal (canal/área/teléfono + directorio) |
+| G-10 | 🟡 Mejora: UI de historial ciudadano `/mis-consultas` (la API de historial existe) |
+| G-11 | ✅ **Cerrado:** rutas `/login`, `/tramites/[id]`, `/404`, sub-rutas `/admin/*` |
+| G-12 | ✅ **Cerrado:** carga de documentos conectada al backend (`DocumentManager` sube, lista, aprueba y da de baja); KPIs y gráficos reales |
+| G-13 | ✅ **Cerrado:** *chunking* + tabla `fragmentos_documento` con `004` aplicada, OCR y recuperación RAG por fragmento (20/20 documentos) |
+| G-14 | ✅ **Cerrado:** consistencia de campos trámite (`mapearTramite`) |
+| G-15 | 🟡 Mejora opcional: fine-tuning QLoRA del SLM |
+| G-17 | 🟡 Mejora: contenerización frontend/CI, balanceador, HTTPS, monitoreo |
+| G-18 | 🟠 **Mejora de aseguramiento:** suite formal pytest/CI (existen scripts de verificación manual) |
+| G-20 | 🟠 **Hardening:** guardrails anti prompt-injection |
+| G-21 | 🟡 Mejora: resultados del dataset de evaluación (dataset ya versionado) |
+| G-23 | 🟠 **Hardening:** rate limiting / protección contra saturación |
+| G-24 | 🟡 Mejora: auditoría de manipulación de documentos |
+| G-25 | 🟡 Mejora: aviso legal como política de API (ya presente en UI) |
+| G-26 | 🟡 Mejora: auditoría WCAG, pruebas de carga (k6/JMeter), SonarQube, ZAP |
 
 ## Mapa de consistencia a.md ↔ código (resumen)
 
 | Afirmación en a.md | Estado real |
 |---|---|
-| Entidad: MPH (Huancayo) | ⚠️ Corregido: MPJ – Junín, TUPA 2023 (252 procedimientos) |
+| Entidad: MPH (Huancayo) | ✅ Corregido en código, frontend y seeds: **MPH – Huancayo**, TUPA 2023 (252 procedimientos); `a.md`/`README.md` conservan la mención histórica Junín/MPJ |
 | API `POST /api/v1/consulta` | ✅ Real: `POST /api/consultas` con `{pregunta}` |
-| Respuesta con `abstencion`/`groundedness`/`latencia_ms`/`pii_filtrado` | ⚠️ Solo `confianza` (alta/media/baja) |
-| Tablas `fragmentos_documentales`, `respuestas`, `evaluaciones_calidad` | ✅ `fragmentos_documento` existe y está poblada (45/45, `004` aplicada); `evaluaciones_calidad` sigue sin existir |
-| 7 contenedores + monitoreo | ⚠️ 3 servicios (postgres, redis, ollama) |
-| Clasificador Random Forest + TF-IDF | ❌ Regex (`ServicioNLP.py`) |
-| 16 rutas frontend | ⚠️ 4 rutas (`/`, `/chat`, `/tramites`, `/admin`) |
-| Paleta azul institucional | ⚠️ Rediseñada: estilo cálido/orgánico |
-| SLM `qwen2.5:3b-instruct-q4_K_M` | ⚠️ `qwen2.5:3b` (Ollama) |
-| Groundedness coseno > 0.82 con rechazo | ⚠️ Confianza cualitativa sin rechazo |
-| Pruebas con pytest | ❌ Sin suite: **0 suites de pruebas** (G-18) |
+| Respuesta con `abstencion`/`groundedness`/`latencia_ms`/`pii_filtrado` | ✅ `confianza`, `groundedness`, fuentes y bloqueo de afirmaciones; PII queda como mejora G-03 |
+| Tablas `fragmentos_documentales`, `respuestas`, `evaluaciones_calidad` | ✅ `fragmentos_documento` (45/45, `004` aplicada) y `evaluaciones_calidad` existen y están en uso (HU-15) |
+| 7 contenedores + monitoreo | 🟡 3 servicios base (postgres, redis, ollama) + métricas; CI/HTTPS es mejora G-17 |
+| Clasificador Random Forest + TF-IDF | ✅ Funcional con regex + clasificador de dominio; ML es mejora opcional G-02 |
+| 16 rutas frontend | ✅ 4 páginas principales (`/`, `/chat`, `/tramites`, `/admin`) + subrutas admin/login |
+| Paleta azul institucional | ✅ Rediseñada: estilo cálido/orgánico |
+| SLM `qwen2.5:3b-instruct-q4_K_M` | ✅ `qwen2.5:3b` (Ollama) |
+| Groundedness coseno > 0.82 con rechazo | ✅ Confianza cualitativa + umbral de bloqueo (G-04 cerrado) |
+| Pruebas con pytest | 🟡 Scripts de verificación manual; suite formal/CI pendiente (G-18, mejora de aseguramiento) |

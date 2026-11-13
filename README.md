@@ -9,26 +9,20 @@ asistente conversacional basado en **RAG** (PostgreSQL + búsqueda semántica) y
 La base de datos de conocimiento se alimenta del TUPA 2023 (252 procedimientos) y de
 la documentación oficial publicada en <https://www.gob.pe/munijunin>.
 
-## Estado del proyecto (17 de octubre de 2026, verificado en vivo)
+## Estado del proyecto (vigente, según documento rector 06)
 
 | Métrica | Valor |
 | --- | --- |
-| Avance global | **83/101 = 82 %** (PMV1 24/24 = **100 %** ✅ · PMV2 28/28 = **100 %** ✅ incl. HU-11 · PMV3 31/49 = **63 %** incl. HU-17) |
-| Inventario | 91 `.py` de backend · 25 `.ts`/`.tsx` · 14 `.sql` · 92 `.md` · 7 controllers · 11 puertos · 16 componentes front-end |
-| Endpoints | **31 rutas servibles** (la API arranca: `import main` → 31) |
+| Avance global | **101/101 = 100 %** (PMV1 24/24 = **100 %** · PMV2 28/28 = **100 %** · PMV3 49/49 = **100 %**, 18/18 HU completas) |
+| Inventario | 104 `.py` de backend · 27 `.ts`/`.tsx` de fuente · 18 `.sql` · 94 `.md` |
+| Endpoints | **40 rutas servibles** (36 operaciones en `/openapi.json` + 4 de documentación) |
 | Catálogo | **252 procedimientos TUPA** con costo y área reales (272 trámites en BD) |
 | Documentos | **45/45** con metadatos completos y **45/45 fragmentados** (56 fragmentos; RAG por fragmento activo) |
-| Pruebas | 0 suites (`pytest` ausente, G-18) |
+| Pruebas | 0 suites pytest formales (G-18); existen scripts de verificación (`scripts/probar_hu13.py`, `scripts/probar_hu151618.py`) |
 
-> ✅ **PMV1 y PMV2 cerrados al 100 %** (17-oct-2026): la API arranca con 31 rutas, las migraciones
-> `004`/`005`/`006` están aplicadas, `requirements.txt` trae `pypdf`/`python-docx`/`rapidocr`,
-> el panel admin carga y la carga de un PDF real del TUPA responde **201** con texto extraído. Se
-> añadieron el umbral de rechazo "no inventar" (G-04), la trazabilidad completa con bloqueo de
-> afirmaciones y fuentes con metadatos (HU-10), el clasificador de dominio con derivación a la
-> entidad (HU-11) y el panel de auditoría real (HU-14).
-> Quedan pendientes de PMV3 la seguridad, auditoría por filtros, métricas y reportes, y la
-> validación SUS con 50 ciudadanos (P2-17, no fabricable). Estado detallado en
-> [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md).
+> ✅ **PMV1, PMV2 y PMV3 cerrados al 100 %**. Las 18 historias de usuario están completas (**101/101 puntos**) según la fuente canónica: [`documentacion/00-documentos-rectores/06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md).
+>
+> **Nota:** el documento rector indica que la entidad implementada en código es **Huancayo (MPH)**; `README.md` mantiene referencias históricas a Junín/MPJ en secciones descriptivas (inconsistencia documental pendiente de decisión). Las cifras vigentes de estado son las de la tabla anterior y el documento 06.
 
 ## Estructura del proyecto
 
@@ -91,12 +85,9 @@ disponible; si no, la columna `documentos.embedding` se crea como `double precis
 `BusquedaVectorialAdapter` calcula la similitud de coseno en Python. El flujo RAG es idéntico
 en ambos casos; con pgvector se usa el operador `<=>` y el índice HNSW (recomendado para producción).
 
-## API principal (31 rutas servibles: 18 públicos + 9 admin + 4 de documentación)
+## API principal (40 rutas servibles, según documento rector 06)
 
-> ✅ **17-oct-2026 (verificación en vivo):** la API **arranca** y todos los endpoints son servibles
-> (los defectos D-14..D-23 están corregidos; ver
-> `documentacion/00-documentos-rectores/06-estado-actual-implementado.md` §13). Ninguno valida
-> autenticación ni rol (**D-8/G-01**, pendiente de PMV3).
+> **Nota:** la cantidad y clasificación de rutas/endpoints debe tomarse de `GET /openapi.json` y del documento rector [`06-estado-actual-implementado.md`](documentacion/00-documentos-rectores/06-estado-actual-implementado.md) (§6.2). El sistema incluye autenticación JWT y protección por roles en endpoints administrativos (HU-13/G-01 cerrados); algunas rutas permanecen públicas por diseño (p. ej. consulta ciudadana, evaluación, trazabilidad según política implementada). La tabla siguiente es un resumen orientativo y puede no reflejar la totalidad de rutas vigentes.
 
 **Públicos (18):**
 

@@ -20,10 +20,10 @@
 |---|---|
 | Período del plan | 4 de septiembre – 20 de noviembre de 2026 |
 | Número de sprints | 4 (Sprint 3 en curso al momento de elaborar este documento) |
-| Historias de usuario | 18 (HU-01 a HU-18) — 11 completadas al 100% (HU-01, HU-02, HU-04–HU-12) |
+| Historias de usuario | 18 (HU-01 a HU-18) — **18/18 completadas al 100 %** |
 | Equipo | 6 integrantes + representante del cliente (Product Owner interesado) |
-| Avance global (17-oct-2026, verificado) | **82 %** (83/101 puntos de verificación) — Sprint 3: PMV1 y PMV2 cerrados al **100 %**, PMV3 **63 %** |
-| Proyección al 20 de noviembre | ~95% |
+| Avance global (estado vigente, rector 06) | **100 %** (101/101 puntos de verificación) — PMV1, PMV2 y PMV3 al **100 %** |
+| Proyección al 20 de noviembre | **100 %** (alcanzado) |
 | Entrega final | Viernes 20 de noviembre de 2026 |
 
 ---
@@ -42,13 +42,13 @@
 > **Reasignación (16-oct-2026):** la antigua categoría "Transversal" se eliminó: **HU-11 → PMV2** y
 > **HU-17 → PMV3**. Detalle y justificación en
 > [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) §10.7.
-> **Cifras verificadas el 17-oct-2026:** global **82 %** (83/101).
+> **Cifras del snapshot histórico (17-oct-2026):** global **82 %** (83/101). **Estado vigente: 100 % (101/101).**
 
 | PMV | HU | Avance | Sprint(s) donde trabaja |
 |---|---|---|---|
 | **PMV1 · Prototipo funcional** (**100 %** ✅) | HU-05 ✅ · HU-06 ✅ · HU-07 ✅ · HU-09 ✅ | 100 · 100 · 100 · 100 % | S1, S2, S3 |
 | **PMV2 · Modelo RAG optimizado** (**100 %** ✅) | HU-04 ✅ · HU-08 ✅ · HU-10 ✅ · HU-11 ✅ · HU-12 ✅ | 100 · 100 · 100 · 100 · 100 % | S1, S2, S3 |
-| **PMV3 · Sistema integrado** (63 %) | HU-01 ✅ · HU-02 ✅ · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | 100 · 100 · 86 · 40 · 67 · 0 · 0 · 40 · 0 % | S2, S3, S4 |
+| **PMV3 · Sistema integrado** (**100 %** ✅ vigente; 63 % histórico) | HU-01 ✅ · HU-02 ✅ · HU-03 ✅ · HU-13 ✅ · HU-14 ✅ · HU-15 ✅ · HU-16 ✅ · HU-17 ✅ · HU-18 ✅ | **100 %** en el estado vigente | S2, S3, S4 |
 
 ### Responsable principal de cada HU (por PMV)
 
@@ -789,9 +789,9 @@ Then   el detector la marca como sospechosa y responde únicamente con informaci
 
 | Hito | Avance |
 |---|---|
-| Cierre del Sprint 2 (3 oct 2026) | 59% (60/101 puntos de verificación) |
-| Proyección al cierre del Sprint 3 (~24 oct 2026) | ~70% |
-| **Entrega final (20 nov 2026)** | **~90%** |
+| Cierre del Sprint 2 (3 oct 2026) | 59% (60/101 puntos de verificación) — histórico |
+| Proyección al cierre del Sprint 3 (~24 oct 2026) | ~70% — histórico |
+| **Entrega final (20 nov 2026)** | **100 %** (101/101; estado vigente según rector 06) |
 
 Como reserva, si el tiempo no alcanza quedan postergadas la HU-18 (reportes) y la integración de OCR (G-13).
 

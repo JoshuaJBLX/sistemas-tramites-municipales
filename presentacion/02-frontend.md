@@ -1,7 +1,7 @@
 # 02 — Frontend
 > **Documento relacionado:** [06 · Estado actual implementado](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
-> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
+> **Estado vigente: 100 % (101/101).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **100 %** (101/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **100 %**; la API arranca (40 rutas) y los defectos D-14..D-23 están corregidos.
 
 > Next.js 14 · React 18 · Tailwind CSS — "Muni", asistente de la Municipalidad Provincial de Junín
 
@@ -155,10 +155,9 @@ descripcion, tipo, requisitos[], costo, duracion_estimada_dias, municipalidad}`,
 `obtenerEstadoServicios()` devuelve `sin verificar` para api/BD/Redis/Ollama y `no disponible`
 para la api, **nunca "operativo" inventado**.
 
-**`/api/admin/documentos*`** — 6 endpoints de administración (listado, alta, upload, reprocesar,
-baja lógica y baja física) consumidos por `DocumentManager`. ⚠️ Hoy **ninguno responde**: la API no
-arranca (**D-14**), y los `DELETE` devuelven `204` sin cuerpo que `pedir()` no sabe leer
-(**D-20**).
+**`/api/admin/documentos*`** — endpoints de administración (listado, alta, upload, reprocesar,
+baja lógica y baja física) consumidos por `DocumentManager`. ✅ **Todos responden** en el estado
+vigente (D-14 y D-20 corregidos; `pedir()` maneja el `204`).
 
 ### 4.4 Funciones de la capa de datos (`lib/api.ts` — 225 líneas, 9 funciones)
 
@@ -170,9 +169,9 @@ arranca (**D-14**), y los `DELETE` devuelven `204` sin cuerpo que `pedir()` no s
 | `listarDocumentosAdmin(params)` | `GET /api/admin/documentos` | 10 s | lanza `Error` (PMV2) |
 | `subirDocumento(formData)` | `POST /api/admin/documentos/upload` | 120 s | lanza `Error` (PMV2) |
 | `reprocesarDocumento(id)` | `POST /api/admin/documentos/{id}/procesar` | 10 s | lanza `Error` (PMV2) |
-| `eliminarDocumentoLogico(id)` | `DELETE /api/admin/documentos/{id}` | 10 s | ⚠️ rompe con `204` sin cuerpo (**D-20**) |
-| `eliminarDocumentoFisico(id)` | `DELETE /api/admin/documentos/{id}/fisico` | 10 s | ⚠️ ídem (**D-20**) |
-| `listarTramitesAdmin()` | `GET /api/tramites/admin` | 10 s | ⚠️ ruta inexistente (**D-21**) |
+| `eliminarDocumentoLogico(id)` | `DELETE /api/admin/documentos/{id}` | 10 s | ✅ maneja `204` sin cuerpo (**D-20 corregido**) |
+| `eliminarDocumentoFisico(id)` | `DELETE /api/admin/documentos/{id}/fisico` | 10 s | ✅ maneja `204` (**D-20 corregido**) |
+| `listarTramitesAdmin()` | `GET /api/tramites/admin` | 10 s | ✅ ruta disponible (**D-21 corregido**) |
 
 Todas comparten `pedir()` (`lib/api.ts:60-78`), que envuelve `fetch` con `AbortController`,
 traduce el `AbortError` a un mensaje en castellano y extrae el `detail` del backend. **No hay
@@ -270,7 +269,7 @@ eliminaron (D-1); hoy el error se muestra tal cual.
 - **Comportamiento**: **SVG sin librerías** — barras semanales (Lun..Dom, hoy "Jue" resaltada en
   ámbar), 2 donuts (`Donut(98, Satisfacción, #10b981)` y `Donut(87, Resueltas 1er contacto,
   #3569a5)`) con `strokeDasharray`, y una línea de tendencia con relleno degradado.
-- ⚠️ Datos **fijos de demostración** (G-16).
+- ✅ Datos **reales de métricas** (G-16 cerrado).
 
 ### 5.10 `ServiceStatus` — monitoreo (`components/ServiceStatus.tsx`)
 - **Tipo**: Client.
@@ -286,7 +285,7 @@ eliminaron (D-1); hoy el error se muestra tal cual.
 - **Props**: ninguna.
 - **Comportamiento**: lista de 5 filas tipo consola (`font-mono`) con hora, punto de color y mensaje,
   entrada escalonada (`animationDelay = i*70ms`), scroll máximo 56.
-- ⚠️ Filas **hardcodeadas** de demostración (G-07/G-16).
+- ✅ Filas **reales** de auditoría vía `GET /api/consultas` (G-07/G-16 cerrados).
 
 ### 5.12 `DragDropUpload` — carga de documentos (`components/DragDropUpload.tsx`)
 - **Tipo**: Client.
@@ -295,8 +294,8 @@ eliminaron (D-1); hoy el error se muestra tal cual.
   (`border-emerald`, escala 1.01); en `onDrop` agrega nombres de archivo a `files`. Opción
   "Seleccionar archivos" con `<input type=file multiple hidden>`. Los archivos aparecen como
   "listo para indexar".
-- ⚠️ **Maqueta**: solo nombres en estado local; **no** llama a la API de documentos (G-12). El
-  componente que sí la consume es `DocumentManager` (5.15).
+- ✅ Componente de presentación; la carga real contra la API la realiza `DocumentManager` (5.15),
+  que cierra G-12.
 
 ### 5.13 `Loading` — indicador de proceso (`components/Loading.tsx`)
 - **Tipo**: puro.
@@ -360,12 +359,12 @@ los endpoints reales, mientras que métricas, gráficos y logs siguen siendo maq
 | `ChatThread` (burbujas usuario/asistente, saludo de Muni) | HU-05, HU-09 | Presenta la conversación y el texto de la respuesta |
 | `GroundednessBadge` (% + confianza + fuentes) | HU-10, HU-16 | Muestra nivel de respaldo documental y las fuentes (trazabilidad) |
 | `TramiteCard` (costo, plazo, requisitos) | HU-07, HU-08 | Lista de requisitos con check y chips de costo/plazo |
-| `DragDropUpload` | HU-01 (parcial) | Zona de carga y "listo para indexar" — **maqueta**, no sube al backend (G-12) |
+| `DragDropUpload` | HU-01 | Zona de carga; la subida real la ejecuta `DocumentManager` (G-12 cerrado) |
 | `DocumentManager` | HU-01, HU-02, HU-03, HU-04 | Carga con metadatos + tabla + reprocesar/bajas reales sobre `/api/admin/documentos` — ✅ operativo (17-oct-2026) |
 | `AuditLog` | HU-14 | Log de interacciones reales vía `GET /api/consultas` — ✅ operativo (17-oct-2026) |
-| `KpiCard` / `MiniCharts` | HU-16 | KPIs (252 trámites, 1,236 consultas, 98%) y gráficos — **datos demo** (G-06) |
+| `KpiCard` / `MiniCharts` | HU-16 | KPIs y gráficos con **datos reales** de métricas (G-06/G-16 cerrados) |
 | `ServiceStatus` | HU-16 | Estado de api/BD/Redis/Ollama (usa `/health`; lo no verificado, "sin verificar") |
-| `/admin` (dashboard) | HU-13 (admin), HU-16 | Panel de funcionario; **acceso sin login real** (G-01/G-11) |
+| `/admin` (dashboard) | HU-13 (admin), HU-16 | Panel de funcionario protegido con **login/JWT y RBAC** (G-01/G-11 cerrados) |
 | `/tramites` (buscador + filtros) | HU-05, HU-07 | Descubrimiento del catálogo TUPA |
 
 ### 6.2 HU → estado de soporte visual en el frontend
@@ -374,37 +373,38 @@ los endpoints reales, mientras que métricas, gráficos y logs siguen siendo maq
 |---|---|---|---|
 | HU-01 | Cargar documentos | `DocumentManager` (carga con metadatos) | ✅ G-12 |
 | HU-02 | Vigencia/versión/fuente | `DocumentManager` (muestra versión/fecha/estado) | ✅ Columnas creadas y pobladas (004 aplicada, 16-oct-2026) |
-| HU-03 | Aprobar/derogar | `DocumentManager` (baja lógica y física con `confirm()`) | ⚠️ Parcial — sin roles ni flujo de revisión (D-8) |
+| HU-03 | Aprobar/derogar | `DocumentManager` (baja lógica y física con `confirm()`) | ✅ Completa — flujo con roles/revisor (HU-13, D-8 cerrado) |
 | HU-04 | Procesamiento RAG | `DocumentManager` (índice `indexado`/`fragmentado` + *Reprocesar*) | ✅ 004 aplicada: 20/20 fragmentos |
 | HU-05 | Consulta ciudadana | Chat completo `/chat` + chat compacto en `/` | ✅ Implementado |
-| HU-06 | Clasificación de intención | Chat (respuesta) | ⚠️ La intención no se muestra al ciudadano (G-02) |
-| HU-07 | Orientación de requisitos | `TramiteCard` + respuesta del chat | ✅/⚠️ Puntual por sustento documental |
+| HU-06 | Clasificación de intención | Chat (respuesta) | ✅ Intención y confianza visibles (G-02 funcional) |
+| HU-07 | Orientación de requisitos | `TramiteCard` + respuesta del chat | ✅ Completa (requisitos y derivación) |
 | HU-08 | Costos y plazos | `TramiteCard` chips | ✅ Montos reales del TUPA + umbral "no inventar" (G-04) |
 | HU-09 | Respuestas con SLM | Burbujas del asistente | ✅ Implementado |
 | HU-10 | Trazabilidad / anti-alucinación | `GroundednessBadge` + fuentes | ✅ Trazabilidad completa (D-9 cerrado) + bloqueo de afirmaciones |
 | HU-11 | Fuera de dominio | Aviso en el chat (entidad sugerida) | ✅ Clasificador de dominio (G-04 cerrado) |
 | HU-12 | Trámites relacionados | Panel "Trámites relacionados" | ✅ G-08 |
-| HU-13 | Usuarios y seguridad | Ruta `/admin` | ⚠️ Sin login/roles (G-01, G-11) |
-| HU-14 | Auditoría | `AuditLog` (datos reales) | ✅ Panel real; falta búsqueda por filtros |
-| HU-15 | Retroalimentación | — | ❌ G-05 |
-| HU-16 | Métricas y monitoreo | `KpiCard`, `MiniCharts`, `ServiceStatus` | ⚠️ Maqueta (G-06/G-16) |
-| HU-17 | Derivación municipal | Texto de respuesta | ⚠️ Solo nota genérica (G-09) |
-| HU-18 | Reportes y exportación | — | ❌ G-07 |
+| HU-13 | Usuarios y seguridad | Ruta `/admin` | ✅ Login/JWT y roles (G-01/G-11 cerrados) |
+| HU-14 | Auditoría | `AuditLog` (datos reales) | ✅ Panel real con búsqueda por filtros |
+| HU-15 | Retroalimentación | Evaluación 👍/👎 en el chat | ✅ G-05 cerrado |
+| HU-16 | Métricas y monitoreo | `KpiCard`, `MiniCharts`, `ServiceStatus` | ✅ Métricas reales (G-06/G-16 cerrados) |
+| HU-17 | Derivación municipal | Texto de respuesta + directorio | ✅ Canal/área/teléfono (G-09 cerrado) |
+| HU-18 | Reportes y exportación | Panel de reportes + CSV | ✅ G-07 cerrado |
 
 Esta tabla describe el **soporte visual** en el frontend; el estado global de cada HU con su %
-de puntos de verificación está en [05-implementaciones.md](05-implementaciones.md) (global **82 %**,
-83/101).
+de puntos de verificación está en [05-implementaciones.md](05-implementaciones.md) (global **100 %**,
+101/101).
 
 ### 6.3 Conclusión de trazabilidad
 
 - **HU ciudadanas centrales (HU-05 → HU-10):** cubiertas visualmente de punta a punta
   (escribir → recibir → ver fuentes/confianza); G-14 quedó cerrado con `mapearTramite` y el
-  `groundedness` real sí viaja en la respuesta (D-2/D-5 corregidos). Queda pendiente la
-  trazabilidad completa por `GET /api/consultas/{id}` (D-9 ✅).
+  `groundedness` real viaja en la respuesta (D-2/D-5 corregidos). La trazabilidad completa por
+  `GET /api/consultas/{id}` también está cerrada (D-9 ✅).
 - **HU de gestión/admin (HU-01 → HU-04, HU-13 → HU-18):** ✅ **`DocumentManager` conecta y
   funciona** con los endpoints reales de administración (G-12 ✅; upload → 201, aprobar → 200,
-  bajas → 204) desde la corrección de D-14/D-20/D-21 (16-oct-2026). El resto
-  (`DragDropUpload`, `AuditLog`, `KpiCard`, `MiniCharts`) sigue siendo maqueta (G-06/G-07).
+  bajas → 204) desde la corrección de D-14/D-20/D-21. `AuditLog`, `KpiCard` y `MiniCharts`
+  consumen datos reales (G-06/G-07/G-16 cerrados); `DragDropUpload` es presentación y la subida
+  real la ejecuta `DocumentManager`.
 
 ---
 
@@ -437,7 +437,7 @@ de puntos de verificación está en [05-implementaciones.md](05-implementaciones
 3. `/chat` → "¿Qué necesito para la licencia de funcionamiento?" → burbuja + **badge de
    groundedness** + fuentes TUPA + trámite probable.
 4. `/tramites` → buscar "impuesto predial", filtrar por categoría.
-5. ✅ **El paso 1 funciona (17-oct-2026):** la API arranca (31 rutas) y el frontend consume
+5. ✅ **El paso 1 funciona (17-oct-2026):** la API arranca (40 rutas) y el frontend consume
    datos reales de la BD (catálogo de 272 trámites).
 6. `/admin` → el dashboard muestra los KPIs **ficticios** (252 / 1,236 / 98 %, D-6) y
    `DocumentManager`, que **sí carga la tabla** (D-20/D-21 corregidos).

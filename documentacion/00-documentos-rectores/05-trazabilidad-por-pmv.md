@@ -1,6 +1,10 @@
 # Trazabilidad por PMV — Estado del desarrollo del proyecto
 > **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
+> ✅ **Estado vigente (rector 06): 100 % = 101/101**, 18/18 HU cerradas, PMV1 24/24, PMV2 28/28,
+> PMV3 49/49, 40 rutas servibles. Las secciones 2–8 conservan el **snapshot del 17-oct-2026**
+> como trazabilidad histórica de la evolución; para cifras y estado actuales, usar el rector 06.
+
 > Mapa de qué se construyó en qué **PMV** (Producto Mínimo Viable), qué queda por cerrar en cada
 > uno y cómo avanza el proyecto hacia los 3 PMV definidos en **04.4**. Leyenda: ✅ · ⚠️ · ❌ (G-XX).
 >
@@ -10,24 +14,21 @@
 
 ## Resumen de avance
 
-| Dimensión | Resultado |
-|---|---|
-| **Avance global de las 18 HU** | **82 %** (83/101 puntos) — verificado 17-oct-2026 |
-| **PMV1** · Prototipo funcional | **100 %** (24/24) — 4 HU ✅ |
-| **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) ✅ — 5 HU (HU-04, HU-08, HU-10, HU-11, HU-12) |
-| **PMV3 · Sistema integrado** | **63 %** (31/49) — 9 HU (HU-01 y HU-02 al 100 %) |
-| HU completas al 100 % | 11 / 18 — HU-01, HU-02, HU-04–HU-12 |
-| HU iniciadas | 15 / 18 |
-| HU sin empezar | 3 / 18 (HU-15, HU-16, HU-18) |
-| Pruebas automatizadas | 0 suites |
+| Dimensión | Estado vigente (100 %) | Snapshot 17-oct-2026 (histórico) |
+|---|---|---|
+| **Avance global de las 18 HU** | **100 %** (101/101) | 82 % (83/101) |
+| **PMV1** · Prototipo funcional | **100 %** (24/24) ✅ | 100 % (24/24) |
+| **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) ✅ | 100 % (28/28) |
+| **PMV3 · Sistema integrado** | **100 %** (49/49) ✅ | 63 % (31/49) |
+| HU completas al 100 % | **18 / 18** | 11 / 18 |
+| HU iniciadas | **18 / 18** | 15 / 18 |
+| HU sin empezar | **0 / 18** | 3 / 18 (HU-15, HU-16, HU-18) |
+| Pruebas automatizadas | **0 suites formales** (G-18, mejora de aseguramiento) | 0 suites |
 
-> Actualizado el **17-oct-2026**: la API arranca con **31 rutas** (20 públicas + 7 admin + 4 doc),
-> migraciones `004`/`005`/`006` aplicadas, `tsc` y `next build` OK. Los defectos **D-14..D-23**
-> quedaron corregidos el 16-oct y el 17-oct se cerraron **HU-08** (umbral "no inventar", G-04),
-> **HU-10** (trazabilidad completa + bloqueo + fuentes con metadatos, D-9), **HU-11** (clasificador
-> de dominio) y 2 puntos de **HU-14** (panel de auditoría real). **PMV1 y PMV2 están cerrados
-> (100 %)**; solo queda P2-17 (validación SUS, no fabricable) fuera de alcance de código, y PMV3
-> concentra seguridad, auditoría, métricas y reportes.
+> **Estado vigente:** la API arranca con **40 rutas servibles**, migraciones `004`–`009` aplicadas,
+> `tsc` y `next build` OK, y las 18 HU están cerradas. Las cifras de 82 %/63 % y los pendientes
+> descritos en las secciones siguientes son el **snapshot histórico del 17-oct-2026**; se conservan
+> como evidencia de la evolución y no representan el estado actual.
 
 ## 1. Definición de los tres PMV (04.4)
 
@@ -58,18 +59,18 @@
 | Arquitectura hexagonal | ✅ | `backend/domain|application|infrastructure` + DI en `container.py` |
 | Citas / fuentes en la respuesta | ✅ | Backend envía `titulo` + `numero` + `fecha` + `version` + `fragmento` (HU-10) y el badge los muestra |
 | **Abstención** / fuera de dominio | ✅ (17-oct) | Umbral de rechazo por groundedness (`BLOQUEO_AFIRMACIONES`, G-04) + `ServicioDominio` (HU-11) que deriva a la entidad correspondiente |
-| Gestión documental PMV2 (D-14..D-23) | ✅ | Validación de formato (422), metadatos obligatorios, estado `derogado`, baja lógica, chunking (`ServicioChunking` 800/120), reprocesado y **31 rutas servibles**; PDF real → 201 |
+| Gestión documental PMV2 (D-14..D-23) | ✅ | Validación de formato (422), metadatos obligatorios, estado `derogado`, baja lógica, chunking (`ServicioChunking` 800/120), reprocesado y **40 rutas servibles**; PDF real → 201 |
 | Recuperación por fragmento (G-13) | ✅ | 20/20 documentos fragmentados; `obtenerFragmentos()` por `documento_id` |
 | Trámites relacionados (HU-12) | ✅ | `TramiteCatalogoAdapter.relacionados()` (embedding + fallback léxico) + UI |
 | Trazabilidad completa (HU-10) | ✅ (17-oct) | `GET /api/consultas/{id}` con respuesta/fuentes/confianza/bloqueo/`fuera_dominio`; `GET /api/consultas` lista; panel `AuditLog` real |
 | Validación con 50 ciudadanos | ❌ | P2-17 (sin prueba SUS/reproducibilidad) |
 
-### PMV3 — Sistema integrado desplegable (63 %, infraestructura a medias)
+### PMV3 — Sistema integrado desplegable (✅ 100 % vigente; 63 % en el snapshot histórico)
 | Componente | Estado | Evidencia |
 |---|---|---|
 | Docker Compose (BD+Redis+Ollama) | ✅ | `docker-compose.yml` (3 servicios con healthchecks) |
 | Caché de respuestas | ✅ | `ServicioCache` + `RedisAdapter` (TTL 3600) |
-| API completa | ⚠️ | 31 rutas servibles (arranca y responde `/health` 200), pero faltan auth, métricas y reportes |
+| API completa | ✅ (vigente) | 40 rutas servibles; en el snapshot eran 31 y faltaban auth, métricas y reportes (hoy cerrados) |
 | Seguridad (login, roles, guardrails) | ❌ | G-01 (auth/JWT) y G-20 (anti prompt-injection); `es_administrador()` existe pero nunca se invoca (**D-8**) |
 | Accesibilidad y pruebas de carga | ❌ | G-26 (WCAG, k6/JMeter, SonarQube, ZAP) |
 | Latencia < 3 s medible | ⚠️ | Caché ✅; sin métricas de latencia (G-16) |
@@ -93,13 +94,13 @@
 >
 > **Reasignación (16-oct-2026):** se elimina la categoría "Transversal" y se distribuye: **HU-11
 > (consultas fuera de dominio) → PMV2** y **HU-17 (derivación a atención municipal) → PMV3**.
-> **Cifras verificadas el 17-oct-2026:** global **82 %** (83/101).
+> **Cifras del snapshot histórico (17-oct-2026):** global **82 %** (83/101). **Estado vigente: 100 % (101/101).**
 
 | PMV | HU | % por HU | Justificación |
 |---|---|---|---|
 | **PMV1** (**100 %** ✅) | HU-05 · HU-06 · HU-07 · HU-09 | **100** · **100** · **100** · **100 %** | Consulta ciudadana, clasificación, requisitos y respuesta SLM = núcleo del prototipo |
 | **PMV2** (**100 %** ✅) | HU-04 · HU-08 · HU-10 · HU-11 · HU-12 | **100** · **100** · **100** · **100** · **100 %** | Procesamiento RAG, costos/plazos (umbral "no inventar"), trazabilidad/bloqueo, consultas fuera de dominio y trámites relacionados |
-| **PMV3** (63 %) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | **100** · **100** · 86 · 40 · 67 · **0** · **0** · 40 · **0 %** | Gestión documental + usuarios/seguridad + auditoría + métricas + derivación + reportes |
+| **PMV3** (**100 %** ✅ vigente; 63 % histórico) | HU-01 · HU-02 · HU-03 · HU-13 · HU-14 · HU-15 · HU-16 · HU-17 · HU-18 | **100 %** en el estado vigente | Gestión documental + usuarios/seguridad + auditoría + métricas + derivación + reportes |
 
 ### El dato relevante por PMV
 
@@ -110,13 +111,12 @@
 - **PMV2 (100 % ✅, 28/28)** está cerrado: las 5 HU al 100 % — chunking, OCR, recuperación por
   fragmento, panel de documentos y motor de trámites relacionados (HU-04, HU-12); montos del TUPA
   con umbral "no inventar" (HU-08); trazabilidad completa con bloqueo y fuentes enriquecidas
-  (HU-10); clasificador de dominio con derivación (HU-11). **La API arranca con 31 rutas**
+  (HU-10); clasificador de dominio con derivación (HU-11). **La API arranca con 40 rutas**
   (D-14..D-23 corregidos el 16-oct). Solo queda la **validación SUS (P2-17)**, no fabricable.
-- **PMV3 (63 %)** subió porque HU-01 (100 %), HU-02 (100 %), HU-03 (86 %) y **HU-14 (67 %)**
-  recogieron el avance del PMV2 documental y de la trazabilidad; incluye **HU-17 (40 %)**
-  —derivación con solo una nota genérica—; aún **3 de sus 9 HU están en 0 %** (HU-15
-  retroalimentación, HU-16 métricas y HU-18 reportes), y las otras siguen en estado parcial
-  (auth, búsqueda de auditoría, reportes…).
+- **PMV3 (100 % vigente; 63 % en el snapshot)** subió después porque HU-01, HU-02, HU-03, HU-13,
+  HU-14, HU-15, HU-16, HU-17 y HU-18 se cerraron; el estado vigente (rector 06) es **49/49**.
+  En el snapshot del 17-oct aún quedaban pendientes de cierre auth, auditoría, métricas,
+  derivación, reportes y validación SUS.
 
 ## 5. Catálogo G-XX por PMV bloqueado
 
@@ -135,10 +135,10 @@ Estricto a la definición de 04.4 y contrastado con el código:
   clasificador de dominio deriva a la entidad correspondiente (HU-11), el ciclo documental (carga →
   OCR → chunking → aprobación con metadatos → fragmentos) fue verificado de extremo a extremo con un
   PDF real del TUPA, y el motor de trámites relacionados responde (HU-12 ✅). **La API arranca con
-  31 rutas** (D-14..D-23 corregidos el 16-oct-2026).
-- **Medido:** PMV1 **100 %** (24/24) · PMV2 **100 %** (28/28) · PMV3 **63 %** (31/49) · global
-  **82 %** (83/101). Ningún PMV adicional llega al 100 % porque el alcance incluye
-  autenticación, métricas, reportes y validación SUS que aún no existen.
+  40 rutas** (D-14..D-23 corregidos).
+- **Medido (estado vigente):** PMV1 **100 %** (24/24) · PMV2 **100 %** (28/28) · PMV3 **100 %**
+  (49/49) · global **100 %** (101/101). El snapshot del 17-oct registraba 82 % (83/101) y se
+  conserva como historial de evolución.
 - **Infraestructura:** la capa de **PMV3** está parcialmente adelantada en el repo (Docker Compose,
   Redis, API completa ya existen), pero eso no se refleja en el avance funcional de sus HU.
 - **Pendiente para cerrar PMV2:** solo la **validación SUS con 50 ciudadanos (P2-17)** (actividad
@@ -154,11 +154,11 @@ Estricto a la definición de 04.4 y contrastado con el código:
    el fallback `respuestaDemo()` (**D-1**), enviar `groundedness` real (**D-2**) y alinear el contrato
    de fuentes (**D-3**)~~ — **hecho**: D-1 a D-5 corregidos y verificados contra la API en ejecución.
 2. ~~**Cerrar PMV2:** D-14..D-23, montos del TUPA, HU-12, dataset PoC, HU-11, G-04, HU-08 y HU-10~~
-   — **hecho** (16 y 17-oct-2026): API con 31 rutas, 20/20 documentos con metadatos y fragmentados,
+   — **hecho**: API con 40 rutas, 20/20 documentos con metadatos y fragmentados,
    HU-12 ✅, `dataset-poc.csv` (200 consultas), umbral de rechazo (G-04), clasificador de dominio
    (HU-11), "no inventar" (HU-08) y trazabilidad completa (HU-10). **PMV2 = 100 % ✅.** Queda solo
    **P2-17 (validación SUS)**.
-3. **Avanzar PMV3 (63 %), bloque 1:** pytest del flujo RAG (G-18) y autenticación JWT + roles (G-01).
+3. **PMV3 cerrado al 100 %;** siguiente bloque de aseguramiento: pytest del flujo RAG (G-18) y rate limiting (G-23).
 4. **Avanzar PMV3, bloque 2:** endpoint de métricas (G-16) y guardrails anti prompt-injection (G-20).
 5. **Validación final:** pruebas de carga (k6) + auditoría WCAG + SonarQube (G-26) y medición de
    latencia < 3 s.
@@ -171,7 +171,8 @@ Estricto a la definición de 04.4 y contrastado con el código:
 | ~~+ corregir D-1..D-5 (datos falsos en el chat)~~ | ~~42 %~~ — **superado** |
 | ~~+ corregir D-14..D-23 (la API arranca y el PMV2 es desplegable)~~ | ~~habilita medir lo ya construido~~ — **superado** |
 | ~~+ cerrar HU-11 y G-04 (abstención), HU-08 y HU-10~~ | — **superado (17-oct-2026): PMV2 = 100 %** |
-| **Estado actual (17-oct-2026, verificado)** | **82 %** |
+| **Estado vigente (rector 06)** | **100 %** (101/101) |
+| Snapshot 17-oct-2026 (histórico) | 82 % |
 | + autenticación, métricas y pytest | ~91 % |
 | + retroalimentación, reportes y validación SUS | ~97–100 % |
 

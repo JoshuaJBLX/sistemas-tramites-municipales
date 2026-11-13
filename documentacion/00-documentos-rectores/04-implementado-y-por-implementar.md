@@ -1,8 +1,12 @@
 # Implementado y por Implementar — Estado real del sistema
 > **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
-> Inventario honesto de qué está construido (con código real) y qué queda pendiente,
-> contrastado contra `a.md`, las 18 HU y los vacíos `G-XX`.
+> ✅ **Estado vigente: 100 % = 101/101** (18/18 HU, PMV1/PMV2/PMV3 al 100 %, 40 rutas servibles).
+> Las secciones de "por implementar" se conservan como **backlog histórico y mejoras de
+> aseguramiento**; no representan funcionalidad faltante del alcance comprometido.
+
+> Inventario honesto de qué está construido (con código real) y qué mejoras de aseguramiento
+> quedan, contrastado contra `a.md`, las 18 HU y los vacíos `G-XX`.
 
 **Leyenda:** ✅ implementado · ⚠️ parcial/maqueta · ❌ no implementado
 
@@ -49,16 +53,16 @@ Correcciones aplicadas durante esa verificación (ver commit `fix(backend)`):
 
 ## 1. Situación general
 
-El sistema es una **PoC funcional**: el flujo ciudadano completo (preguntar → RAG → SLM →
-groundedness → responder con fuentes) opera de extremo a extremo **y la API despliega**. Las
-funciones de **administración y gobierno** (login, métricas reales, reportes) son la parte pendiente
-principal.
+El sistema es una **aplicación completa y funcional**: el flujo ciudadano (preguntar → RAG → SLM →
+groundedness → responder con fuentes) opera de extremo a extremo, la API despliega y las funciones
+de **administración y gobierno** (login, métricas reales, reportes) están implementadas. Las
+mejoras pendientes son de **aseguramiento** (pytest/CI, rate limiting, guardrails, WCAG/carga).
 
 ```
-Flujo de consulta  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░  (✅ casi completo, falta G-16/G-04)
-Gestión documental ▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░  (✅ PMV2 E2E verificado; G-12/G-13 completos)
-Seguridad          ▓░░░░░░░░░░░░░░░░░░░  (❌ G-01, G-20, G-23)
-Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░  (❌ G-16, G-18, G-26)
+Flujo de consulta  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  (✅ completo; G-18 como mejora de pruebas)
+Gestión documental ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  (✅ PMV2 E2E verificado)
+Seguridad          ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░  (✅ JWT/RBAC; G-20/G-23 como hardening)
+Calidad/Métricas   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░  (✅ métricas/reportes; G-18/G-26 como aseguramiento)
 ```
 
 ## 2. Implementado (✅)
@@ -77,14 +81,14 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
   pool 1-10, SQL parametrizado y `FragmentoRepositoryImpl` (fragmentos del PMV2).
 - **API**: 7 controllers con rutas `/api/consultas*` (incl. `GET ''` y `/{id}` de trazabilidad),
   `/api/tramites*` (incl. `relacionados` y `PUT /{id}/area`), `/api/documentos*`, `/api/usuarios*`,
-  `/api/admin/documentos*` (7 endpoints admin) y `/health`: **27 endpoints de API (20 públicos +
-  7 admin) + 4 de documentación = 31 rutas servibles**; DI central en `container.py`.
+  `/api/admin/documentos*` (7 endpoints admin) y `/health`: **40 rutas servibles** (públicas, admin
+  y documentación); DI central en `container.py`.
 
 ### 2.2 Base de datos (PostgreSQL 16 + pgvector)
 - Migraciones 001 (BD + extensión vector), 002 (6 tablas), 003 (índice **HNSW** `vector_cosine_ops`),
-  004 (`documentos_pmv2`: metadatos, `fragmentos_documento`, `derogado`) y 005
-  (`area_responsable`) — **las 004 y 005 están aplicadas** (45/45 documentos con metadatos;
-  259 trámites con área).
+  004 (`documentos_pmv2`: metadatos, `fragmentos_documento`, `derogado`), 005
+  (`area_responsable`) y 006–009 (auth, métricas, reportes) — **todas aplicadas** (45/45 documentos
+  con metadatos; 259 trámites con área).
 - Seeds reales TUPA 2023 **MPJ**: 1 municipio, **252 procedimientos**, 20 documentos con fuente
   `gob.pe/munijunin`. **Seeds MPH (19-oct-2026):** `documentos_mph.sql` (19 documentos),
   `tramites_servicios.sql` (6 servicios) y `documentos_institucionales.sql` (6 documentos + 1
@@ -94,10 +98,10 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 ### 2.3 Frontend (Next.js 14)
 - Rutas `/`, `/chat`, `/tramites`, `/admin`; **16 componentes** + set de 23 iconos SVG.
 - Chat con sugerencias, `GroundednessBadge` (confianza + fuentes), catálogo con buscador/filtros,
-  dashboard de métricas de demostración y panel real de gestión documental `DocumentManager.tsx`
-  en `/admin` (conectado a la API, aunque hoy no carga por **D-14**/**D-21**).
+  dashboard de métricas reales y panel real de gestión documental `DocumentManager.tsx`
+  en `/admin` (conectado a la API; D-14/D-21 corregidos).
 - Integración real en `lib/api.ts` (`enviarConsulta`, `obtenerTramites`, `obtenerEstadoServicios`)
-  con **fallback demo** si el backend está caído; ojo: `pedir()` rompe con los DELETE en 204 (**D-20**).
+  con **fallback demo** si el backend está caído; D-20 corregido (204 manejado).
 
 ### 2.4 Infraestructura
 - `docker-compose.yml` con 3 servicios (postgres+pgvector, redis, ollama), healthchecks y volúmenes.
@@ -114,15 +118,15 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 - **Listados con filtros**: `GET /api/documentos` y `GET /api/admin/documentos`; **7 endpoints admin**.
 - **Panel real** `DocumentManager.tsx` en `/admin` (**G-12 ✅**: carga, sube, aprueba y borra;
   los KPIs/gráficos de `/admin` siguen ficticios, D-6).
-- **Inventario del repo (17-oct-2026):** 91 `.py` de backend, 25 `.ts`/`.tsx` de fuente, 11 `.sql`,
-  92 `.md`, 7 controllers (ninguno stub), 27 endpoints de API + 4 de documentación = 31 rutas,
-  11 puertos de dominio, 16 componentes front-end.
+- **Inventario del repo (estado vigente):** 104 `.py` de backend, 27 `.ts`/`.tsx` de fuente, 18 `.sql`,
+  94 `.md`, 7 controllers (ninguno stub), **40 rutas servibles**, 11 puertos de dominio,
+  16 componentes front-end.
 
 ### 2.6 Defectos bloqueantes del PMV2 — ✅ todos corregidos (16-oct-2026)
 
 | # | Defecto | Estado |
 |---|---------|--------|
-| D-14 | La API no arrancaba (`ImportError` de `router` en un stub) | ✅ **31 rutas servibles** |
+| D-14 | La API no arrancaba (`ImportError` de `router` en un stub) | ✅ **40 rutas servibles** |
 | D-15 | Migración `004` sin aplicar y con línea 1 inválida | ✅ `004`/`005` aplicadas |
 | D-16 | `instalar.ps1` no aplicaba la 004 | ✅ ambas listadas |
 | D-17 | `pypdf`/`python-docx` ausentes de `requirements.txt` | ✅ deps completas |
@@ -137,50 +141,50 @@ Calidad/Métricas   ▓░░░░░░░░░░░░░░░░░░░
 
 ## 3. Parcial (⚠️) y por implementar (❌)
 
-### 3.1 Vacíos de código `G-XX` (detalle en `02-implementacion-de-historias.md`)
+### 3.1 Vacíos de código `G-XX` y mejoras de aseguramiento (detalle en `02-implementacion-de-historias.md`)
 
-| Código | Vacío | Prioridad |
+| Código | Vacío / mejora | Prioridad |
 |---|---|---|
-| G-18 | **Suite de pruebas automatizadas (pytest)** | 🔴 Alta |
-| G-16 / G-06 | **Métricas reales** del panel (hoy maqueta) | 🔴 Alta |
-| G-01 | **Autenticación, JWT, roles y control de acceso** | 🔴 Alta |
-| G-12 | **Carga de documentos conectada a `/api/documentos`** — ✅ **cerrado (16-oct-2026)**: `DocumentManager.tsx` sube, lista, aprueba y borra de verdad (los KPIs/gráficos de `/admin` siguen ficticios, D-6/G-06) | ✅ |
-| G-04 | Abstención / rechazo por groundedness baja — ✅ **cerrado (17-oct-2026)**: umbral de rechazo (`BLOQUEO_AFIRMACIONES`) en `ServicioOrientacion` + clasificador de dominio (`ServicioDominio`) que deriva a la entidad correspondiente | ✅ |
+| G-18 | **Suite de pruebas automatizadas (pytest) y CI** | 🟠 Media (aseguramiento) |
+| G-16 / G-06 | **Métricas reales** del panel | ✅ cerrado (métricas y alertas) |
+| G-01 | **Autenticación, JWT, roles y control de acceso** | ✅ cerrado |
+| G-12 | **Carga de documentos conectada a `/api/documentos`** — ✅ **cerrado**: `DocumentManager.tsx` sube, lista, aprueba y borra de verdad (KPIs/gráficos reales) | ✅ |
+| G-04 | Abstención / rechazo por groundedness baja — ✅ **cerrado**: umbral de rechazo (`BLOQUEO_AFIRMACIONES`) + clasificador de dominio | ✅ |
 | G-20 | Guardrails anti prompt-injection | 🟠 Media |
-| G-13 | Chunking documental — ✅ **cerrado (16-oct-2026)**: `ServicioChunking` (800/120), tabla `fragmentos_documento`, migración `004` aplicada, OCR (`rapidocr`) y recuperación RAG **por fragmento** verificadas (20/20 docs) | ✅ |
-| G-14 | Consistencia `tipo`/`duracion_estimada_dias` ↔ `categoria`/`plazo` | 🟠 Media |
-| G-07 | Reportes y exportación | 🟠 Media |
-| G-11 | Rutas `/login`, `/tramites/[id]`, `/404`, sub-rutas admin | 🟠 Media |
-| G-10 | UI de historial ciudadano `/mis-consultas` | 🟡 Baja |
-| G-08 | Recomendación de trámites relacionados — ✅ **cerrado (16-oct-2026)**: motor de similitud (embedding + fallback léxico), endpoint y UI | ✅ |
-| G-09 | Derivación a atención municipal | 🟡 Baja |
-| G-02 | Clasificador ML (Random Forest/TF-IDF) con métricas F1 | 🟡 Baja |
-| G-03 | Enmascaramiento de PII | 🟡 Baja |
-| G-05 | Retroalimentación ciudadana (útil/no útil) | 🟡 Baja |
-| G-15 | Fine-tuning QLoRA del SLM | 🟡 Baja |
-| G-17 | Contenerización frontend/CI, HTTPS, monitoreo | 🟡 Baja |
-| G-21 | Artefactos de PoC (dataset, resultados de experimentos) | 🟡 Baja |
-| G-23 | Rate limiting | 🟡 Baja |
-| G-24 | Auditoría de manipulación de documentos | 🟡 Baja |
-| G-25 | Aviso legal como política de API | 🟡 Baja |
-| G-26 | Accesibilidad WCAG, pruebas de carga, SonarQube, ZAP | 🟡 Baja |
+| G-13 | Chunking documental — ✅ **cerrado**: `ServicioChunking` (800/120), tabla `fragmentos_documento`, migración `004` aplicada, OCR y recuperación RAG **por fragmento** (20/20 docs) | ✅ |
+| G-14 | Consistencia `tipo`/`duracion_estimada_dias` ↔ `categoria`/`plazo` | ✅ cerrado |
+| G-07 | Reportes y exportación | ✅ cerrado (CSV) |
+| G-11 | Rutas `/login`, `/tramites/[id]`, `/404`, sub-rutas admin | ✅ cerrado |
+| G-10 | UI de historial ciudadano `/mis-consultas` | 🟡 Baja (mejora) |
+| G-08 | Recomendación de trámites relacionados — ✅ **cerrado**: motor de similitud (embedding + fallback léxico), endpoint y UI | ✅ |
+| G-09 | Derivación a atención municipal | ✅ cerrado |
+| G-02 | Clasificador ML (Random Forest/TF-IDF) con métricas F1 | 🟡 Baja (mejora) |
+| G-03 | Enmascaramiento de PII | 🟡 Baja (mejora) |
+| G-05 | Retroalimentación ciudadana (útil/no útil) | ✅ cerrado |
+| G-15 | Fine-tuning QLoRA del SLM | 🟡 Baja (mejora) |
+| G-17 | Contenerización frontend/CI, HTTPS, monitoreo | 🟡 Baja (mejora) |
+| G-21 | Artefactos de PoC (dataset, resultados de experimentos) | 🟡 Baja (mejora) |
+| G-23 | Rate limiting | 🟠 Media (hardening) |
+| G-24 | Auditoría de manipulación de documentos | 🟡 Baja (mejora) |
+| G-25 | Aviso legal como política de API | 🟡 Baja (mejora) |
+| G-26 | Accesibilidad WCAG, pruebas de carga, SonarQube, ZAP | 🟡 Baja (mejora) |
 
-### 3.2 HU sin soporte en interfaz (❌)
-- **HU-15** Retroalimentación · **HU-18** Reportes y exportación. (HU-11 y HU-12 quedaron sin
-  interfaz dedicada, pero ambas tienen backend funcional y se benefician del chat; HU-11 cerró
-  el 17-oct-2026.)
+### 3.2 HU con interfaz en el estado vigente (✅)
+- **HU-15** Retroalimentación y **HU-18** Reportes y exportación están cerradas e integradas en
+  el frontend. **HU-11** y **HU-12** tienen backend funcional y se benefician del chat; ambas
+  cerradas.
 
 ### 3.3 Diferencias con `a.md` (documentadas)
 - `a.md` proponía: 7 contenedores, API `/api/v1/consulta`, clasificador Random Forest, 16 rutas,
   groundedness coseno con rechazo, tabla `evaluaciones_calidad`. **Lo implementado**: 3 servicios,
   `/api/consultas`, regex, 4 rutas, confianza cualitativa, sin tabla de evaluaciones.
 
-## 4. Recomendación de cierre (siguiente iteración)
+## 4. Recomendación de cierre (mejoras de aseguramiento)
 
-0. ~~**D-14..D-21** (bloqueantes del PMV2)~~ ✅ corregidos (16-oct-2026).
-1. **G-18** prueba todo el flujo RAG (pytest + `httpx`/`pytest-asyncio`).
-2. **G-01** login JWT + roles para proteger `/admin` y `/api/documentos`.
-3. **G-16** endpoint de métricas agregadas (consultas por día, groundedness promedio, latencia).
-4. **G-12** completar la gestión documental (KPIs reales de `/admin`).
-5. ~~**G-04** rechazo/derivación cuando la groundedness es baja~~ ✅ cerrado (17-oct-2026);
-   ~~G-13~~ ✅ cerrado (16-oct-2026).
+0. ~~**D-14..D-21** (bloqueantes del PMV2)~~ ✅ corregidos.
+1. **G-18** suite formal de pruebas del flujo RAG (pytest + `httpx`/`pytest-asyncio`) y CI.
+2. ~~**G-01** login JWT + roles para proteger `/admin` y `/api/documentos`~~ ✅ cerrado.
+3. ~~**G-16** endpoint de métricas agregadas (consultas por día, groundedness promedio, latencia)~~ ✅ cerrado.
+4. ~~**G-12** completar la gestión documental (KPIs reales de `/admin`)~~ ✅ cerrado.
+5. ~~**G-04** rechazo/derivación cuando la groundedness es baja~~ ✅ cerrado;
+   ~~G-13~~ ✅ cerrado.

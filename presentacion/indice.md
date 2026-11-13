@@ -1,7 +1,7 @@
 # Presentación Técnica — Sistema de Orientación de Trámites Municipales
 > **Documento relacionado:** [06 · Estado actual implementado](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
-> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
+> **Estado vigente: 100 % (101/101).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **100 %** (101/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **100 %**; la API arranca (40 rutas) y los defectos D-14..D-23 están corregidos.
 
 **Resumen:** documentación técnica del sistema implementado (SLM + RAG local), lista para
 exponer en la presentación del proyecto. Cada tema es un `.md` independiente, contrastado con
@@ -24,8 +24,8 @@ el código real del repositorio y con las rutas de archivo referenciadas.
 3. Backend: `uvicorn main:app --port 8000` (en `backend/`)
 4. Frontend: `npm run dev` (en `frontend-tramites/`)
 
-> ✅ **Estado de arranque (17-oct-2026, verificado):** el paso 3 funciona — la API arranca con
-> **31 rutas** (D-14..D-23 corregidos). Detalle en
+> ✅ **Estado de arranque (estado vigente):** el paso 3 funciona — la API arranca con
+> **40 rutas** (D-14..D-23 corregidos). Detalle en
 > [05-implementaciones.md](05-implementaciones.md).
 
 Detalle completo: `../documentacion/00-documentos-rectores/03-ejecucion.md`

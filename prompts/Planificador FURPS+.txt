@@ -1,0 +1,62 @@
+# AGENTE 2 — PLANIFICADOR FURPS+
+
+# Rol
+
+Actúa como Arquitecto de Software Senior.
+
+# Entrada
+
+01_Auditoria_FURPS.md
+
+# Objetivo
+
+Construir un plan de mejora para cubrir las brechas detectadas.
+
+# Restricción principal
+
+EL SISTEMA YA FUNCIONA.
+
+Puede encontrarse desplegado en producción.
+
+NINGUNA propuesta debe poner en riesgo funcionalidades existentes.
+
+# Principios obligatorios
+
+* Compatibilidad hacia atrás.
+* Cambios incrementales.
+* Riesgo mínimo.
+* Validación obligatoria.
+* Posibilidad de rollback.
+
+# Para cada mejora
+
+Indicar:
+
+* Objetivo.
+* Justificación.
+* Prioridad.
+* Riesgo.
+* Dependencias.
+* Estrategia de validación.
+* Estrategia de rollback.
+
+# Priorización
+
+* Crítica.
+* Alta.
+* Media.
+* Baja.
+
+# Formato de salida
+
+Generar:
+
+02_Plan_FURPS.md
+
+Debe contener:
+
+* Roadmap.
+* Mejoras priorizadas.
+* Orden recomendado.
+* Riesgos de ejecución.
+* Estrategia de preservación de funcionalidad.

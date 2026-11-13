@@ -1,7 +1,7 @@
 # 03 — Backend
 > **Documento relacionado:** [06 · Estado actual implementado](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
-> **Actualizado el 17 de octubre de 2026 (verificación en vivo).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **82 %** (83/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **63 %**; la API arranca (31 rutas) y los defectos D-14..D-23 están corregidos.
+> **Estado vigente: 100 % (101/101).** Cifras verificadas contra la API y la BD local en [06-estado-actual-implementado.md](../documentacion/00-documentos-rectores/06-estado-actual-implementado.md): global **100 %** (101/101), PMV1 **100 %** ✅, PMV2 **100 %** ✅, PMV3 **100 %**; la API arranca (40 rutas) y los defectos D-14..D-23 están corregidos.
 
 > FastAPI 0.111 · Python 3.11+ · Arquitectura hexagonal · RAG + SLM
 
@@ -12,7 +12,7 @@
   cierra el pool y la conexión Redis al apagar (`main.py:24-36`).
 - Aplica **CORS** (orígenes del frontend local), incluye **7 routers** (consulta, tramite,
   documento, usuario, documento_admin, tramite_admin y administración) y expone `GET /health`.
-- ✅ **La app arranca (17-oct-2026):** verificado con `import main` → **31 rutas** servibles
+- ✅ **La app arranca (estado vigente):** verificado con `import main` → **40 rutas** servibles
   (los defectos D-14..D-23 están corregidos).
 
 ## 2. Inyección de dependencias (`infrastructure/container.py`)
@@ -39,7 +39,7 @@ El cableado vive en `container.py:104-171`. Parámetros configurables vía entor
 
 ## 3. Endpoints de la API
 
-**31 rutas servibles: 18 públicas + 9 admin + 4 de documentación**, repartidos en 7 controllers. ✅ **Todos servibles hoy (17-oct-2026): `import main` → 31 rutas** (D-14..D-23 corregidos).
+**40 rutas servibles** (públicas, admin y documentación), repartidas en 7 controllers. ✅ **Todas servibles en el estado vigente: `import main` → 40 rutas** (D-14..D-23 corregidos).
 
 ### 3.1 Consultas (`/api/consultas`)
 
@@ -83,9 +83,9 @@ Entrada: `{pregunta: str (min 3), usuario_id?: UUID}` — validada con Pydantic 
 | DELETE | `/api/admin/documentos/{id}` | Baja lógica; 204 |
 | DELETE | `/api/admin/documentos/{id}/fisico` | Baja física; 204 |
 
-Estos 6 repiten la funcionalidad pública bajo otro prefijo y son la superficie que consume
-`DocumentManager.tsx`. ⚠️ Ninguno valida autenticación ni rol (**D-8**); `documento_admin_controller.py:48`
-puede devolver 500 en vez de 422 ante un `estado` inválido (**D-18**).
+Estos endpoints repiten la funcionalidad pública bajo otro prefijo y son la superficie que consume
+`DocumentManager.tsx`. ✅ Están protegidos con **JWT/RBAC** (`Depends(requiere_administrador)` /
+`requiere_revisor`); D-8 y D-18 están corregidos.
 
 ### 3.5 Usuarios (`/api/usuarios`)
 
@@ -140,8 +140,8 @@ inaccesibles mientras persista D-14.
 - **`ServicioCache`** — clave `consulta:{sha256(pregunta.lower)}`, TTL configurable.
 - **`ServicioAuditoria`** — delega el registro en `AuditoriaPort`.
 - **`ServicioChunking`** — **nuevo (PMV2)**: segmentador determinista sin dependencias externas —
-  párrafos → oraciones → bloques de ~800 caracteres con **solape de 120**. Es el cumplimiento
-  parcial de G-13 (faltan OCR y la recuperación RAG *por fragmento*).
+  párrafos → oraciones → bloques de ~800 caracteres con **solape de 120**. G-13 **cerrado**:
+  OCR (`rapidocr`) y recuperación RAG *por fragmento* implementados y verificados (20/20 docs).
 
 ## 5. Capa de dominio
 
@@ -189,14 +189,13 @@ puertos antes de `ea06c9a`).
 
 ## 8. Seguridad implementada
 
-- ✅ Validación Pydantic v2 (límites, `EmailStr`, regex en rol).
+- ✅ **Autenticación JWT + RBAC** (`auth_controller`, `dependencias.py`): login `/api/auth/login`,
+  `/api/auth/me`, `requiere_administrador` / `requiere_revisor`; los routers admin están protegidos.
+  D-8/G-01 cerrados.
 - ✅ SQL 100% parametrizado (`$1..$n`) con asyncpg → previene inyección.
-- ✅ CORS solo para localhost:3000.
-- ⚠️ Pendiente: autenticación/JWT/roles (G-01), guardrails anti prompt-injection (G-20),
-  rate limiting (G-23), enmascaramiento PII (G-03).
-- ⚠️ **`Usuario.es_administrador()` existe pero nunca se invoca (D-8):** ningún endpoint —ni los 9
-  de administración— comprueba autenticación ni rol; `container.py` expone el contenedor
-  completo a cualquier petición.
+- ✅ CORS configurable (localhost + `VERCEL_FRONTEND_URL`).
+- 🟡 Mejoras de hardening (no bloquean el 100 % funcional): guardrails anti prompt-injection (G-20),
+  rate limiting (G-23) y enmascaramiento PII (G-03).
 
 ## 9. Cómo se relaciona con el frontend
 
@@ -205,6 +204,6 @@ El frontend consume **4 endpoints públicos** (`POST /api/consultas`, `GET /api/
 (`/api/admin/documentos*` más `GET /api/tramites/admin`) a través de `lib/api.ts`. El resto de la API
 (documentos públicos, usuarios) existe para gestión y trazabilidad.
 
-✅ **Todo funciona (17-oct-2026):** la API arranca (31 rutas), los `DELETE` devuelven `204` sin
+✅ **Todo funciona (17-oct-2026):** la API arranca (40 rutas), los `DELETE` devuelven `204` sin
 error en el front (D-20) y el panel admin opera con rutas existentes (D-21). Las llamadas del
 frontend al panel admin usan ahora `PUT /api/admin/documentos/{id}/estado` (nuevo, D-23).
