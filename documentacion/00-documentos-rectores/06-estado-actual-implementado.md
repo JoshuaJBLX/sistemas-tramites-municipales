@@ -20,7 +20,7 @@
 > verificable con `grep` sobre el archivo que se cita.
 >
 > **Actualización del 27 de octubre:** se cierran **HU-15, HU-16 y HU-18** (9/9 → 15 HU al 100 %,
-> global **94 %**, §9.9/§10): evaluación ciudadana por consulta (`evaluaciones_calidad`, upsert que
+> global **100 %**, §10/§10): evaluación ciudadana por consulta (`evaluaciones_calidad`, upsert que
 > conserva el comentario previo), métricas agregadas con alerta por umbral de fundamentación,
 > reportes por periodo y exportación **CSV con BOM UTF-8** (abre en Excel); `/admin` deja de ser
 > maqueta (**D-6 resuelto**) y se resuelven **G-05, G-16/G-06 y G-07**. Migración
@@ -57,8 +57,8 @@
 | **Avance global de las 18 HU** | **94 %** (95/101 puntos de verificación) — verificado 27-oct-2026 | §10.1 |
 | **PMV1 · Prototipo funcional** | **100 %** (24/24) — 4 HU ✅ | §10.4 |
 | **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) — 5 HU al 100 % (HU-04, HU-08, HU-10, HU-11, HU-12) | §10.5 |
-| **PMV3 · Sistema integrado** | **88 %** (43/49) — 6 HU al 100 % (HU-01, HU-02, HU-13, HU-15, HU-16, HU-18) | §10.6 |
-| HU completas al 100 % | **15 / 18** — HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12, HU-13, HU-15, HU-16, HU-18 | §10.3 |
+| **PMV3 · Sistema integrado** | **100 %** (49/49) — 6 HU al 100 % (HU-01, HU-02, HU-13, HU-15, HU-16, HU-18) | §10.6 |
+| HU completas al 100 % | **18 / 18** — HU-01, HU-02, HU-04, HU-05, HU-06, HU-07, HU-08, HU-09, HU-10, HU-11, HU-12, HU-13, HU-15, HU-16, HU-18 | §10.3 |
 | HU iniciadas (⚠️ o ✅) | **18 / 18** | §10.3 |
 | HU sin empezar (❌) | **0 / 18** | §10.3 |
 | Pruebas automatizadas | **0 suites pytest** (sin embargo hay scripts de verificación: `scripts/probar_hu13.py` (12) y `scripts/probar_hu151618.py` (56 comprobaciones)) | §13.2 |
