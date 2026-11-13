@@ -26,3 +26,5 @@ Thumbs.db
 # Artefactos locales de servicios (Redis/PostgreSQL)
 dump.rdb
 appendonlydir/
+
+.vercel

@@ -376,7 +376,7 @@ Como funcionario necesito generar reportes sobre las consultas y el desempeño d
 | HU-07 | Orientación de requisitos | Como ciudadano necesito conocer los documentos que debo presentar para realizar un trámite municipal. |
 | HU-08 | Orientación de costos y plazos | Como ciudadano necesito conocer el costo y el plazo de atención de un trámite para planificar mi solicitud. |
 | HU-09 | Generación de respuestas con SLM | Como ciudadano necesito recibir una explicación clara y ordenada del procedimiento que debo seguir. |
-| HU-10 | Trazabilidad y control de alucinaciones | Como ciudadano necesito saber cuándo una consulta no corresponde a trámites municipales para recibir orientación adecuada. |
+| HU-10 | Trazabilidad y control de alucinaciones | Como ciudadano necesito conocer las fuentes (documento, número, fecha, versión, artículo, página o URL) que respaldan la respuesta para confiar en ella. |
 | HU-11 | Consultas fuera de dominio | Como ciudadano necesito saber cuándo una consulta no corresponde a trámites municipales para recibir orientación adecuada. |
 | HU-12 | Trámites relacionados | Como ciudadano necesito conocer trámites complementarios que podrían estar relacionados con mi solicitud. |
 | HU-13 | Gestión de usuarios y seguridad | Como administrador necesito gestionar usuarios y roles para controlar el acceso a documentos, configuraciones y métricas. |
