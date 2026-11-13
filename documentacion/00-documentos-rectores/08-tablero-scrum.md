@@ -800,4 +800,3 @@ Como reserva, si el tiempo no alcanza quedan postergadas la HU-18 (reportes) y l
 > **Vínculos relacionados:**
 > - [`01-historias-de-usuario.md`](01-historias-de-usuario.md) — redacción completa de las 18 HU.
 > - [`06-estado-actual-implementado.md`](06-estado-actual-implementado.md) — estado real del código con porcentajes medidos.
-> - [`../../PMV2_DOCUMENTOS.md`](../../PMV2_DOCUMENTOS.md) — alcance y estado del PMV2.

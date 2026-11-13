@@ -68,7 +68,7 @@
 | Archivos Python (backend) | **104** | §5 |
 | Archivos `.ts`/`.tsx` de fuente | **27** (5 rutas + 19 componentes + 2 lib + 1 config — `MetricasPanel.tsx` y `VotoRespuesta.tsx` nuevos en HU-15/16/18) | §5 |
 | Archivos SQL | **18** (10 en `migrations/` —incluye 2 de Supabase, la `007` y la nueva `008`—, 6 seeds, 1 script, 1 schema) | §7 |
-| Documentos Markdown | **95** | §11 |
+| Documentos Markdown | **94** | §11 |
 
 **Lo que funciona de extremo a extremo (código):** el flujo ciudadano completo
 `pregunta → clasificación de intención con confianza → persistencia → caché → recuperación vectorial →
@@ -115,8 +115,8 @@ retroalimentación **G-05**, las métricas **G-16/G-06** y los reportes **G-07**
 | Front-end | Next.js 14.2.5 (App Router) + React 18.3 + TypeScript + Tailwind CSS 3.4 |
 
 > ⚠️ **Inconsistencia activa de branding (ver §12.1).** El código y la base de datos dicen
-> **Huancayo (MPH)** tras el commit `ff7a589`; en cambio `README.md`, `DOCUMENTACION.md` y
-> `PRESENTACION-PMV1.md` siguen diciendo **Junín (MPJ)**, y
+> **Huancayo (MPH)** tras el commit `ff7a589`; en cambio `README.md` sigue diciendo
+> **Junín (MPJ)**, y
 > `database/seeds/municipios.sql:10` todavía inserta *"Municipalidad Provincial de Junín"*
 > (aunque `database/scripts/actualizar_huancayo.sql` corrige ese registro al ejecutarse).
 > Este documento adopta **Huancayo (MPH)** por ser lo que el código implementa.
@@ -180,7 +180,7 @@ sistemas-tramites-municipales/            raíz del proyecto
 │   │                                       · documentos_institucionales (6 + 1 servicio)
 │   └── scripts/actualizar_huancayo.sql    corrección de entidad Junín → Huancayo
 ├── documentacion/
-│   ├── 00-documentos-rectores/             7 documentos (este es el 06)
+│   ├── 00-documentos-rectores/             9 documentos (este es el 06)
 │   ├── 01-analisis-del-problema/           11 archivos
 │   ├── 02-conocimientos-de-ingenieria/     10 archivos
 │   ├── 03-el-ingeniero-y-la-sociedad/      14 archivos
@@ -194,11 +194,10 @@ sistemas-tramites-municipales/            raíz del proyecto
 ├── .env.example                            15 variables de entorno
 ├── README.md                               guía de puesta en marcha
 ├── DOCUMENTACION.md                        índice maestro de la documentación
-├── PMV2_DOCUMENTOS.md                      alcance y **estado verificado** del PMV2
-└── PRESENTACION-PMV1.md                    guion de demostración del PMV1  ⚠️ reescrito localmente (§12.2)
+└── PRESUPUESTO_PROYECTO.md                 presupuesto del proyecto (8,983 S/)
 ```
 
-**Totales:** 104 archivos Python · 27 archivos `.ts`/`.tsx` de fuente · 18 archivos SQL · 95 archivos
+**Totales:** 104 archivos Python · 27 archivos `.ts`/`.tsx` de fuente · 18 archivos SQL · 94 archivos
 Markdown · 1 script PowerShell · 1 archivo YAML (adicional: `Dockerfile`, `.dockerignore`, `fly.toml`
 del respaldo Fly.io).
 
@@ -1229,9 +1228,9 @@ históricas en este documento.
 
 ## 11. Inventario unificado de todos los `.md` del repositorio
 
-**95 documentos Markdown** en 9 ubicaciones (5 en la raíz, 7 rector, 76 temáticos de
-`documentacion/`, 1 en `database/` y 6 de presentación). Conteo verificado con
-`git ls-files '*.md'` el 26-oct-2026.
+**94 documentos Markdown**: 4 en la raíz, 9 en `documentacion/00-documentos-rectores/`, 73 en las
+carpetas temáticas de `documentacion/`, 1 en `documentacion/` (informe final), 1 en `database/` y
+6 en `presentacion/`. Conteo verificado con `git ls-files '*.md'` el 12-nov-2026.
 
 ### 11.1 Raíz del repositorio (4 documentos)
 
@@ -1239,10 +1238,10 @@ históricas en este documento.
 |---|---|---|
 | `README.md` | Guía de puesta en marcha: estructura, requisitos, instalación con `instalar.ps1`, ejecución, tabla de endpoints, flujo RAG en 5 pasos | `DOCUMENTACION.md`; punto de entrada de todo lector nuevo |
 | `DOCUMENTACION.md` | Índice maestro de la documentación: árbol de las 7 carpetas, catálogo de vacíos G-XX, mapa de consistencia `a.md` ↔ código | `README.md`; este documento (§11) |
-| `PRESENTACION-PMV1.md` | Guion de demostración del PMV1 para sustentación: cómo levantar, 4 demos (HU-09/06/07/05), resumen con % | `DOCUMENTACION.md:10-11` · cifras corregidas (§12.2) |
-| `PMV2_DOCUMENTOS.md` | Alcance del PMV2 y su **estado verificado**: ✅ implementado, ⚠️ parcial, ❌ bloqueos B1-B8, avance 14/25 | Este documento (§10.5, §13.1) |
+| `DESPLEGUE_RENDER.md` | Guía de despliegue en producción: Render (back-end) + Vercel (front-end) + PostgreSQL y Storage | Este documento (§9.6) |
+| `PRESUPUESTO_PROYECTO.md` | Presupuesto del proyecto: 18/18 HU, 101/101 indicadores, 8,983 S/ | Este documento (§0, §11) |
 
-### 11.2 `documentacion/00-documentos-rectores/` (7 documentos) — transverse
+### 11.2 `documentacion/00-documentos-rectores/` (9 documentos) — transverse
 
 | Archivo | Qué contiene | Se referencia desde |
 |---|---|---|
@@ -1253,6 +1252,8 @@ históricas en este documento.
 | `04-implementado-y-por-implementar.md` | Inventario ✅/⚠️/❌ vs. pendiente, verificación local de octubre, G-XX priorizados, recomendación de cierre | Este doc (§2, §13); `05` |
 | `05-trazabilidad-por-pmv.md` | Avance por PMV1/PMV2/PMV3, backlog, distribución de las 18 HU, G-XX por PMV, ruta de cierre, proyección | Este doc (§10.2, §10.4-10.7) |
 | **`06-estado-actual-implementado.md`** | **Este documento.** Inventario de código archivo por archivo, flujos front/back, BD, avance HU+PMV actualizado, inventario unificado de los `.md`, inconsistencias y ruta de cierre | — (documento rector actual) |
+| `07-checklist-implementacion.md` | Checklist de verificación de los 3 PMV (archivo, estado y método con `grep`) + corrección de enlaces C-01..C-07 | Este doc (§11) |
+| `08-tablero-scrum.md` | Tablero Scrum: Product Backlog de las 18 HU, 4 sprints, roles y ceremonias | `indice.md` |
 
 ### 11.3 Carpetas temáticas de `documentacion/` (6 carpetas, 73 documentos)
 
@@ -1287,7 +1288,7 @@ Cada archivo usa la convención `NN-titulo.md` y la leyenda ✅ / ⚠️ / ❌ (
 ### 11.5 Cómo se referencian entre sí
 
 - `README.md` → `documentacion/00/03-ejecucion.md` (§49).
-- `DOCUMENTACION.md` → `PRESENTACION-PMV1.md` y al árbol de las 7 carpetas.
+- `DOCUMENTACION.md` → al árbol de las 7 carpetas.
 - `00/indice.md` → `README.md`, `instalar.ps1`, los demás rectores.
 - `00/02` → `01-historias-de-usuario.md`; es la base de las cifras de §10.
 - `00/04` y `00/05` → `00/02` (defectos y %).
@@ -1308,7 +1309,6 @@ Cada archivo usa la convención `NN-titulo.md` y la leyenda ✅ / ⚠️ / ❌ (
 | `database/seeds/municipios.sql:3,10-11` | **Junín** | ❌ Desalineado |
 | `README.md:3,9` | **Junín (MPJ)**, `munijunin.gob.pe` | ❌ Desalineado |
 | `DOCUMENTACION.md:7-8` | **Junín (MPJ)** | ✅ Corregido al publicar este documento (ahora declara Huancayo/MPH y señala la inconsistencia) |
-| `PRESENTACION-PMV1.md:3,34` | **Junín**, `munijunin.gob.pe` | ⚠️ Parcial: el título (línea 3) ya dice Huancayo/MPH; queda la URL de ejemplo de la línea 34 |
 | `presentacion/01..05` y `documentacion/01..06/*` | **Junín (MPJ)** en ~35 archivos | ⚠️ Pendiente: son documentos académicos; el renombrado masivo requiere decisión del equipo (§12.6) |
 
 **Acción:** alinear `README.md` y `database/seeds/municipios.sql` con el branding de Huancayo (MPH)
@@ -1317,23 +1317,11 @@ decidir de una vez si el resto de la documentación académica se renombra a MPH
 histórica. **Es una decisión de proyecto, no técnica** — pero debe resolverse antes de sustentar,
 porque el nombre de la entidad aparece en la portada y en el pie de la app.
 
-### 12.2 ✅ `PRESENTACION-PMV1.md` — cifras corregidas al publicar este documento
+### 12.2 ✅ `PRESENTACION-PMV1.md` — eliminado (12-nov-2026)
 
-| Métrica | Decía `PRESENTACION-PMV1.md` | Real (§10) | Estado |
-|---|---|---|---|
-| PMV1 | **100 %** | **88 %** (21/24) | ⚠️ **Revisado el 16-oct**: la cifra "real" anterior (24/24) estaba mal sumada; ver §12.7 |
-| HU-05 | 44 % | **100 %** (9/9) | ✅ Corregido |
-| HU-06 | 40 % | **100 %** (5/5) | ✅ Corregido |
-| HU-07 | 40 % | **80 %** (4/5) | ✅ Corregido |
-| HU-09 | 60 % | 60 % (3/5) | ✅ Ya era correcto |
-
-El guion de demostración **no se actualizó** tras el commit `04f91ff` (`feat(hu-05,06,07,09)`), que
-cerró HU-05 y HU-06 y subió HU-07 a 80 %; la línea `**PMV1: 46 %**` era la fuente de error más
-visible al sostener con ese documento.
-
-**Estado:** la tabla de resumen de `PRESENTACION-PMV1.md` ya muestra los valores reales y enlaza
-a este documento (§10). Verificar de nuevo las cifras antes de cada sustentación: este documento es
-la fuente de verdad y `PRESENTACION-PMV1.md` es una copia derivada.
+El guion de demostración del PMV1 se **eliminó del repositorio** por estar desactualizado y quedar
+superado por `presentacion/01..05`, que cubre el mismo material con las cifras vigentes. Las cifras
+oficiales siguen siendo las de §10 de este documento.
 
 ### 12.3 ⚠️ `presentacion/01..05` está desalineado con el código actual
 
@@ -1373,11 +1361,11 @@ bloqueante.
 |---|---|---|
 | 1 | Este documento (`06`) es la fuente canónica de cifras y de flujos | ✅ Hecho |
 | 2 | `00/indice.md` y `DOCUMENTACION.md` enlazan a `06` y tienen sus cifras al día | ✅ Hecho |
-| 3 | `PRESENTACION-PMV1.md` con las cifras reales de §10.4 | ✅ Hecho |
+| 3 | `PRESENTACION-PMV1.md` (eliminado 12-nov-2026; superado por `presentacion/`) | ✅ N/A |
 | 4 | Marcar `02`, `04`, `05` y `presentacion/01..05` con cabecera *"Documento histórico — cifras actualizadas en [06](06-estado-actual-implementado.md)"* | ⬜ Pendiente |
 | 5 | Resolver la entidad (Huancayo vs. Junín) en `README.md`, `seeds/municipios.sql` y `presentacion/01..05` (§12.1) | ⬜ Pendiente — decisión de equipo |
 | 6 | Mantener `01-historias-de-usuario.md` como fuente de requisitos (no cambia) | ✅ No requiere acción |
-| 7 | Actualizar `02`, `04`, `05`, `indice.md`, `DOCUMENTACION.md`, `README.md` y `presentacion/01..05` a las cifras de 16-oct-2026 (**72 % global, PMV1 100 %, PMV2 71 %, PMV3 59 %, 30 rutas, 89 `.py`, 92 `.md`**) | ✅ Hecho — todos los rectores, `README`, `DOCUMENTACION`, `PMV2_DOCUMENTOS` y `presentacion/` alineados; `02` marcado como **histórico** con banner que apunta a §10 |
+| 7 | Actualizar `02`, `04`, `05`, `indice.md`, `DOCUMENTACION.md`, `README.md` y `presentacion/01..05` a las cifras de 16-oct-2026 (**72 % global, PMV1 100 %, PMV2 71 %, PMV3 59 %, 30 rutas, 89 `.py`, 92 `.md`**) | ✅ Hecho — todos los rectores, `README`, `DOCUMENTACION` y `presentacion/` alineados; `02` marcado como **histórico** con banner que apunta a §10 |
 | 8 | Re-sincronizar todos los rectores y `presentacion/` a las cifras del 17-oct-2026 (**82 % global, PMV1 100 %, PMV2 100 %, PMV3 63 %, 31 rutas, 91 `.py`, 11 `.sql`, 92 `.md`**) tras cerrar HU-08, HU-10, HU-11 y los puntos de HU-14 | ✅ Hecho (17-oct-2026) |
 | 9 | Re-sincronizar a las cifras del 26-oct-2026 (**85 % global, PMV3 69 %, 34 rutas, 102 `.py`, 17 `.sql`, 95 `.md`**) tras cerrar HU-13 (§9.8) y el fallback de catálogo (§9.7) | ✅ Hecho en este documento (`06`); el resto de rectores/`presentacion/` queda pendiente de la misma re-sincronización |
 | 10 | Re-sincronizar a las cifras del 27-oct-2026 (**94 % global, PMV3 88 %, 40 rutas, 104 `.py`, 18 `.sql`, 27 `.ts`/`.tsx`, 95 `.md`**) tras cerrar HU-15 + HU-16 + HU-18 (§9.9) | ✅ Hecho en este documento (`06`); el resto de rectores/`presentacion/` queda pendiente de la misma re-sincronización |
@@ -1391,7 +1379,7 @@ bloqueante.
 | PMV2 | 44 % (11/25) | **56 % (14/25)** | HU-01/02/03/04 avanzaron con el commit `ea06c9a` |
 | PMV3 | 34 % (15/44) | **52 % (23/44)** | ídem (HU-01, HU-02, HU-03) |
 | Endpoints | 13 | **22** (16 públicos + 6 admin) | controllers `documento_admin` y rutas nuevas de `documento_controller` |
-| `.md` | 79 | **90** | `PMV2_DOCUMENTOS.md` + 10 documentos académicos no contabilizados antes |
+| `.md` | 79 | **90** | 10 documentos académicos y de alcance no contabilizados antes |
 
 Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 = 101` ✅.
 
@@ -1440,7 +1428,7 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 | D-9 | `GET /api/consultas/{id}` devuelve solo la consulta, no respuesta/fuentes/confianza | `consulta_controller.py` | ✅ **Corregido 17-oct-2026** — `TrazabilidadResponse` devuelve consulta + respuesta/confianza/groundedness/fuentes con metadatos y banderas (HU-10 8/8; habilita además el panel real de HU-14) |
 | D-10 | `DELETE /api/documentos/{id}` borra físicamente | `documento_controller.py:104` | ✅ **Corregido en `ea06c9a`** — ahora es baja lógica (`eliminado_en`) y existe `DELETE /{id}/fisico` aparte (HU-03 5/7) |
 | D-11 | `GET /health` solo comprueba el propio proceso | `main.py:71-74` | ⚠️ El panel informa "sin verificar" para BD/Redis/Ollama; la latencia ya se mide en `GET /api/metricas` (HU-16) |
-| D-12 | Branding inconsistente Huancayo vs. Junín | `README.md`, `PRESENTACION-PMV1.md`, `seeds/municipios.sql`, `presentacion/01..05`, `documentacion/01..06/*` | ⚠️ **Parcial** — `DOCUMENTACION.md` y el título de `PRESENTACION-PMV1.md` corregidos; quedan `README.md`, el seed y ~35 documentos académicos (§12.1) |
+| D-12 | Branding inconsistente Huancayo vs. Junín | `README.md`, `seeds/municipios.sql`, `presentacion/01..05`, `documentacion/01..06/*` | ⚠️ **Parcial** — `DOCUMENTACION.md` corregido; quedan `README.md`, el seed y ~35 documentos académicos (§12.1) |
 | D-13 | `preguntas` sin normalizar antes de la caché: `"¿Cuánto cuesta?"` y `"¿Cuánto cuesta ?"` generaron claves distintas hasta el primer acierto | `ServicioCache.construir_clave` | Solo afecta la tasa de acierto, no la corrección |
 
 **Defectos detectados en la revisión del PMV2 (16 de octubre de 2026) — corregidos y verificados el mismo día:**
@@ -1504,7 +1492,7 @@ Comprobación de consistencia: `21 + 14 + 23 + 2 = 60` ✅ y `24 + 25 + 44 + 8 =
 | 0c | ✅ **Cierre PMV2 (hecho 17-oct)** | HU-08 umbral "no inventar" (G-04) + HU-10 trazabilidad/bloqueo/fuentes/panel (D-9) + HU-11 clasificador de dominio | ✅ **PMV2 71 % → 100 %**; HU-14 33 % → 67 %; global 72 % → **82 %** |
 | 0d | ✅ **Cierre HU-13 (hecho 26-oct)** | JWT + contraseñas + roles + eventos de seguridad (G-01, D-8) + fallback de catálogo (§9.7) | ✅ **PMV3 63 % → 69 %**; global 82 % → **85 %** |
 | 0e | ✅ **Cierre HU-15 + HU-16 + HU-18 (hecho 27-oct)** | Evaluación ciudadana (G-05) + métricas con alerta (G-16/G-06, D-6) + reportes con CSV (G-07); migración 008 y `probar_hu151618.py` 56/56 | ✅ **PMV3 69 % → 88 %**; global 85 % → **94 %** |
-| 1 | Corrección inmediata | Resolver branding (§12.1) y actualizar `PRESENTACION-PMV1.md` (§12.2) | — (correctitud) |
+| 1 | Corrección inmediata | Resolver branding (§12.1) | — (correctitud) |
 | 2 | ✅ Dato crítico (hecho) | Montos reales del TUPA en `tramites.costo` | HU-08 60 % → 80 % |
 | 3 | ✅ PMV2 (hecho) | Motor de trámites relacionados (HU-12) + recuperación por fragmento (G-13) | PMV2 56 % → 71 % |
 | 4 | PMV3 bloque 1 | `pytest` del flujo RAG (G-18) + rol `revisor` para HU-03 | PMV3 88 % → ~93 % |

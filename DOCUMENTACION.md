@@ -6,7 +6,7 @@ Documentación derivada de `a.md`, corregida y contrastada contra el código rea
 del proyecto). Cada carpeta incluye su propio `indice.md` de resumen y contenido breve.
 
 **Entidad del sistema:** Municipalidad Provincial de **Huancayo (MPH)** — TUPA 2023, 252
-procedimientos. ⚠️ `a.md` y los documentos de la raíz (`README.md`, `PRESENTACION-PMV1.md`) aún
+procedimientos. ⚠️ `a.md` y `README.md` aún
 dicen «Municipalidad Provincial de Junín (MPJ)» y el dominio `munijunin.gob.pe`: es una
 inconsistencia pendiente de corregir (ver `06-estado-actual-implementado.md` §12.1). El código,
 el front-end y los seeds ya usan Huancayo/MPH.
@@ -21,9 +21,6 @@ el front-end y los seeds ya usan Huancayo/MPH.
 > completa y clasificador de dominio). Las cifras de los documentos temáticos deben reconciliarse
 > contra su §10.
 
-**Presentación del PMV1** (para sustentación, en la raíz): [`PRESENTACION-PMV1.md`](PRESENTACION-PMV1.md)
-— contiene los ejemplos reales de consulta, el diagrama del flujo y el rendimiento medido.
-
 ## Estructura de la documentación
 
 ```
@@ -35,10 +32,12 @@ documentacion/
 │   ├── 03-ejecucion.md             # Ejecución local: preparación + arranque — antes EJECUCION.md
 │   ├── 04-implementado-y-por-implementar.md  # Inventario real ✅/⚠️/❌ y brechas G-XX
 │   ├── 05-trazabilidad-por-pmv.md  # Avance por PMV1/PMV2/PMV3
-│   └── 06-estado-actual-implementado.md  # ★ Documento maestro: consolida los 90 .md,
-│                                       #   inventaría el código archivo por archivo,
-│                                       #   documenta los flujos front/back/BD y fija el
-│                                       #   estado real de las 18 HU y los 3 PMV
+│   ├── 06-estado-actual-implementado.md  # ★ Documento maestro: consolida los 94 .md,
+│   │                                   #   inventaría el código archivo por archivo,
+│   │                                   #   documenta los flujos front/back/BD y fija el
+│   │                                   #   estado real de las 18 HU y los 3 PMV
+│   ├── 07-checklist-implementacion.md  # Checklist de verificación de los 3 PMV
+│   └── 08-tablero-scrum.md         # Tablero Scrum: backlog, sprints, roles y ceremonias
 ├── 01-analisis-del-problema/        # Doc. 1 — Diagnóstico del problema (AG-T08)
 │   ├── indice.md                    # Resumen + índice de contenido breve
 │   └── 01..10                       # 10 numerales: contexto, AS-IS, causas, efectos,
@@ -75,8 +74,6 @@ documentacion/
 |---|---|
 | `README.md` | Guía de puesta en marcha completa del repositorio |
 | `DOCUMENTACION.md` | Índice maestro de toda la documentación |
-| `PMV2_DOCUMENTOS.md` | **Alcance y estado del PMV2 (17-oct-2026):** lo implementado (metadatos, `derogado`, chunking, endpoints admin, `DocumentManager.tsx`), los bloqueos **D-14..D-21** y la ruta de cierre; **PMV2 cerrado al 100 %** |
-| `PRESENTACION-PMV1.md` | Guion de sustentación del PMV1 ⚠️ (cifras desactualizadas: ver §12.2 del doc. 06) |
 | `06-estado-actual-implementado.md` | **Documento maestro** que consolida todo lo anterior |
 
 Los documentos transversales (HU, implementación por HU y guía de ejecución) viven ahora en
@@ -102,7 +99,7 @@ corregir y ya no se mantiene en el repositorio.
 ## Defectos bloqueantes (D-14..D-23) — ✅ todos corregidos (16-oct-2026)
 
 > Catálogo con ubicación exacta y evidencia de cierre en `06-estado-actual-implementado.md`
-> (§13.1) y en [`PMV2_DOCUMENTOS.md`](PMV2_DOCUMENTOS.md).
+> (§13.1).
 
 | # | Defecto | Estado |
 |---|---|---|

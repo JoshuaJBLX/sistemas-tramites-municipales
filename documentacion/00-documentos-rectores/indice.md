@@ -2,7 +2,7 @@
 > **Documento relacionado:** [06 · Estado actual implementado](06-estado-actual-implementado.md) — documento rector y fuente única de verdad del estado y las cifras.
 
 > **Actualizado el 17 de octubre de 2026**. Cifras verificadas contra
-> `06-estado-actual-implementado.md` (§10 y §13) y contra `PMV2_DOCUMENTOS.md`.
+> `06-estado-actual-implementado.md` (§10 y §13).
 
 **Resumen:** documentos transversales del proyecto que antes vivían en la raíz y ahora se
 centralizan aquí, siguiendo la convención `NN-titulo.md` de `documentacion/`. Son la fuente de
@@ -35,11 +35,10 @@ verdad de requisitos (HU), su estado de implementación y la guía de ejecución
 | **`08-tablero-scrum.md`** | **Tablero Scrum del proyecto (4 sep – 20 nov 2026)**: Product Backlog de las 18 HU por código con criterios Gherkin, plan de **4 sprints** (Sprint 3 en curso), columnas del tablero (Refinamiento, TODO, In Progress, QA/Testing, Done), **roles de Scrum** del equipo (PO, Scrum Master, Arquitecto, Back-End, BD, Integración IA/API) y ceremonias (Daily, Sprint Review, Sprint Retrospective). | Nuevo (16-oct-2026) |
 
 > **Fuente de verdad de las cifras:** `06-estado-actual-implementado.md` (§10 y §13) es el
-> documento rector de referencia (actualizado el 17-oct-2026); para el alcance y los bloqueos del
-> PMV2, `../../PMV2_DOCUMENTOS.md`. `02-implementacion-de-historias.md` y
+> documento rector de referencia (actualizado el 17-oct-2026). `02-implementacion-de-historias.md` y
 > `05-trazabilidad-por-pmv.md` son la fuente del detalle por HU y por PMV; sus porcentajes se
 > reconciliaron el 17-oct-2026 contra el §10 del documento 06. Las cifras citadas en
-> `PRESENTACION-PMV1.md`, en `presentacion/01..05` y en los resúmenes de `DOCUMENTACION.md`
+> `presentacion/01..05` y en los resúmenes de `DOCUMENTACION.md`
 > deben reconciliarse contra el §10 del documento 06.
 
 ## Relación con el repositorio
@@ -47,7 +46,6 @@ verdad de requisitos (HU), su estado de implementación y la guía de ejecución
 - Índice maestro de toda la documentación: `../../DOCUMENTACION.md`.
 - **Punto de partida recomendado**: `06-estado-actual-implementado.md` (consolida este
   directorio y el resto de `documentacion/`).
-- Alcance, avance y bloqueos del PMV2 (16-oct-2026): `../../PMV2_DOCUMENTOS.md`.
 - Guía completa de puesta en marcha (instalación + ejecución): `03-ejecucion.md` y `../../README.md`.
 - Instalador de un solo comando: `../../instalar.ps1` (idempotente).
 - Los archivos citan código real de `backend/`, `frontend-tramites/`, `database/` y
