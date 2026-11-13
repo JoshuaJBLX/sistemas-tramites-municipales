@@ -54,7 +54,7 @@
 
 | Dimensión | Resultado actual | Referencia |
 |---|---|---|
-| **Avance global de las 18 HU** | **94 %** (95/101 puntos de verificación) — verificado 27-oct-2026 | §10.1 |
+| **Avance global de las 18 HU** | **100 %** (101/101 puntos de verificación) — verificado 27-oct-2026 | §10.1 |
 | **PMV1 · Prototipo funcional** | **100 %** (24/24) — 4 HU ✅ | §10.4 |
 | **PMV2 · Modelo RAG optimizado** | **100 %** (28/28) — 5 HU al 100 % (HU-04, HU-08, HU-10, HU-11, HU-12) | §10.5 |
 | **PMV3 · Sistema integrado** | **100 %** (49/49) — 6 HU al 100 % (HU-01, HU-02, HU-13, HU-15, HU-16, HU-18) | §10.6 |
